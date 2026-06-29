@@ -7,40 +7,32 @@ export default function StatusDistribution() {
   const equipment = useStore(s => s.equipment)
   const total = equipment.length
 
-  const counts = (Object.entries(STATUS) as [StatusKey, { label: string; color: string }][]).map(([key, def]) => ({
-    key,
-    label: def.label,
-    color: def.color,
-    count: equipment.filter(e => e.st === key).length,
-  })).filter(c => c.count > 0)
+  const bars = (Object.keys(STATUS) as StatusKey[]).map(k => {
+    const count = equipment.filter(e => e.st === k).length
+    const pct = total ? (count / total) * 100 : 0
+    return { key: k, label: STATUS[k].label, color: STATUS[k].color, count, pct, pctText: Math.round(pct) + '%' }
+  }).filter(b => b.count > 0)
 
   return (
-    <div className="bg-white rounded-2xl border border-[var(--border)] p-5">
-      <div className="font-semibold text-sm text-[var(--ink)] mb-4">状态分布</div>
+    <div style={{ background: '#fff', border: '1px solid #E9E8E4', borderRadius: '14px', padding: '19px' }}>
+      <h3 style={{ margin: '0 0 16px', fontSize: '15px', fontWeight: 600 }}>状态分布</h3>
 
       {/* bar */}
-      <div className="flex h-3 rounded-full overflow-hidden gap-0.5 mb-4">
-        {counts.map(c => (
-          <div
-            key={c.key}
-            className="h-full rounded-full transition-all"
-            style={{ width: `${(c.count / total) * 100}%`, background: c.color }}
-            title={`${c.label}: ${c.count}`}
-          />
+      <div className="flex overflow-hidden" style={{ height: '14px', borderRadius: '7px', marginBottom: '16px', background: '#F1F0EC' }}>
+        {bars.map(b => (
+          <div key={b.key} style={{ width: `${b.pct}%`, background: b.color, height: '100%' }} title={`${b.label} ${b.count}`} />
         ))}
       </div>
 
-      <div className="space-y-2">
-        {counts.map(c => (
-          <div key={c.key} className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: c.color }} />
-              <span className="text-[var(--ink-3)]">{c.label}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[var(--ink-4)] text-xs">{Math.round(c.count / total * 100)}%</span>
-              <span className="font-semibold text-[var(--ink)] font-mono w-8 text-right">{c.count}</span>
-            </div>
+      {/* 2-col legend */}
+      <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '10px 18px' }}>
+        {bars.map(b => (
+          <div key={b.key} className="flex items-center" style={{ gap: '8px', fontSize: '13px' }}>
+            <span className="inline-block shrink-0" style={{ width: '9px', height: '9px', borderRadius: '3px', background: b.color }} />
+            <span style={{ color: '#44423D' }}>{b.label}</span>
+            <span className="flex-1" />
+            <span className="font-mono" style={{ color: '#1C1B19' }}>{b.count}</span>
+            <span className="font-mono text-right" style={{ fontSize: '11px', color: '#A6A49C', width: '38px' }}>{b.pctText}</span>
           </div>
         ))}
       </div>

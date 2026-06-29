@@ -14,61 +14,53 @@ export default function TalentPage() {
   const [filter, setFilter] = useState<RoleKey | 'all'>('all')
 
   const filtered = filter === 'all' ? talent : talent.filter(t => t.roleKey === filter)
+  const roles = [{ id: 'all' as const, label: '全部人员' }, ...ROLES]
 
   return (
     <>
       <Header />
-      <div className="max-w-5xl mx-auto px-5 py-8">
-        {/* hero */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[var(--ink)]">人才库</h1>
-          <p className="text-[var(--ink-4)] mt-2">专业影视制作团队成员</p>
+      <main className="flex-1 w-full mx-auto" style={{ maxWidth: '1440px', padding: '22px 22px 60px' }}>
+        <div style={{ marginBottom: '18px' }}>
+          <h1 style={{ margin: '0 0 4px', fontSize: '24px', fontWeight: 700, letterSpacing: '-0.01em' }}>人才库</h1>
+          <p style={{ margin: 0, fontSize: '13px', color: '#76746E' }}>
+            具备特种技能的专业团队 · 统一档案呈现 · 共 <span className="font-mono" style={{ color: '#44423D' }}>{talent.length}</span> 位入库人员
+          </p>
         </div>
 
-        {/* role filter */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          <RoleBtn active={filter === 'all'} onClick={() => setFilter('all')} label="全部角色" />
-          {ROLES.map(r => (
-            <RoleBtn
-              key={r.id}
-              active={filter === r.id}
-              onClick={() => setFilter(r.id as RoleKey)}
-              label={r.label}
-            />
-          ))}
+        {/* role chips */}
+        <div className="flex flex-wrap" style={{ gap: '8px', marginBottom: '24px' }}>
+          {roles.map(r => {
+            const active = filter === r.id
+            return (
+              <button
+                key={r.id}
+                onClick={() => setFilter(r.id as RoleKey | 'all')}
+                className="whitespace-nowrap cursor-pointer"
+                style={{
+                  padding: '8px 16px', borderRadius: '999px', fontSize: '13.5px',
+                  border: active ? '1px solid #1C1B19' : '1px solid #E4E3DE',
+                  background: active ? '#1C1B19' : '#fff',
+                  color: active ? '#fff' : '#44423D',
+                }}
+              >
+                {r.label}
+              </button>
+            )
+          })}
         </div>
 
-        {/* grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(264px, 1fr))', gap: '16px' }}>
           {filtered.map(t => <TalentCard key={t.id} item={t} />)}
         </div>
 
         {filtered.length === 0 && (
-          <div className="text-center py-20 text-[var(--ink-5)]">
-            <div className="text-5xl mb-3">👤</div>
-            <div>该角色暂无人才</div>
-          </div>
+          <div style={{ padding: '80px 0', textAlign: 'center', color: '#9C9A93', fontSize: '14px' }}>该角色暂无人才</div>
         )}
-      </div>
+      </main>
 
       <TalentDetail />
       <CartPanel />
       <Toast />
     </>
-  )
-}
-
-function RoleBtn({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors border ${
-        active
-          ? 'bg-[var(--accent)] border-[var(--accent)] text-white'
-          : 'border-[var(--border)] text-[var(--ink-3)] hover:border-[var(--border-2)] bg-white'
-      }`}
-    >
-      {label}
-    </button>
   )
 }

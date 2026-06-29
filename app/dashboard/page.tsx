@@ -1,5 +1,4 @@
 'use client'
-import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import StatCards from '@/components/dashboard/StatCards'
 import StatusDistribution from '@/components/dashboard/StatusDistribution'
@@ -9,32 +8,26 @@ import CartPanel from '@/components/equipment/CartPanel'
 import Toast from '@/components/ui/Toast'
 
 export default function DashboardPage() {
+  const today = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-')
+
   return (
     <>
       <Header />
-      <div className="max-w-5xl mx-auto px-5 py-8 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-[var(--ink)]">库存总览</h1>
-            <p className="text-sm text-[var(--ink-4)] mt-1">实时器材资产状态</p>
-          </div>
-          <Link
-            href="/admin"
-            className="px-4 py-2 text-sm border border-[var(--border)] rounded-xl text-[var(--ink-3)] hover:bg-[var(--border)] transition-colors font-medium"
-          >
-            进入管理后台 →
-          </Link>
+      <main className="flex-1 w-full mx-auto" style={{ maxWidth: '1320px', padding: '26px 22px 60px' }}>
+        <div style={{ marginBottom: '22px' }}>
+          <h1 style={{ margin: '0 0 4px', fontSize: '24px', fontWeight: 700, letterSpacing: '-0.01em' }}>库存总览</h1>
+          <p style={{ margin: 0, fontSize: '13px', color: '#76746E' }}>设备台账实时概览 · 截至 <span className="font-mono">{today}</span></p>
         </div>
 
         <StatCards />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid" style={{ gridTemplateColumns: '1.2fr 1fr', gap: '18px', marginBottom: '18px' }}>
           <StatusDistribution />
           <CategoryBars />
         </div>
 
         <RecentMovements />
-      </div>
+      </main>
 
       <CartPanel />
       <Toast />

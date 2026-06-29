@@ -2,7 +2,6 @@
 import { useState } from 'react'
 import { useStore } from '@/lib/store'
 import { DOMAINS } from '@/lib/constants'
-import { domainOf } from '@/lib/constants'
 import type { DomainKey } from '@/lib/types'
 import Header from '@/components/layout/Header'
 import ServiceCard from '@/components/services/ServiceCard'
@@ -15,58 +14,49 @@ export default function ServicesPage() {
   const [filter, setFilter] = useState<DomainKey | 'all'>('all')
 
   const filtered = filter === 'all' ? services : services.filter(s => s.domain === filter)
+  const domains = [{ id: 'all' as const, label: '全部领域' }, ...DOMAINS.map(d => ({ id: d.id, label: d.label }))]
 
   return (
     <>
       <Header />
-      <div className="max-w-6xl mx-auto px-5 py-8">
-        {/* hero */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[var(--ink)]">服务超市</h1>
-          <p className="text-[var(--ink-4)] mt-2">专业影视制作一站式服务解决方案</p>
+      <main className="flex-1 w-full mx-auto" style={{ maxWidth: '1440px', padding: '22px 22px 60px' }}>
+        <div style={{ marginBottom: '18px' }}>
+          <h1 style={{ margin: '0 0 4px', fontSize: '24px', fontWeight: 700, letterSpacing: '-0.01em' }}>服务超市</h1>
+          <p style={{ margin: 0, fontSize: '13px', color: '#76746E' }}>
+            按拍摄领域选服务包 · 每个包整合 <span style={{ color: '#44423D' }}>硬件资源 + 服务团队 + 拍摄能力</span> · 共 <span className="font-mono" style={{ color: '#44423D' }}>{services.length}</span> 个服务包
+          </p>
         </div>
 
-        {/* domain filter */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          <DomainBtn active={filter === 'all'} onClick={() => setFilter('all')} color="var(--ink-3)" label="全部服务" />
-          {DOMAINS.map(d => (
-            <DomainBtn
-              key={d.id}
-              active={filter === d.id}
-              onClick={() => setFilter(d.id as DomainKey)}
-              color={d.color}
-              label={d.label}
-              en={d.en}
-            />
-          ))}
+        {/* domain chips */}
+        <div className="flex flex-wrap" style={{ gap: '8px', marginBottom: '24px' }}>
+          {domains.map(d => {
+            const active = filter === d.id
+            return (
+              <button
+                key={d.id}
+                onClick={() => setFilter(d.id as DomainKey | 'all')}
+                className="whitespace-nowrap cursor-pointer"
+                style={{
+                  padding: '8px 16px', borderRadius: '999px', fontSize: '13.5px',
+                  border: active ? '1px solid #1C1B19' : '1px solid #E4E3DE',
+                  background: active ? '#1C1B19' : '#fff',
+                  color: active ? '#fff' : '#44423D',
+                }}
+              >
+                {d.label}
+              </button>
+            )
+          })}
         </div>
 
-        {/* grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(326px, 1fr))', gap: '18px' }}>
           {filtered.map(s => <ServiceCard key={s.id} item={s} />)}
         </div>
-      </div>
+      </main>
 
       <ServiceDetail />
       <CartPanel />
       <Toast />
     </>
-  )
-}
-
-function DomainBtn({ active, onClick, color, label, en }: {
-  active: boolean; onClick: () => void; color: string; label: string; en?: string
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium transition-all border ${
-        active ? 'border-transparent text-white shadow-sm' : 'border-[var(--border)] text-[var(--ink-3)] hover:border-[var(--border-2)] bg-white'
-      }`}
-      style={active ? { background: color, borderColor: color } : {}}
-    >
-      {label}
-      {en && <span className={`text-[10px] font-bold ${active ? 'text-white/70' : 'text-[var(--ink-5)]'}`}>{en}</span>}
-    </button>
   )
 }

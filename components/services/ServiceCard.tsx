@@ -7,42 +7,88 @@ import type { Service } from '@/lib/types'
 interface Props { item: Service }
 
 export default function ServiceCard({ item }: Props) {
-  const openService = useStore(s => s.openService)
-  const domain = domainOf(item.domain)
+  const { openService, talent, toast } = useStore(s => ({
+    openService: s.openService,
+    talent: s.talent,
+    toast: s.toast,
+  }))
+  const dom = domainOf(item.domain)
+  const leads = item.talent.map(id => talent.find(t => t.id === id)).filter(Boolean).slice(0, 4) as typeof talent
+
+  const mix = (pct: number) => `color-mix(in oklch, ${dom.color} ${pct}%, white)`
 
   return (
     <div
-      className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
       onClick={() => openService(item.id)}
+      className="flex flex-col bg-white overflow-hidden cursor-pointer transition-all duration-150 hover:border-[#CFCEC8] hover:shadow-[0_10px_30px_rgba(20,20,18,0.09)] hover:-translate-y-0.5"
+      style={{ border: '1px solid #E9E8E4', borderRadius: '14px' }}
     >
-      {/* domain band */}
-      <div className="h-1.5" style={{ background: domain.color }} />
-
-      <div className="p-5">
-        {/* domain tag */}
+      {/* hero */}
+      <div
+        className="relative flex flex-col justify-between"
+        style={{ aspectRatio: '16 / 9', background: mix(15), borderBottom: `1px solid ${mix(24)}`, padding: '14px 16px' }}
+      >
         <span
-          className="text-[10px] font-bold tracking-widest px-2 py-0.5 rounded"
-          style={{ background: domain.color + '18', color: domain.color }}
+          className="self-start"
+          style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.04em', padding: '4px 11px', borderRadius: '999px', background: '#fff', color: dom.color, border: `1px solid ${mix(30)}` }}
         >
-          {domain.en}
+          {dom.label}
         </span>
-
-        <h3 className="mt-2 font-bold text-base text-[var(--ink)] leading-tight">{item.name}</h3>
-        <p className="text-xs text-[var(--ink-4)] mt-1 line-clamp-2">{item.tagline}</p>
-
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-[var(--border)]">
-          <div>
-            <div className="text-[10px] text-[var(--ink-5)]">起价</div>
-            <div className="font-bold text-[var(--accent)] text-lg">{fmtCNY(item.priceFrom)}</div>
-            <div className="text-[10px] text-[var(--ink-5)]">{item.unit}</div>
-          </div>
-          <div className="text-right">
-            <div className="text-[10px] text-[var(--ink-5)]">标准周期</div>
-            <div className="text-xs font-medium text-[var(--ink-3)] mt-0.5">{item.duration}</div>
-            <div className="text-[10px] text-[var(--ink-5)]">配备 {item.crew} 人</div>
-          </div>
+        <div>
+          <div className="font-mono" style={{ fontSize: '10px', letterSpacing: '0.16em', color: 'rgba(28,27,25,0.45)', marginBottom: '5px' }}>{dom.en}</div>
+          <div style={{ fontSize: '20px', fontWeight: 700, color: '#1C1B19', letterSpacing: '-0.01em' }}>{item.name}</div>
         </div>
       </div>
+
+      {/* body */}
+      <div className="flex flex-col flex-1" style={{ padding: '15px 16px 16px', gap: '13px' }}>
+        <p style={{ margin: 0, fontSize: '13.5px', color: '#76746E' }}>{item.tagline}</p>
+
+        {/* stat pills */}
+        <div className="flex flex-wrap" style={{ gap: '7px' }}>
+          <Pill>硬件 {item.hw.length}</Pill>
+          <Pill>能力 {item.caps.length}</Pill>
+          <Pill>团队 {leads.length}</Pill>
+        </div>
+
+        {/* price + avatars */}
+        <div className="flex items-end justify-between" style={{ marginTop: 'auto', paddingTop: '13px', borderTop: '1px solid #F2F1ED', gap: '10px' }}>
+          <div>
+            <div style={{ fontSize: '11px', color: '#9C9A93', marginBottom: '2px' }}>服务起价</div>
+            <div className="flex items-baseline" style={{ gap: '3px' }}>
+              <span className="font-mono" style={{ fontSize: '18px', fontWeight: 600, color: '#1C1B19' }}>{fmtCNY(item.priceFrom)}</span>
+              <span style={{ fontSize: '11px', color: '#9C9A93' }}>/{item.unit}起</span>
+            </div>
+          </div>
+          <div className="flex items-center">
+            {leads.map((t, i) => (
+              <div
+                key={t.id}
+                className="flex items-center justify-center text-white"
+                style={{ width: '27px', height: '27px', borderRadius: '999px', background: t.color, fontSize: '11px', fontWeight: 600, marginLeft: i === 0 ? 0 : '-7px', border: '2px solid #fff', boxShadow: '0 0 0 .5px rgba(0,0,0,.04)' }}
+              >
+                {t.initials}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button
+          onClick={e => { e.stopPropagation(); toast(`已提交「${item.name}」服务意向，顾问将尽快与你联系`); }}
+          className="w-full cursor-pointer transition-colors hover:!bg-[#2F5AC7]"
+          style={{ height: '40px', borderRadius: '10px', border: 'none', background: '#1C1B19', color: '#fff', fontSize: '14px' }}
+        >
+          一键发起服务
+        </button>
+      </div>
     </div>
+  )
+}
+
+function Pill({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center" style={{ gap: '5px', fontSize: '12px', color: '#44423D', background: '#F4F3F0', padding: '4px 10px', borderRadius: '7px' }}>
+      {children}
+    </span>
   )
 }

@@ -46,6 +46,7 @@ interface State {
   adminSearch: string
   adminCatFilter: CatKey | 'all'
   adminStatusFilter: StatusKey | 'all'
+  adminOwnerFilter: string
   deviceEditorOpen: boolean
   deviceEditorId: number | null  // null = new
   importModalOpen: boolean
@@ -93,6 +94,8 @@ interface Actions {
   setAdminSearch: (v: string) => void
   setAdminCatFilter: (v: CatKey | 'all') => void
   setAdminStatusFilter: (v: StatusKey | 'all') => void
+  setAdminOwnerFilter: (v: string) => void
+  batchSetStatus: (ids: number[], st: StatusKey) => void
   toggleAdminSelect: (id: number) => void
   selectAllAdmin: (ids: number[]) => void
   clearAdminSelect: () => void
@@ -147,6 +150,7 @@ export const useStore = create<Store>()(
     adminSearch: '',
     adminCatFilter: 'all',
     adminStatusFilter: 'all',
+    adminOwnerFilter: 'all',
     deviceEditorOpen: false,
     deviceEditorId: null,
     importModalOpen: false,
@@ -226,6 +230,12 @@ export const useStore = create<Store>()(
     setAdminSearch: (v) => set(s => { s.adminSearch = v }),
     setAdminCatFilter: (v) => set(s => { s.adminCatFilter = v }),
     setAdminStatusFilter: (v) => set(s => { s.adminStatusFilter = v }),
+    setAdminOwnerFilter: (v) => set(s => { s.adminOwnerFilter = v }),
+    batchSetStatus: (ids, st) => set(s => {
+      s.equipment.forEach(e => { if (ids.includes(e.id)) e.st = st })
+      s.adminSelectedIds = []
+      s.toasts.push({ id: Date.now().toString(), msg: `已批量修改 ${ids.length} 件设备状态`, type: 'ok' })
+    }),
     toggleAdminSelect: (id) => set(s => {
       const idx = s.adminSelectedIds.indexOf(id)
       if (idx >= 0) s.adminSelectedIds.splice(idx, 1)
