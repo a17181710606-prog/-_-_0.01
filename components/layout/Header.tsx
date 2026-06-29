@@ -21,31 +21,38 @@ export default function Header() {
   }))
 
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0)
-  const isAdmin = pathname.startsWith('/admin')
-  if (isAdmin) return null
+  if (pathname.startsWith('/admin')) return null
 
   return (
-    <header className="sticky top-0 z-50 bg-[var(--bg)]/95 backdrop-blur border-b border-[var(--border)] h-14 flex items-center px-5 gap-4">
+    <header
+      className="sticky top-0 z-40 flex items-center"
+      style={{ background: 'rgba(250,250,248,0.88)', backdropFilter: 'blur(12px)', borderBottom: '1px solid #E9E8E4', padding: '0 22px', height: '62px', gap: '18px' }}
+    >
       {/* logo */}
-      <Link href="/catalog" className="flex items-center gap-2.5 shrink-0">
-        <Image src="/assets/logo.png" alt="景彩文化" width={28} height={28} className="rounded" />
-        <span className="font-semibold text-[var(--ink)] text-sm tracking-tight hidden sm:block">景彩文化</span>
-        <span className="text-[var(--ink-5)] text-xs hidden sm:block">器材超市</span>
+      <Link href="/catalog" className="flex items-center shrink-0" style={{ gap: '10px' }}>
+        <Image src="/assets/logo.png" alt="景彩文化" width={30} height={30} style={{ height: '30px', width: 'auto' }} />
+        <div className="flex flex-col" style={{ lineHeight: 1.12 }}>
+          <span style={{ fontSize: '15px', fontWeight: 700, letterSpacing: '0.02em', color: '#1C1B19' }}>景彩文化</span>
+          <span className="font-mono" style={{ fontSize: '9px', letterSpacing: '0.18em', color: '#A6A49C' }}>器材超市 · EQUIPMENT</span>
+        </div>
       </Link>
 
       {/* nav */}
-      <nav className="flex items-center gap-1 flex-1">
+      <nav className="flex items-center" style={{ gap: '4px', marginLeft: '8px' }}>
         {NAV.map(n => {
           const active = pathname === n.href || pathname.startsWith(n.href + '/')
           return (
             <Link
               key={n.href}
               href={n.href}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                active
-                  ? 'bg-[var(--accent-sel)] text-[var(--accent)]'
-                  : 'text-[var(--ink-3)] hover:bg-[var(--border)] hover:text-[var(--ink)]'
-              }`}
+              className="transition-colors"
+              style={{
+                height: '34px', padding: '0 13px', borderRadius: '9px', fontSize: '13px',
+                display: 'flex', alignItems: 'center',
+                background: active ? '#1C1B19' : 'transparent',
+                color: active ? '#fff' : '#44423D',
+                fontWeight: active ? 600 : 400,
+              }}
             >
               {n.label}
             </Link>
@@ -54,44 +61,61 @@ export default function Header() {
       </nav>
 
       {/* search */}
-      <div className="relative hidden md:block w-48">
-        <input
-          type="text"
-          value={searchQ}
-          onChange={e => setSearchQ(e.target.value)}
-          placeholder="搜索器材…"
-          className="w-full h-8 pl-8 pr-3 text-sm bg-[var(--border)] rounded-full border-0 text-[var(--ink)] placeholder:text-[var(--ink-5)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
-        />
-        <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--ink-4)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
+      <div className="flex-1 flex justify-center min-w-0">
+        <div className="relative w-full" style={{ maxWidth: '420px' }}>
+          <span className="absolute flex" style={{ left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#A6A49C' }}>
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5}>
+              <circle cx="7" cy="7" r="5" />
+              <line x1="11" y1="11" x2="14.5" y2="14.5" strokeLinecap="round" />
+            </svg>
+          </span>
+          <input
+            value={searchQ}
+            onChange={e => setSearchQ(e.target.value)}
+            placeholder="搜索设备、型号、品牌、编号…"
+            className="w-full focus:outline-none focus:ring-1 focus:ring-[#2F5AC7]"
+            style={{ height: '38px', padding: '0 14px 0 34px', border: '1px solid #E4E3DE', borderRadius: '10px', background: '#fff', fontSize: '13px', color: '#1C1B19' }}
+          />
+        </div>
       </div>
 
       {/* cart */}
       <button
         onClick={() => setCartOpen(true)}
-        className="relative p-2 rounded-lg text-[var(--ink-3)] hover:bg-[var(--border)] hover:text-[var(--ink)] transition-colors"
+        className="flex items-center cursor-pointer transition-colors"
+        style={{ height: '34px', padding: '0 13px', borderRadius: '9px', border: '1px solid #E4E3DE', background: '#fff', fontSize: '13px', color: '#44423D', gap: '6px' }}
       >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.4}>
+          <rect x="3" y="2.5" width="10" height="12" rx="1.6" />
+          <line x1="5.6" y1="6" x2="10.4" y2="6" strokeLinecap="round" />
+          <line x1="5.6" y1="8.6" x2="10.4" y2="8.6" strokeLinecap="round" />
+          <line x1="5.6" y1="11.2" x2="8.6" y2="11.2" strokeLinecap="round" />
         </svg>
+        <span>我的清单</span>
         {cartCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[var(--accent)] text-white text-[10px] font-bold flex items-center justify-center">
+          <span
+            className="font-mono flex items-center justify-center"
+            style={{ minWidth: '18px', height: '18px', padding: '0 5px', borderRadius: '999px', background: '#2F5AC7', color: '#fff', fontSize: '11px', fontWeight: 600 }}
+          >
             {cartCount}
           </span>
         )}
       </button>
 
+      <div style={{ width: '1px', height: '22px', background: '#E4E3DE', margin: '0 2px' }} />
+
       {/* admin */}
       <Link
         href="/admin"
-        className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-[var(--ink-4)] hover:text-[var(--ink)] hover:bg-[var(--border)] transition-colors"
+        className="flex items-center cursor-pointer transition-colors hover:!bg-[#1C1B19] hover:!text-white hover:!border-[#1C1B19]"
+        style={{ height: '34px', padding: '0 13px', borderRadius: '9px', border: '1px solid #E4E3DE', background: '#fff', fontSize: '13px', color: '#44423D', gap: '6px' }}
       >
-        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.4}>
+          <rect x="2.5" y="3" width="11" height="8" rx="1.2" />
+          <line x1="6" y1="13.6" x2="10" y2="13.6" strokeLinecap="round" />
+          <line x1="8" y1="11" x2="8" y2="13.6" />
         </svg>
-        后台
+        后台管理
       </Link>
     </header>
   )

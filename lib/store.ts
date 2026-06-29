@@ -27,6 +27,8 @@ interface State {
   // catalog filters
   catFilter: CatKey | 'all'
   statusFilter: StatusKey | 'all'
+  brandFilter: string
+  sortBy: 'featured' | 'priceAsc' | 'priceDesc' | 'avail'
   searchQ: string
   layout: Layout
 
@@ -60,8 +62,11 @@ interface Actions {
   // filters
   setCatFilter: (v: CatKey | 'all') => void
   setStatusFilter: (v: StatusKey | 'all') => void
+  setBrandFilter: (v: string) => void
+  setSortBy: (v: 'featured' | 'priceAsc' | 'priceDesc' | 'avail') => void
   setSearchQ: (v: string) => void
   setLayout: (v: Layout) => void
+  resetFilters: () => void
 
   // cart
   addToCart: (id: number) => void
@@ -126,6 +131,8 @@ export const useStore = create<Store>()(
 
     catFilter: 'all',
     statusFilter: 'all',
+    brandFilter: 'all',
+    sortBy: 'featured',
     searchQ: '',
     layout: 'grid',
 
@@ -152,8 +159,16 @@ export const useStore = create<Store>()(
     // filter actions
     setCatFilter: (v) => set(s => { s.catFilter = v }),
     setStatusFilter: (v) => set(s => { s.statusFilter = v }),
+    setBrandFilter: (v) => set(s => { s.brandFilter = v }),
+    setSortBy: (v) => set(s => { s.sortBy = v }),
     setSearchQ: (v) => set(s => { s.searchQ = v }),
     setLayout: (v) => set(s => { s.layout = v }),
+    resetFilters: () => set(s => {
+      s.catFilter = 'all'
+      s.statusFilter = 'all'
+      s.brandFilter = 'all'
+      s.searchQ = ''
+    }),
 
     // cart
     addToCart: (id) => set(s => {

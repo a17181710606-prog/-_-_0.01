@@ -1,130 +1,130 @@
 'use client'
 import { useStore } from '@/lib/store'
-import { CATS, STATUS } from '@/lib/constants'
-import type { Equipment } from '@/lib/types'
+import { CATS } from '@/lib/constants'
 import EquipmentCard from './EquipmentCard'
+import FilterRail from './FilterRail'
+import { CatChips, BrandStatusSelects } from './FilterChips'
 
+// 共享筛选 + 排序，与设计稿 filtered() 一致
 function useFiltered() {
-  const { equipment, catFilter, statusFilter, searchQ } = useStore(s => ({
+  const { equipment, catFilter, brandFilter, statusFilter, searchQ, sortBy } = useStore(s => ({
     equipment: s.equipment,
     catFilter: s.catFilter,
+    brandFilter: s.brandFilter,
     statusFilter: s.statusFilter,
     searchQ: s.searchQ,
+    sortBy: s.sortBy,
   }))
-  return equipment.filter(e => {
-    if (catFilter !== 'all' && e.cat !== catFilter) return false
-    if (statusFilter !== 'all' && e.st !== statusFilter) return false
-    if (searchQ) {
-      const q = searchQ.toLowerCase()
-      if (
-        !e.name.toLowerCase().includes(q) &&
-        !e.brand.toLowerCase().includes(q) &&
-        !e.model.toLowerCase().includes(q) &&
-        !e.code.toLowerCase().includes(q)
-      ) return false
-    }
-    return true
-  })
+  let list = equipment.slice()
+  if (catFilter !== 'all') list = list.filter(e => e.cat === catFilter)
+  if (brandFilter !== 'all') list = list.filter(e => e.brand === brandFilter)
+  if (statusFilter !== 'all') list = list.filter(e => e.st === statusFilter)
+  if (searchQ.trim()) {
+    const q = searchQ.trim().toLowerCase()
+    list = list.filter(e => (e.name + ' ' + e.brand + ' ' + e.model + ' ' + e.code).toLowerCase().includes(q))
+  }
+  if (sortBy === 'priceAsc') list.sort((a, b) => a.day - b.day)
+  else if (sortBy === 'priceDesc') list.sort((a, b) => b.day - a.day)
+  else if (sortBy === 'avail') list.sort((a, b) => b.av - a.av)
+  return list
 }
 
+function NoResults() {
+  const resetFilters = useStore(s => s.resetFilters)
+  return (
+    <div style={{ padding: '80px 0', textAlign: 'center', color: '#9C9A93', fontSize: '14px' }}>
+      没有符合条件的器材，试试{' '}
+      <button onClick={resetFilters} className="cursor-pointer bg-transparent border-0" style={{ color: '#2F5AC7', fontSize: '14px' }}>
+        重置筛选
+      </button>
+    </div>
+  )
+}
+
+// LAYOUT A：货架网格（rail + grid）
 export function GridView() {
   const items = useFiltered()
-  if (items.length === 0) return <EmptyState />
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-      {items.map(e => <EquipmentCard key={e.id} item={e} />)}
+    <div className="flex items-start" style={{ gap: '24px' }}>
+      <FilterRail />
+      <div className="flex-1 min-w-0">
+        {items.length > 0 ? (
+          <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(216px, 1fr))', gap: '16px' }}>
+            {items.map(e => <EquipmentCard key={e.id} item={e} />)}
+          </div>
+        ) : <NoResults />}
+      </div>
     </div>
   )
 }
 
+// LAYOUT B：分区货架（chips + 横向滚动分区）
 export function AisleView() {
   const items = useFiltered()
-  if (items.length === 0) return <EmptyState />
+  const setCatFilter = useStore(s => s.setCatFilter)
+  const setLayout = useStore(s => s.setLayout)
 
-  // group by cat
-  const groups = CATS.map(c => ({
+  const aisles = CATS.map(c => ({
     cat: c,
     items: items.filter(e => e.cat === c.id),
-  })).filter(g => g.items.length > 0)
+  })).filter(a => a.items.length > 0)
 
   return (
-    <div className="space-y-8">
-      {groups.map(g => (
-        <section key={g.cat.id}>
-          <div className="flex items-baseline gap-2 mb-3">
-            <h2 className="font-semibold text-[var(--ink)]">{g.cat.label}</h2>
-            <span className="text-xs text-[var(--ink-5)] font-mono">{g.cat.en}</span>
-            <span className="text-xs text-[var(--ink-5)]">({g.items.length})</span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {g.items.map(e => <EquipmentCard key={e.id} item={e} />)}
-          </div>
-        </section>
-      ))}
+    <div>
+      <div className="mb-[14px]"><CatChips /></div>
+      <div className="flex flex-wrap items-center mb-6" style={{ gap: '10px' }}>
+        <BrandStatusSelects />
+      </div>
+
+      {aisles.length > 0 ? (
+        <div className="flex flex-col" style={{ gap: '30px' }}>
+          {aisles.map(a => (
+            <section key={a.cat.id}>
+              <div className="flex items-center mb-[13px]" style={{ gap: '10px' }}>
+                <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>{a.cat.label}</h2>
+                <span className="font-mono" style={{ fontSize: '11px', color: '#A6A49C' }}>{a.cat.en}</span>
+                <span style={{ fontSize: '12px', color: '#9C9A93' }}>· {a.items.length} 件</span>
+                <div className="flex-1" style={{ height: '1px', background: '#EAE9E5' }} />
+                <button
+                  onClick={() => { setCatFilter(a.cat.id); setLayout('grid') }}
+                  className="cursor-pointer bg-transparent border-0 whitespace-nowrap"
+                  style={{ fontSize: '12px', color: '#2F5AC7' }}
+                >
+                  查看全部 →
+                </button>
+              </div>
+              <div className="flex overflow-x-auto" style={{ gap: '14px', paddingBottom: '8px', scrollSnapType: 'x proximity' }}>
+                {a.items.map(e => (
+                  <div key={e.id} className="shrink-0" style={{ width: '218px', scrollSnapAlign: 'start' }}>
+                    <EquipmentCard item={e} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      ) : <NoResults />}
     </div>
   )
 }
 
+// LAYOUT C：大图筛选（toolbar + 宽松卡片网格）
 export function ShowcaseView() {
   const items = useFiltered()
-  if (items.length === 0) return <EmptyState />
   return (
-    <div className="space-y-2">
-      {items.map(e => <ShowcaseRow key={e.id} item={e} />)}
+    <div>
+      <div className="bg-white flex flex-col" style={{ border: '1px solid #E9E8E4', borderRadius: '14px', padding: '16px 18px', marginBottom: '24px', gap: '14px' }}>
+        <CatChips />
+        <div className="flex flex-wrap items-center" style={{ gap: '10px', paddingTop: '13px', borderTop: '1px solid #F2F1ED' }}>
+          <span style={{ fontSize: '12px', color: '#9C9A93' }}>精细筛选</span>
+          <BrandStatusSelects showReset resetLabel="重置" />
+        </div>
+      </div>
+      {items.length > 0 ? (
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '22px' }}>
+          {items.map(e => <EquipmentCard key={e.id} item={e} />)}
+        </div>
+      ) : <NoResults />}
     </div>
   )
-}
-
-function ShowcaseRow({ item }: { item: Equipment }) {
-  const { openEquipment, addToCart } = useStore(s => ({ openEquipment: s.openEquipment, addToCart: s.addToCart }))
-  const status = STATUS[item.st]
-  const canRent = item.st === 'in'
-
-  return (
-    <div
-      className="flex items-center gap-4 bg-white border border-[var(--border)] rounded-xl px-4 py-3 cursor-pointer hover:shadow-sm transition-shadow"
-      onClick={() => openEquipment(item.id)}
-    >
-      <div className="w-10 h-10 rounded-lg bg-[var(--border)] flex items-center justify-center text-xl shrink-0">
-        {catIcon(item.cat)}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="font-medium text-sm text-[var(--ink)] truncate">{item.name}</div>
-        <div className="text-xs text-[var(--ink-4)]">{item.brand} {item.model} · <span className="font-mono">{item.code}</span></div>
-      </div>
-      <div className="flex items-center gap-3 shrink-0">
-        <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: status.color + '22', color: status.color }}>
-          {status.label}
-        </span>
-        <span className="text-sm font-bold text-[var(--accent)] w-20 text-right">¥{item.day}/天</span>
-        <button
-          onClick={e => { e.stopPropagation(); if (canRent) addToCart(item.id) }}
-          disabled={!canRent}
-          className={`text-xs px-3 py-1.5 rounded-full font-medium transition-colors ${
-            canRent ? 'bg-[var(--accent)] text-white hover:bg-[#2347a3]' : 'bg-[var(--border)] text-[var(--ink-5)] cursor-not-allowed'
-          }`}
-        >
-          {canRent ? '加入' : '不可租'}
-        </button>
-      </div>
-    </div>
-  )
-}
-
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center py-24 text-center">
-      <div className="text-5xl mb-4">🔍</div>
-      <div className="font-medium text-[var(--ink-3)]">没有找到符合条件的器材</div>
-      <div className="text-sm text-[var(--ink-5)] mt-1">尝试调整筛选条件</div>
-    </div>
-  )
-}
-
-function catIcon(cat: string): string {
-  const map: Record<string, string> = {
-    cinema: '🎬', lens: '🔭', light: '💡', monitor: '🖥',
-    support: '🎚', audio: '🎙', fpv: '🚁', drone: '🛸', accessory: '🔧',
-  }
-  return map[cat] ?? '📦'
 }
