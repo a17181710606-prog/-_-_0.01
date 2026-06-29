@@ -46,9 +46,9 @@ export default function ServiceCard({ item }: Props) {
 
         {/* stat pills */}
         <div className="flex flex-wrap" style={{ gap: '7px' }}>
-          <Pill>硬件 {item.hw.length}</Pill>
-          <Pill>能力 {item.caps.length}</Pill>
-          <Pill>团队 {leads.length}</Pill>
+          <Pill icon={<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5}><rect x="2" y="3" width="12" height="9" rx="1.2" /><line x1="2" y1="6" x2="14" y2="6" /></svg>}>硬件 {item.hw.length}</Pill>
+          <Pill icon={<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5}><polyline points="3,8 6,11 13,4" strokeLinecap="round" strokeLinejoin="round" /></svg>}>能力 {item.caps.length}</Pill>
+          <Pill icon={<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5}><circle cx="6" cy="6" r="2.4" /><path d="M2 13c0-2.2 1.8-4 4-4s4 1.8 4 4" /><path d="M11 5.5a2.2 2.2 0 010 4M14 13a3.6 3.6 0 00-2.5-3.4" /></svg>}>团队 {leads.length}</Pill>
         </div>
 
         {/* price + avatars */}
@@ -85,10 +85,10 @@ export default function ServiceCard({ item }: Props) {
   )
 }
 
-function Pill({ children }: { children: React.ReactNode }) {
+function Pill({ icon, children }: { icon?: React.ReactNode; children: React.ReactNode }) {
   return (
     <span className="inline-flex items-center" style={{ gap: '5px', fontSize: '12px', color: '#44423D', background: '#F4F3F0', padding: '4px 10px', borderRadius: '7px' }}>
-      {children}
+      {icon}{children}
     </span>
   )
 }
