@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ font-family:'Noto Sans SC', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; color:#1C1B19; background:#FAFAF8; -webkit-font-smoothing:antialiased; }
+  ::selection{ background:#D9E2FA; }
+  *::-webkit-scrollbar{ height:8px; width:8px; }
+  *::-webkit-scrollbar-thumb{ background:#DAD8D2; border-radius:8px; }
+  *::-webkit-scrollbar-track{ background:transparent; }
+  select{ -webkit-appearance:none; appearance:none; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M3 4.5L6 7.5L9 4.5' stroke='%2376746E' stroke-width='1.3' fill='none' stroke-linecap='round'/></svg>"); background-repeat:no-repeat; background-position:right 9px center; }
+  input:focus, select:focus{ outline:none; border-color:#2F5AC7 !important; }
+  @keyframes ovIn{ from{ opacity:0; } to{ opacity:1; } }
+  @keyframes panelIn{ from{ transform:translateX(30px); opacity:.4; } to{ transform:translateX(0); opacity:1; } }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</helmet>
+
+<div style="min-height:100vh; display:flex; flex-direction:column; background:#FAFAF8;">
+
+  <sc-if value="{{ frontView }}" hint-placeholder-val="{{ true }}">
+  <header style="position:sticky; top:0; z-index:40; background:rgba(250,250,248,.88); backdrop-filter:blur(12px); border-bottom:1px solid #E9E8E4; padding:0 22px; height:62px; display:flex; align-items:center; gap:18px;">
+    <div onClick="{{ goCatalog }}" style="display:flex; align-items:center; gap:10px; cursor:pointer; flex-shrink:0;">
+      <img src="assets/logo.png" alt="景彩文化" style="height:30px; width:auto; display:block;" />
+      <div style="display:flex; flex-direction:column; line-height:1.12;">
+        <span style="font-size:15px; font-weight:700; letter-spacing:.02em; color:#1C1B19;">景彩文化</span>
+        <span style="font-size:9px; letter-spacing:.18em; color:#A6A49C; font-family:'JetBrains Mono', monospace;">器材超市 · EQUIPMENT</span>
+      </div>
+    </div>
+
+    <nav style="display:flex; align-items:center; gap:4px; margin-left:8px;">
+      <button onClick="{{ goCatalog }}" style="{{ navCatStyle }}">器材超市</button>
+      <button onClick="{{ goServices }}" style="{{ navSvcStyle }}">服务超市</button>
+      <button onClick="{{ goTalent }}" style="{{ navTalentStyle }}">人才库</button>
+      <button onClick="{{ goDashboard }}" style="{{ navDashStyle }}">库存总览</button>
+    </nav>
+
+    <div style="flex:1; display:flex; justify-content:center; min-width:0;">
+      <div style="position:relative; width:100%; max-width:420px;">
+        <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#A6A49C; display:flex;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"></circle><line x1="11" y1="11" x2="14.5" y2="14.5" stroke-linecap="round"></line></svg></span>
+        <input value="{{ searchVal }}" onChange="{{ onSearch }}" onInput="{{ onSearch }}" placeholder="搜索设备、型号、品牌、编号…" style="width:100%; height:38px; padding:0 14px 0 34px; border:1px solid #E4E3DE; border-radius:10px; background:#fff; font-family:inherit; font-size:13px; color:#1C1B19;" />
+      </div>
+    </div>
+
+    <button onClick="{{ goCart }}" style="{{ navCartStyle }}">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="2.5" width="10" height="12" rx="1.6"></rect><line x1="5.6" y1="6" x2="10.4" y2="6" stroke-linecap="round"></line><line x1="5.6" y1="8.6" x2="10.4" y2="8.6" stroke-linecap="round"></line><line x1="5.6" y1="11.2" x2="8.6" y2="11.2" stroke-linecap="round"></line></svg>
+      <span>我的清单</span>
+      <sc-if value="{{ cartHasItems }}" hint-placeholder-val="">
+        <span style="min-width:18px; height:18px; padding:0 5px; border-radius:999px; background:#2F5AC7; color:#fff; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono', monospace;">{{ cartCount }}</span>
+      </sc-if>
+    </button>
+    <div style="width:1px; height:22px; background:#E4E3DE; margin:0 2px;"></div>
+    <button onClick="{{ goAdmin }}" style="display:flex; align-items:center; gap:6px; height:34px; padding:0 13px; border-radius:9px; border:1px solid #E4E3DE; background:#fff; cursor:pointer; font-family:inherit; font-size:13px; color:#44423D;" style-hover="border-color:#1C1B19; background:#1C1B19; color:#fff;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.5" y="3" width="11" height="8" rx="1.2"></rect><line x1="6" y1="13.6" x2="10" y2="13.6" stroke-linecap="round"></line><line x1="8" y1="11" x2="8" y2="13.6"></line></svg>后台管理</button>
+  </header>
+
+  <!-- ============ CATALOG ============ -->
+  <sc-if value="{{ showCatalog }}" hint-placeholder-val="{{ true }}">
+  <main style="flex:1; max-width:1440px; width:100%; margin:0 auto; padding:22px 22px 60px;">
+
+    <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+      <div>
+        <h1 style="margin:0 0 4px; font-size:24px; font-weight:700; letter-spacing:-.01em;">器材超市</h1>
+        <p style="margin:0; font-size:13px; color:#76746E;">逛着挑设备 · 加入清单凑一套 · 共 <span style="font-family:'JetBrains Mono', monospace; color:#44423D;">{{ totalCount }}</span> 件器材，当前可借 <span style="font-family:'JetBrains Mono', monospace; color:#44423D;">{{ totalAvail }}</span> 件</p>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div style="font-size:12px; color:#9C9A93;">布局方案</div>
+        <div style="display:flex; padding:3px; background:#F1F0EC; border-radius:10px; gap:2px;">
+          <sc-for list="{{ layouts }}" as="lo" hint-placeholder-count="3">
+            <button onClick="{{ lo.select }}" style="{{ lo.style }}">{{ lo.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:18px;">
+      <div style="font-size:13px; color:#76746E;">共 <span style="font-family:'JetBrains Mono', monospace; color:#1C1B19; font-weight:500;">{{ resultCount }}</span> 件结果</div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:12px; color:#9C9A93;">排序</span>
+        <select value="{{ sortVal }}" onChange="{{ onSort }}" style="height:34px; padding:0 30px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;">
+          <option value="featured">推荐</option>
+          <option value="priceAsc">日租 低→高</option>
+          <option value="priceDesc">日租 高→低</option>
+          <option value="avail">可借数量</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- LAYOUT A: 货架网格 (rail + grid) -->
+    <sc-if value="{{ layoutGrid }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex; gap:24px; align-items:flex-start;">
+      <aside style="width:218px; flex-shrink:0; position:sticky; top:84px;">
+        <div style="font-size:11px; font-weight:600; letter-spacing:.08em; color:#9C9A93; text-transform:uppercase; margin-bottom:9px;">分类</div>
+        <div style="display:flex; flex-direction:column; gap:2px; margin-bottom:18px;">
+          <sc-for list="{{ cats }}" as="c" hint-placeholder-count="10">
+            <button onClick="{{ c.select }}" style="{{ c.railStyle }}"><span>{{ c.label }}</span><span style="font-family:'JetBrains Mono', monospace; font-size:11px; opacity:.7;">{{ c.count }}</span></button>
+          </sc-for>
+        </div>
+        <div style="height:1px; background:#EAE9E5; margin:0 0 16px;"></div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <label style="display:flex; flex-direction:column; gap:5px; font-size:12px; color:#9C9A93;">品牌
+            <select value="{{ brandVal }}" onChange="{{ onBrand }}" style="height:34px; padding:0 28px 0 10px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ brandOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px; font-size:12px; color:#9C9A93;">状态
+            <select value="{{ statusVal }}" onChange="{{ onStatus }}" style="height:34px; padding:0 28px 0 10px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ statusOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+          </label>
+          <button onClick="{{ resetFilters }}" style="margin-top:4px; align-self:flex-start; font-size:12px; color:#2F5AC7; background:none; border:none; cursor:pointer; padding:0; font-family:inherit;">重置筛选</button>
+        </div>
+      </aside>
+      <div style="flex:1; min-width:0;">
+        <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(216px, 1fr)); gap:16px;">
+            <sc-for list="{{ cards }}" as="c" hint-placeholder-count="12">
+              <dc-import name="Card" item="{{ c }}" hint-size="216px,320px"></dc-import>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noResults }}" hint-placeholder-val="">
+          <div style="padding:80px 0; text-align:center; color:#9C9A93; font-size:14px;">没有符合条件的器材，试试 <button onClick="{{ resetFilters }}" style="color:#2F5AC7; background:none; border:none; cursor:pointer; font-size:14px; font-family:inherit;">重置筛选</button></div>
+        </sc-if>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- LAYOUT B: 分区货架 (aisles) -->
+    <sc-if value="{{ layoutAisle }}" hint-placeholder-val="">
+    <div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+        <sc-for list="{{ cats }}" as="c" hint-placeholder-count="10">
+          <button onClick="{{ c.select }}" style="{{ c.chipStyle }}">{{ c.label }}</button>
+        </sc-for>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px;">
+        <select value="{{ brandVal }}" onChange="{{ onBrand }}" style="height:34px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ brandOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+        <select value="{{ statusVal }}" onChange="{{ onStatus }}" style="height:34px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ statusOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+      </div>
+      <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; flex-direction:column; gap:30px;">
+          <sc-for list="{{ aisles }}" as="aisle" hint-placeholder-count="4">
+            <section>
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:13px;">
+                <h2 style="margin:0; font-size:16px; font-weight:600;">{{ aisle.label }}</h2>
+                <span style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#A6A49C;">{{ aisle.en }}</span>
+                <span style="font-size:12px; color:#9C9A93;">· {{ aisle.count }} 件</span>
+                <div style="flex:1; height:1px; background:#EAE9E5;"></div>
+                <button onClick="{{ aisle.viewAll }}" style="font-size:12px; color:#2F5AC7; background:none; border:none; cursor:pointer; font-family:inherit; white-space:nowrap;">查看全部 →</button>
+              </div>
+              <div style="display:flex; gap:14px; overflow-x:auto; padding-bottom:8px; scroll-snap-type:x proximity;">
+                <sc-for list="{{ aisle.items }}" as="c" hint-placeholder-count="5">
+                  <div style="width:218px; flex-shrink:0; scroll-snap-align:start;"><dc-import name="Card" item="{{ c }}" hint-size="218px,320px"></dc-import></div>
+                </sc-for>
+              </div>
+            </section>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ noResults }}" hint-placeholder-val="">
+        <div style="padding:80px 0; text-align:center; color:#9C9A93; font-size:14px;">没有符合条件的器材，试试 <button onClick="{{ resetFilters }}" style="color:#2F5AC7; background:none; border:none; cursor:pointer; font-size:14px; font-family:inherit;">重置筛选</button></div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- LAYOUT C: 大图筛选 (toolbar + spacious grid) -->
+    <sc-if value="{{ layoutShowcase }}" hint-placeholder-val="">
+    <div>
+      <div style="background:#fff; border:1px solid #E9E8E4; border-radius:14px; padding:16px 18px; margin-bottom:24px; display:flex; flex-direction:column; gap:14px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <sc-for list="{{ cats }}" as="c" hint-placeholder-count="10">
+            <button onClick="{{ c.select }}" style="{{ c.chipStyle }}">{{ c.label }}</button>
+          </sc-for>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; padding-top:13px; border-top:1px solid #F2F1ED;">
+          <span style="font-size:12px; color:#9C9A93;">精细筛选</span>
+          <select value="{{ brandVal }}" onChange="{{ onBrand }}" style="height:34px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ brandOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+          <select value="{{ statusVal }}" onChange="{{ onStatus }}" style="height:34px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ statusOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+          <button onClick="{{ resetFilters }}" style="font-size:12px; color:#2F5AC7; background:none; border:none; cursor:pointer; padding:0; font-family:inherit;">重置</button>
+        </div>
+      </div>
+      <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:22px;">
+          <sc-for list="{{ cards }}" as="c" hint-placeholder-count="9">
+            <dc-import name="Card" item="{{ c }}" hint-size="300px,380px"></dc-import>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ noResults }}" hint-placeholder-val="">
+        <div style="padding:80px 0; text-align:center; color:#9C9A93; font-size:14px;">没有符合条件的器材，试试 <button onClick="{{ resetFilters }}" style="color:#2F5AC7; background:none; border:none; cursor:pointer; font-size:14px; font-family:inherit;">重置筛选</button></div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+  </main>
+  </sc-if>
+
+  <!-- ============ CART / 我的清单 ============ -->
+  <sc-if value="{{ showCart }}" hint-placeholder-val="">
+  <main style="flex:1; max-width:1040px; width:100%; margin:0 auto; padding:26px 22px 60px;">
+    <button onClick="{{ goCatalog }}" style="display:flex; align-items:center; gap:6px; font-size:13px; color:#76746E; background:none; border:none; cursor:pointer; padding:0; margin-bottom:16px; font-family:inherit;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8.5 3L4.5 7L8.5 11" stroke-linecap="round" stroke-linejoin="round"></path></svg> 返回器材超市</button>
+
+    <sc-if value="{{ cartEmpty }}" hint-placeholder-val="">
+      <div style="padding:90px 0; text-align:center;">
+        <div style="width:56px; height:56px; margin:0 auto 18px; border-radius:14px; background:#F1F0EC; display:flex; align-items:center; justify-content:center; color:#B6B4AC;"><svg width="26" height="26" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="2.5" width="10" height="12" rx="1.6"></rect><line x1="5.6" y1="6" x2="10.4" y2="6" stroke-linecap="round"></line><line x1="5.6" y1="8.6" x2="10.4" y2="8.6" stroke-linecap="round"></line></svg></div>
+        <h2 style="margin:0 0 6px; font-size:18px;">清单还是空的</h2>
+        <p style="margin:0 0 20px; color:#9C9A93; font-size:13px;">去器材超市挑设备，凑一套这次拍摄要用的器材</p>
+        <button onClick="{{ goCatalog }}" style="padding:10px 20px; border-radius:10px; background:#1C1B19; color:#fff; border:none; cursor:pointer; font-size:14px; font-family:inherit;">去逛器材超市</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ cartHasItems }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex; gap:26px; align-items:flex-start; flex-wrap:wrap;">
+      <div style="flex:1; min-width:320px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px;">
+          <h1 style="margin:0; font-size:22px; font-weight:700;">我的清单</h1>
+          <span style="font-size:13px; color:#9C9A93;">{{ cartCount }} 件设备</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <sc-for list="{{ cartItems }}" as="c" hint-placeholder-count="3">
+            <div style="display:flex; gap:14px; align-items:center; background:#fff; border:1px solid #E9E8E4; border-radius:12px; padding:13px;">
+              <div onClick="{{ c.open }}" style="width:78px; height:60px; flex-shrink:0; border-radius:8px; background:repeating-linear-gradient(135deg, #F4F3F0 0 8px, #EFEEEA 8px 16px); display:flex; align-items:center; justify-content:center; cursor:pointer;"><span style="font-family:'JetBrains Mono', monospace; font-size:9px; color:#B6B4AC;">{{ c.en }}</span></div>
+              <div style="flex:1; min-width:0;">
+                <div onClick="{{ c.open }}" style="font-size:14px; font-weight:500; cursor:pointer;">{{ c.name }}</div>
+                <div style="display:flex; align-items:center; gap:7px; margin-top:4px; font-size:12px; color:#9C9A93;"><span style="font-family:'JetBrains Mono', monospace;">{{ c.code }}</span><span style="{{ c.dotStyle }}"></span><span>{{ c.statusLabel }}</span></div>
+              </div>
+              <div style="text-align:right; flex-shrink:0;">
+                <div style="font-family:'JetBrains Mono', monospace; font-size:13px; color:#76746E;">{{ c.dailyText }}<span style="font-size:11px; color:#A6A49C;">/天</span></div>
+              </div>
+              <div style="display:flex; align-items:center; gap:0; border:1px solid #E4E3DE; border-radius:8px; overflow:hidden; flex-shrink:0;">
+                <button onClick="{{ c.dec }}" style="width:30px; height:32px; border:none; background:#fff; cursor:pointer; color:#44423D; font-size:16px; display:flex; align-items:center; justify-content:center;">−</button>
+                <span style="width:30px; text-align:center; font-family:'JetBrains Mono', monospace; font-size:13px;">{{ c.qty }}</span>
+                <button onClick="{{ c.inc }}" style="width:30px; height:32px; border:none; background:#fff; cursor:pointer; color:#44423D; font-size:16px; display:flex; align-items:center; justify-content:center;">+</button>
+              </div>
+              <div style="width:92px; text-align:right; flex-shrink:0; font-family:'JetBrains Mono', monospace; font-size:14px; font-weight:600;">{{ c.lineTotal }}</div>
+              <button onClick="{{ c.remove }}" style="width:30px; height:30px; border:none; background:none; cursor:pointer; color:#B6B4AC; display:flex; align-items:center; justify-content:center; flex-shrink:0;" style-hover="color:#C8543E;"><svg width="15" height="15" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3.5" y1="3.5" x2="10.5" y2="10.5" stroke-linecap="round"></line><line x1="10.5" y1="3.5" x2="3.5" y2="10.5" stroke-linecap="round"></line></svg></button>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <aside style="width:300px; flex-shrink:0; position:sticky; top:84px; background:#fff; border:1px solid #E9E8E4; border-radius:14px; padding:18px;">
+        <div style="font-size:12px; color:#9C9A93; margin-bottom:6px;">项目名称</div>
+        <input value="{{ projectName }}" onChange="{{ onProjectName }}" onInput="{{ onProjectName }}" style="width:100%; height:38px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:inherit; font-size:14px; font-weight:500; color:#1C1B19; margin-bottom:16px;" />
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+          <span style="font-size:13px; color:#44423D;">租期</span>
+          <div style="display:flex; align-items:center; gap:0; border:1px solid #E4E3DE; border-radius:8px; overflow:hidden;">
+            <button onClick="{{ decDays }}" style="width:30px; height:32px; border:none; background:#fff; cursor:pointer; color:#44423D; font-size:16px;">−</button>
+            <span style="min-width:44px; text-align:center; font-family:'JetBrains Mono', monospace; font-size:13px;">{{ daysVal }} 天</span>
+            <button onClick="{{ incDays }}" style="width:30px; height:32px; border:none; background:#fff; cursor:pointer; color:#44423D; font-size:16px;">+</button>
+          </div>
+        </div>
+        <div style="height:1px; background:#EEEDE9; margin:0 0 14px;"></div>
+        <div style="display:flex; flex-direction:column; gap:10px; font-size:13px;">
+          <div style="display:flex; justify-content:space-between; color:#76746E;"><span>设备日租小计</span><span style="font-family:'JetBrains Mono', monospace; color:#1C1B19;">{{ sumDaily }}</span></div>
+          <div style="display:flex; justify-content:space-between; color:#76746E;"><span>租期合计 ×{{ daysVal }} 天</span><span style="font-family:'JetBrains Mono', monospace; color:#1C1B19;">{{ sumRent }}</span></div>
+          <div style="display:flex; justify-content:space-between; color:#76746E;"><span>押金合计</span><span style="font-family:'JetBrains Mono', monospace; color:#1C1B19;">{{ sumDeposit }}</span></div>
+        </div>
+        <div style="height:1px; background:#EEEDE9; margin:14px 0;"></div>
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:18px;"><span style="font-size:14px; font-weight:600;">预估总额</span><span style="font-family:'JetBrains Mono', monospace; font-size:20px; font-weight:600; color:#2F5AC7;">{{ sumTotal }}</span></div>
+        <button style="width:100%; height:42px; border-radius:10px; background:#1C1B19; color:#fff; border:none; cursor:pointer; font-size:14px; font-family:inherit; margin-bottom:9px;">生成询价单</button>
+        <button onClick="{{ clearCart }}" style="width:100%; height:38px; border-radius:10px; background:#fff; color:#76746E; border:1px solid #E4E3DE; cursor:pointer; font-size:13px; font-family:inherit;">清空清单</button>
+        <p style="margin:14px 0 0; font-size:11px; color:#B6B4AC; line-height:1.5;">日租与押金为参考价，最终以正式报价单为准。</p>
+      </aside>
+    </div>
+    </sc-if>
+  </main>
+  </sc-if>
+
+  <!-- ============ DASHBOARD / 库存总览 ============ -->
+  <sc-if value="{{ showDashboard }}" hint-placeholder-val="">
+  <main style="flex:1; max-width:1320px; width:100%; margin:0 auto; padding:26px 22px 60px;">
+    <div style="margin-bottom:22px;">
+      <h1 style="margin:0 0 4px; font-size:24px; font-weight:700; letter-spacing:-.01em;">库存总览</h1>
+      <p style="margin:0; font-size:13px; color:#76746E;">设备台账实时概览 · 截至 <span style="font-family:'JetBrains Mono', monospace;">{{ today }}</span></p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:14px; margin-bottom:26px;">
+      <sc-for list="{{ stats }}" as="s" hint-placeholder-count="6">
+        <div style="background:#fff; border:1px solid #E9E8E4; border-radius:13px; padding:16px 17px;">
+          <div style="font-size:12px; color:#9C9A93; margin-bottom:10px;">{{ s.label }}</div>
+          <div style="display:flex; align-items:baseline; gap:5px;"><span style="font-family:'JetBrains Mono', monospace; font-size:26px; font-weight:600; color:#1C1B19;">{{ s.value }}</span><span style="font-size:12px; color:#A6A49C;">{{ s.unit }}</span></div>
+          <div style="font-size:11px; color:#A6A49C; margin-top:7px;">{{ s.sub }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:18px; margin-bottom:18px;">
+      <div style="background:#fff; border:1px solid #E9E8E4; border-radius:14px; padding:19px;">
+        <h3 style="margin:0 0 16px; font-size:15px; font-weight:600;">状态分布</h3>
+        <div style="display:flex; height:14px; border-radius:7px; overflow:hidden; margin-bottom:16px; background:#F1F0EC;">
+          <sc-for list="{{ statusBars }}" as="b" hint-placeholder-count="5">
+            <div style="{{ b.barStyle }}"></div>
+          </sc-for>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 18px;">
+          <sc-for list="{{ statusBars }}" as="b" hint-placeholder-count="6">
+            <div style="display:flex; align-items:center; gap:8px; font-size:13px;"><span style="{{ b.dotStyle }}"></span><span style="color:#44423D;">{{ b.label }}</span><span style="flex:1;"></span><span style="font-family:'JetBrains Mono', monospace; color:#1C1B19;">{{ b.count }}</span><span style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#A6A49C; width:38px; text-align:right;">{{ b.pctText }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff; border:1px solid #E9E8E4; border-radius:14px; padding:19px;">
+        <h3 style="margin:0 0 16px; font-size:15px; font-weight:600;">类别库存</h3>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <sc-for list="{{ catBars }}" as="c" hint-placeholder-count="9">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="width:70px; font-size:13px; color:#44423D; flex-shrink:0;">{{ c.label }}</span>
+              <div style="flex:1; height:8px; border-radius:5px; background:#F1F0EC; overflow:hidden;"><div style="{{ c.barStyle }}"></div></div>
+              <span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#76746E; width:54px; text-align:right; flex-shrink:0;">{{ c.availText }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr; gap:18px;">
+      <div style="background:#fff; border:1px solid #E9E8E4; border-radius:14px; padding:19px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;"><h3 style="margin:0; font-size:15px; font-weight:600;">最近出入库记录</h3><span style="font-size:12px; color:#A6A49C;">实时</span></div>
+        <div style="display:flex; flex-direction:column;">
+          <sc-for list="{{ records }}" as="r" hint-placeholder-count="6">
+            <div style="display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #F2F1ED;">
+              <span style="{{ r.tagStyle }}">{{ r.op }}</span>
+              <div style="flex:1; min-width:0;"><div style="font-size:13px; color:#1C1B19;">{{ r.dev }}</div><div style="font-size:11px; color:#A6A49C; margin-top:2px;">{{ r.proj }}</div></div>
+              <div style="text-align:right; flex-shrink:0;"><div style="font-size:12px; color:#76746E;">{{ r.by }}</div><div style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#A6A49C; margin-top:2px;">{{ r.t }}</div></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </main>
+  </sc-if>
+
+  <!-- ============ SERVICES / 服务超市 ============ -->
+  <sc-if value="{{ showServices }}" hint-placeholder-val="">
+  <main style="flex:1; max-width:1440px; width:100%; margin:0 auto; padding:22px 22px 60px;">
+    <div style="margin-bottom:18px;">
+      <h1 style="margin:0 0 4px; font-size:24px; font-weight:700; letter-spacing:-.01em;">服务超市</h1>
+      <p style="margin:0; font-size:13px; color:#76746E;">按拍摄领域选服务包 · 每个包整合 <span style="color:#44423D;">硬件资源 + 服务团队 + 拍摄能力</span> · 共 <span style="font-family:'JetBrains Mono', monospace; color:#44423D;">{{ svcTotal }}</span> 个服务包</p>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px;">
+      <sc-for list="{{ svcDomains }}" as="d" hint-placeholder-count="7">
+        <button onClick="{{ d.select }}" style="{{ d.chipStyle }}">{{ d.label }}</button>
+      </sc-for>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(326px, 1fr)); gap:18px;">
+      <sc-for list="{{ serviceCards }}" as="s" hint-placeholder-count="6">
+        <div onClick="{{ s.open }}" style="display:flex; flex-direction:column; background:#fff; border:1px solid #E9E8E4; border-radius:14px; overflow:hidden; cursor:pointer; transition:border-color .15s, box-shadow .15s, transform .15s;" style-hover="border-color:#CFCEC8; box-shadow:0 10px 30px rgba(20,20,18,.09); transform:translateY(-2px);">
+          <div style="{{ s.heroStyle }}">
+            <span style="{{ s.domBadgeStyle }}">{{ s.domLabel }}</span>
+            <div>
+              <div style="font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:.16em; color:rgba(28,27,25,.45); margin-bottom:5px;">{{ s.domEn }}</div>
+              <div style="font-size:20px; font-weight:700; color:#1C1B19; letter-spacing:-.01em;">{{ s.name }}</div>
+            </div>
+          </div>
+          <div style="padding:15px 16px 16px; display:flex; flex-direction:column; gap:13px; flex:1;">
+            <p style="margin:0; font-size:13.5px; color:#76746E;">{{ s.tagline }}</p>
+            <div style="display:flex; gap:7px; flex-wrap:wrap;">
+              <span style="display:inline-flex; align-items:center; gap:5px; font-size:12px; color:#44423D; background:#F4F3F0; padding:4px 10px; border-radius:7px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="9" rx="1.2"></rect><line x1="2" y1="6" x2="14" y2="6"></line></svg>硬件 {{ s.hwCount }}</span>
+              <span style="display:inline-flex; align-items:center; gap:5px; font-size:12px; color:#44423D; background:#F4F3F0; padding:4px 10px; border-radius:7px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3,8 6,11 13,4" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>能力 {{ s.capCount }}</span>
+              <span style="display:inline-flex; align-items:center; gap:5px; font-size:12px; color:#44423D; background:#F4F3F0; padding:4px 10px; border-radius:7px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="2.4"></circle><path d="M2 13c0-2.2 1.8-4 4-4s4 1.8 4 4"></path><path d="M11 5.5a2.2 2.2 0 010 4M14 13a3.6 3.6 0 00-2.5-3.4"></path></svg>团队 {{ s.crewCount }}</span>
+            </div>
+            <div style="margin-top:auto; padding-top:13px; border-top:1px solid #F2F1ED; display:flex; align-items:flex-end; justify-content:space-between; gap:10px;">
+              <div>
+                <div style="font-size:11px; color:#9C9A93; margin-bottom:2px;">服务起价</div>
+                <div style="display:flex; align-items:baseline; gap:3px;"><span style="font-family:'JetBrains Mono', monospace; font-size:18px; font-weight:600; color:#1C1B19;">{{ s.priceText }}</span><span style="font-size:11px; color:#9C9A93;">/{{ s.unit }}起</span></div>
+              </div>
+              <div style="display:flex; align-items:center;">
+                <sc-for list="{{ s.leadAvatars }}" as="a" hint-placeholder-count="3">
+                  <div style="{{ a.avStyle }}">{{ a.initials }}</div>
+                </sc-for>
+              </div>
+            </div>
+            <button onClick="{{ s.order }}" style="width:100%; height:40px; border-radius:10px; border:none; background:#1C1B19; color:#fff; cursor:pointer; font-family:inherit; font-size:14px;" style-hover="background:#2F5AC7;">一键发起服务</button>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </main>
+  </sc-if>
+
+  <!-- ============ TALENT / 人才库 ============ -->
+  <sc-if value="{{ showTalent }}" hint-placeholder-val="">
+  <main style="flex:1; max-width:1440px; width:100%; margin:0 auto; padding:22px 22px 60px;">
+    <div style="margin-bottom:18px;">
+      <h1 style="margin:0 0 4px; font-size:24px; font-weight:700; letter-spacing:-.01em;">人才库</h1>
+      <p style="margin:0; font-size:13px; color:#76746E;">具备特种技能的专业团队 · 统一档案呈现 · 共 <span style="font-family:'JetBrains Mono', monospace; color:#44423D;">{{ talentTotal }}</span> 位入库人员</p>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px;">
+      <sc-for list="{{ talentRoles }}" as="r" hint-placeholder-count="10">
+        <button onClick="{{ r.select }}" style="{{ r.chipStyle }}">{{ r.label }}</button>
+      </sc-for>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(264px, 1fr)); gap:16px;">
+      <sc-for list="{{ talentCards }}" as="t" hint-placeholder-count="9">
+        <div onClick="{{ t.open }}" style="display:flex; flex-direction:column; gap:13px; background:#fff; border:1px solid #E9E8E4; border-radius:14px; padding:17px; cursor:pointer; transition:border-color .15s, box-shadow .15s, transform .15s;" style-hover="border-color:#CFCEC8; box-shadow:0 10px 28px rgba(20,20,18,.08); transform:translateY(-2px);">
+          <div style="display:flex; align-items:center; gap:13px;">
+            <div style="{{ t.avStyle }}">{{ t.initials }}</div>
+            <div style="min-width:0; flex:1;">
+              <div style="font-size:16px; font-weight:700; color:#1C1B19;">{{ t.name }}</div>
+              <div style="display:flex; align-items:center; gap:7px; margin-top:5px;">
+                <span style="{{ t.rolePillStyle }}">{{ t.role }}</span>
+              </div>
+            </div>
+          </div>
+          <div style="font-size:12.5px; color:#76746E; line-height:1.5;">{{ t.specialty }}</div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <sc-for list="{{ t.topSkills }}" as="sk" hint-placeholder-count="3">
+              <span style="font-size:11.5px; color:#44423D; background:#F4F3F0; padding:4px 9px; border-radius:6px;">{{ sk }}</span>
+            </sc-for>
+          </div>
+          <div style="margin-top:auto; padding-top:12px; border-top:1px solid #F2F1ED; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+            <div style="min-width:0;"><div style="font-size:10.5px; color:#A6A49C; margin-bottom:1px;">代表项目</div><div style="font-size:12px; color:#44423D; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.signature }}</div></div>
+            <span style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#9C9A93; flex-shrink:0;">{{ t.yearsText }}</span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </main>
+  </sc-if>
+
+  </sc-if>
+
+  <!-- ============ DETAIL SLIDE-OVER ============ -->
+  <sc-if value="{{ detailOpen }}" hint-placeholder-val="">
+  <div onClick="{{ closeDetail }}" style="position:fixed; inset:0; z-index:60; background:rgba(24,23,20,.38); animation:ovIn .18s ease; display:flex; justify-content:flex-end;">
+    <div onClick="{{ stop }}" style="width:min(560px, 94vw); height:100%; background:#fff; overflow-y:auto; animation:panelIn .26s cubic-bezier(.22,.7,.3,1); box-shadow:-20px 0 60px rgba(20,20,18,.18);">
+      <div style="position:sticky; top:0; background:rgba(255,255,255,.92); backdrop-filter:blur(8px); border-bottom:1px solid #EEEDE9; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; z-index:2;">
+        <div style="display:flex; align-items:center; gap:9px; font-size:13px; color:#76746E;"><span>{{ detail.catLabel }}</span><span style="color:#CFCDC6;">/</span><span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#9C9A93;">{{ detail.code }}</span></div>
+        <button onClick="{{ closeDetail }}" style="width:32px; height:32px; border-radius:8px; border:1px solid #E4E3DE; background:#fff; cursor:pointer; color:#44423D; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3.5" y1="3.5" x2="10.5" y2="10.5" stroke-linecap="round"></line><line x1="10.5" y1="3.5" x2="3.5" y2="10.5" stroke-linecap="round"></line></svg></button>
+      </div>
+      <div style="padding:20px;">
+        <div style="position:relative; aspect-ratio:16 / 10; border-radius:14px; background:repeating-linear-gradient(135deg, #F4F3F0 0 11px, #EFEEEA 11px 22px); display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
+          <span style="font-family:'JetBrains Mono', monospace; font-size:13px; letter-spacing:.05em; color:#AEACA3;">{{ detail.model }}</span>
+          <span style="position:absolute; top:13px; left:14px; font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:.14em; color:#BCBAB1;">{{ detail.en }}</span>
+          <span style="position:absolute; bottom:12px; right:14px; font-size:11px; color:#B6B4AC;">产品图占位</span>
+        </div>
+
+        <div style="font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:.07em; color:#9C9A93; text-transform:uppercase; margin-bottom:6px;">{{ detail.brand }}</div>
+        <h2 style="margin:0 0 12px; font-size:21px; font-weight:700; line-height:1.25;">{{ detail.name }}</h2>
+        <div style="display:flex; align-items:center; gap:9px; font-size:13px; color:#76746E; margin-bottom:20px; flex-wrap:wrap;"><span style="display:flex; align-items:center; gap:6px;"><span style="{{ detail.dotStyle }}"></span>{{ detail.statusLabel }}</span><span style="color:#CFCDC6;">·</span><span style="font-family:'JetBrains Mono', monospace;">{{ detail.availText }}</span></div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:20px;">
+          <div style="background:#F8F7F4; border-radius:11px; padding:13px;"><div style="font-size:11px; color:#9C9A93; margin-bottom:6px;">日租参考</div><div style="font-family:'JetBrains Mono', monospace; font-size:17px; font-weight:600; color:#2F5AC7;">{{ detail.dailyText }}</div></div>
+          <div style="background:#F8F7F4; border-radius:11px; padding:13px;"><div style="font-size:11px; color:#9C9A93; margin-bottom:6px;">押金参考</div><div style="font-family:'JetBrains Mono', monospace; font-size:17px; font-weight:600; color:#1C1B19;">{{ detail.depositText }}</div></div>
+          <div style="background:#F8F7F4; border-radius:11px; padding:13px;"><div style="font-size:11px; color:#9C9A93; margin-bottom:6px;">设备估值</div><div style="font-family:'JetBrains Mono', monospace; font-size:17px; font-weight:600; color:#1C1B19;">{{ detail.valueText }}</div></div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:24px;">
+          <div style="display:flex; align-items:center; gap:0; border:1px solid #E4E3DE; border-radius:9px; overflow:hidden;">
+            <button onClick="{{ decDetailQty }}" style="width:36px; height:42px; border:none; background:#fff; cursor:pointer; color:#44423D; font-size:18px;">−</button>
+            <span style="min-width:40px; text-align:center; font-family:'JetBrains Mono', monospace; font-size:15px;">{{ detailQty }}</span>
+            <button onClick="{{ incDetailQty }}" style="width:36px; height:42px; border:none; background:#fff; cursor:pointer; color:#44423D; font-size:18px;">+</button>
+          </div>
+          <button onClick="{{ detailAdd }}" style="flex:1; height:46px; border-radius:11px; background:#1C1B19; color:#fff; border:none; cursor:pointer; font-size:15px; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="3.5" x2="8" y2="12.5" stroke-linecap="round"></line><line x1="3.5" y1="8" x2="12.5" y2="8" stroke-linecap="round"></line></svg>加入清单</button>
+        </div>
+
+        <h3 style="margin:0 0 11px; font-size:14px; font-weight:600;">关键参数</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;">
+          <sc-for list="{{ detail.specs }}" as="sp" hint-placeholder-count="4">
+            <span style="padding:6px 12px; background:#F3F2EE; border-radius:8px; font-size:13px; color:#44423D;">{{ sp }}</span>
+          </sc-for>
+        </div>
+
+        <h3 style="margin:0 0 11px; font-size:14px; font-weight:600;">台账信息</h3>
+        <div style="display:flex; flex-direction:column; gap:0; margin-bottom:24px; border:1px solid #EEEDE9; border-radius:11px; overflow:hidden;">
+          <div style="display:flex; justify-content:space-between; padding:11px 14px; font-size:13px; border-bottom:1px solid #F2F1ED;"><span style="color:#9C9A93;">编号</span><span style="font-family:'JetBrains Mono', monospace; color:#1C1B19;">{{ detail.code }}</span></div>
+          <div style="display:flex; justify-content:space-between; padding:11px 14px; font-size:13px; border-bottom:1px solid #F2F1ED;"><span style="color:#9C9A93;">存放位置</span><span style="font-family:'JetBrains Mono', monospace; color:#1C1B19;">货架 {{ detail.loc }}</span></div>
+          <div style="display:flex; justify-content:space-between; padding:11px 14px; font-size:13px;"><span style="color:#9C9A93;">总数 / 可借</span><span style="font-family:'JetBrains Mono', monospace; color:#1C1B19;">{{ detail.totText }}</span></div>
+        </div>
+
+        <sc-if value="{{ detail.hasNote }}" hint-placeholder-val="">
+          <h3 style="margin:0 0 9px; font-size:14px; font-weight:600;">备注</h3>
+          <p style="margin:0 0 24px; font-size:13px; color:#76746E; line-height:1.6;">{{ detail.note }}</p>
+        </sc-if>
+
+        <h3 style="margin:0 0 11px; font-size:14px; font-weight:600;">出入库记录</h3>
+        <div style="display:flex; flex-direction:column;">
+          <sc-for list="{{ detail.records }}" as="r" hint-placeholder-count="3">
+            <div style="display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid #F2F1ED; font-size:13px;"><span style="{{ r.tagStyle }}">{{ r.op }}</span><span style="flex:1; color:#44423D;">{{ r.by }}</span><span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#A6A49C;">{{ r.t }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ ADMIN ============ -->
+  <sc-if value="{{ adminView }}" hint-placeholder-val="">
+  <div onClick="{{ closeMenus }}" style="display:flex; min-height:100vh; background:#F4F3F0;">
+    <aside style="width:216px; flex-shrink:0; background:#191A1E; color:#E8E7E3; display:flex; flex-direction:column; position:sticky; top:0; height:100vh;">
+      <div style="padding:18px 18px 15px; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,.08);">
+        <img src="assets/logo.png" alt="景彩文化" style="height:26px; width:auto; display:block;" />
+        <div style="display:flex; flex-direction:column; line-height:1.18;">
+          <span style="font-size:13.5px; font-weight:700; color:#fff;">景彩文化</span>
+          <span style="font-size:9px; letter-spacing:.14em; color:#7C7A74; font-family:'JetBrains Mono', monospace;">后台管理 ADMIN</span>
+        </div>
+      </div>
+      <nav style="flex:1; padding:14px 12px; display:flex; flex-direction:column; gap:3px;">
+        <div style="font-size:10px; letter-spacing:.12em; color:#67655F; padding:2px 11px 8px;">运营</div>
+        <sc-for list="{{ adminNav }}" as="n" hint-placeholder-count="3">
+          <button onClick="{{ n.select }}" style="{{ n.navStyle }}">{{ n.label }}</button>
+        </sc-for>
+      </nav>
+      <div style="padding:13px 12px; border-top:1px solid rgba(255,255,255,.08);">
+        <button onClick="{{ goFront }}" style="display:flex; align-items:center; gap:8px; width:100%; padding:9px 12px; border-radius:8px; border:none; background:rgba(255,255,255,.06); color:#C9C7C1; cursor:pointer; font-family:inherit; font-size:13px;" style-hover="background:rgba(255,255,255,.12);"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8.5 3L4.5 7L8.5 11" stroke-linecap="round" stroke-linejoin="round"></path></svg>返回前台超市</button>
+      </div>
+    </aside>
+
+    <div style="flex:1; min-width:0;">
+
+      <sc-if value="{{ adminHome }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:24px 28px 60px;">
+        <h1 style="margin:0 0 3px; font-size:21px; font-weight:700;">工作台</h1>
+        <p style="margin:0 0 20px; font-size:13px; color:#76746E;">今天 <span style="font-family:'JetBrains Mono', monospace;">{{ today }}</span> · 设备台账实时状态</p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px; margin-bottom:20px;">
+          <sc-for list="{{ aStats }}" as="s" hint-placeholder-count="6">
+            <div style="background:#fff; border:1px solid #E6E5E1; border-radius:11px; padding:14px 15px;">
+              <div style="display:flex; align-items:center; gap:7px; margin-bottom:9px;"><span style="{{ s.dot }}"></span><span style="font-size:12px; color:#76746E;">{{ s.label }}</span></div>
+              <div style="display:flex; align-items:baseline; gap:4px;"><span style="font-family:'JetBrains Mono', monospace; font-size:24px; font-weight:600;">{{ s.value }}</span><span style="font-size:11px; color:#A6A49C;">{{ s.unit }}</span></div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid; grid-template-columns:1.45fr 1fr; gap:16px;">
+          <div style="background:#fff; border:1px solid #E6E5E1; border-radius:13px; padding:18px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;"><h3 style="margin:0; font-size:15px; font-weight:600;">今日待办 · 到期归还</h3><span style="font-size:12px; color:#A6A49C;">{{ todoCount }} 项</span></div>
+            <div style="display:flex; flex-direction:column;">
+              <sc-for list="{{ todos }}" as="t" hint-placeholder-count="5">
+                <div style="display:flex; align-items:flex-start; gap:11px; padding:11px 0; border-bottom:1px solid #F2F1ED;">
+                  <span style="{{ t.tagStyle }}">{{ t.op }}</span>
+                  <div style="flex:1; min-width:0;"><div style="font-size:13.5px; color:#1C1B19;">{{ t.text }}</div><div style="font-size:11.5px; color:#A6A49C; margin-top:2px;">{{ t.sub }}</div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff; border:1px solid #E6E5E1; border-radius:13px; padding:18px;">
+            <h3 style="margin:0 0 12px; font-size:15px; font-weight:600;">快捷入口</h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <sc-for list="{{ quickActions }}" as="q" hint-placeholder-count="4">
+                <button onClick="{{ q.go }}" style="display:flex; flex-direction:column; gap:3px; align-items:flex-start; text-align:left; padding:14px 13px; border-radius:10px; border:1px solid #E6E5E1; background:#FAFAF8; cursor:pointer; font-family:inherit;" style-hover="border-color:#2F5AC7; background:#EEF2FD;">
+                  <span style="font-size:13.5px; font-weight:600; color:#1C1B19;">{{ q.label }}</span>
+                  <span style="font-size:11.5px; color:#9C9A93;">{{ q.desc }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ adminDevices }}" hint-placeholder-val="">
+      <div style="padding:24px 28px 60px;">
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:14px; margin-bottom:16px; flex-wrap:wrap;">
+          <div><h1 style="margin:0 0 2px; font-size:21px; font-weight:700;">设备管理</h1><p style="margin:0; font-size:13px; color:#76746E;">共 <span style="font-family:'JetBrains Mono', monospace;">{{ totalSkus }}</span> 个型号 · 当前 <span style="font-family:'JetBrains Mono', monospace;">{{ adminCount }}</span> 条</p></div>
+          <div style="display:flex; gap:9px;">
+            <button onClick="{{ openImport }}" style="display:flex; align-items:center; gap:7px; height:38px; padding:0 14px; border-radius:9px; border:1px solid #E4E3DE; background:#fff; color:#44423D; cursor:pointer; font-family:inherit; font-size:14px;" style-hover="border-color:#1C1B19; background:#F4F3F0;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="9" rx="1.2"></rect><line x1="2" y1="7" x2="14" y2="7"></line><line x1="5.5" y1="1.5" x2="5.5" y2="4.5" stroke-linecap="round"></line><line x1="10.5" y1="1.5" x2="10.5" y2="4.5" stroke-linecap="round"></line></svg>导入 Excel</button>
+            <button onClick="{{ openNew }}" style="display:flex; align-items:center; gap:7px; height:38px; padding:0 16px; border-radius:9px; border:none; background:#2F5AC7; color:#fff; cursor:pointer; font-family:inherit; font-size:14px;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="8" y1="3.5" x2="8" y2="12.5" stroke-linecap="round"></line><line x1="3.5" y1="8" x2="12.5" y2="8" stroke-linecap="round"></line></svg>新增设备</button>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
+          <div style="position:relative; flex:1; min-width:200px; max-width:320px;">
+            <span style="position:absolute; left:11px; top:50%; transform:translateY(-50%); color:#A6A49C; display:flex;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"></circle><line x1="11" y1="11" x2="14.5" y2="14.5" stroke-linecap="round"></line></svg></span>
+            <input value="{{ aSearch }}" onChange="{{ onASearch }}" onInput="{{ onASearch }}" placeholder="搜索名称 / 型号 / 编号" style="width:100%; height:36px; padding:0 12px 0 33px; border:1px solid #E4E3DE; border-radius:8px; background:#fff; font-family:inherit; font-size:13px;" />
+          </div>
+          <select value="{{ aCat }}" onChange="{{ onACat }}" style="height:36px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ catFilterOptions }}" as="o" hint-placeholder-count="10"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+          <select value="{{ aStatus }}" onChange="{{ onAStatus }}" style="height:36px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ statusFilterOptions }}" as="o" hint-placeholder-count="7"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+          <select value="{{ aOwner }}" onChange="{{ onAOwner }}" style="height:36px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ ownerFilterOptions }}" as="o" hint-placeholder-count="4"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+        </div>
+        <sc-if value="{{ hasSel }}" hint-placeholder-val="">
+          <div style="display:flex; align-items:center; gap:12px; padding:9px 14px; background:#1C1B19; border-radius:10px; margin-bottom:12px; color:#fff; flex-wrap:wrap;">
+            <span style="font-size:13px;">已选 <span style="font-family:'JetBrains Mono', monospace;">{{ selCount }}</span> 项</span>
+            <div style="width:1px; height:16px; background:rgba(255,255,255,.22);"></div>
+            <span style="font-size:12px; color:#B8B6B0;">批量改状态</span>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <sc-for list="{{ batchInOptions }}" as="b" hint-placeholder-count="6">
+                <button onClick="{{ b.pick }}" style="font-size:12px; padding:4px 10px; border-radius:6px; border:1px solid rgba(255,255,255,.22); background:transparent; color:#fff; cursor:pointer; font-family:inherit;" style-hover="background:rgba(255,255,255,.12);">{{ b.label }}</button>
+              </sc-for>
+            </div>
+            <div style="flex:1;"></div>
+            <button onClick="{{ batchDelete }}" style="font-size:12px; padding:5px 12px; border-radius:6px; border:none; background:oklch(0.55 0.18 25); color:#fff; cursor:pointer; font-family:inherit;">删除所选</button>
+            <button onClick="{{ clearSel }}" style="font-size:12px; padding:5px 12px; border-radius:6px; border:1px solid rgba(255,255,255,.22); background:transparent; color:#fff; cursor:pointer; font-family:inherit;">取消</button>
+          </div>
+        </sc-if>
+        <div style="background:#fff; border:1px solid #E6E5E1; border-radius:12px;">
+          <div style="display:grid; grid-template-columns:34px 92px 1.7fr 84px 116px 80px 60px 78px 86px 78px; align-items:center; gap:10px; padding:11px 16px; border-bottom:1px solid #EAE9E5; background:#FAFAF8; font-size:11px; color:#9C9A93; letter-spacing:.03em;">
+            <span><input type="checkbox" checked="{{ allSelected }}" onChange="{{ onSelectAll }}" style="cursor:pointer; accent-color:#2F5AC7;" /></span>
+            <span>编号</span><span>名称</span><span>类别</span><span>状态</span><span>所属方</span><span>位置</span><span style="text-align:right;">可借/总</span><span style="text-align:right;">日租</span><span style="text-align:center;">操作</span>
+          </div>
+          <sc-for list="{{ adminRows }}" as="r" hint-placeholder-count="12">
+            <div style="{{ r.rowStyle }}">
+              <span><input type="checkbox" checked="{{ r.selected }}" onChange="{{ r.toggleSel }}" style="cursor:pointer; accent-color:#2F5AC7;" /></span>
+              <span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#76746E;">{{ r.code }}</span>
+              <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                <div style="width:34px; height:26px; flex-shrink:0; border-radius:5px; background:repeating-linear-gradient(135deg, #F4F3F0 0 6px, #EFEEEA 6px 12px);"></div>
+                <div style="min-width:0;"><div style="font-size:13px; color:#1C1B19; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ r.name }}</div><div style="font-size:11px; color:#A6A49C; font-family:'JetBrains Mono', monospace;">{{ r.brand }}</div></div>
+              </div>
+              <span style="font-size:12.5px; color:#44423D;">{{ r.catLabel }}</span>
+              <div style="position:relative;">
+                <button onClick="{{ r.openMenu }}" style="{{ r.pillStyle }}"><span style="{{ r.dotStyle }}"></span>{{ r.statusLabel }}<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 4.5L6 7.5L9 4.5" stroke-linecap="round"></path></svg></button>
+                <sc-if value="{{ r.menuOpen }}" hint-placeholder-val="">
+                  <div onClick="{{ stop }}" style="position:absolute; top:30px; left:0; z-index:30; background:#fff; border:1px solid #E4E3DE; border-radius:9px; box-shadow:0 12px 30px rgba(20,20,18,.16); padding:5px; min-width:118px;">
+                    <sc-for list="{{ r.menuItems }}" as="m" hint-placeholder-count="6">
+                      <button onClick="{{ m.pick }}" style="display:flex; align-items:center; gap:8px; width:100%; padding:7px 9px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-family:inherit; font-size:13px; color:#44423D; text-align:left;" style-hover="background:#F3F2EE;"><span style="{{ m.dotStyle }}"></span>{{ m.label }}</button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+              <span style="font-size:12.5px; color:#44423D;">{{ r.own }}</span>
+              <span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#76746E;">{{ r.loc }}</span>
+              <span style="{{ r.qtyStyle }}">{{ r.qtyText }}</span>
+              <span style="font-family:'JetBrains Mono', monospace; font-size:13px; text-align:right; color:#1C1B19;">{{ r.dailyText }}</span>
+              <div style="display:flex; align-items:center; justify-content:center; gap:5px;">
+                <button onClick="{{ r.edit }}" style="width:28px; height:28px; border-radius:6px; border:1px solid #E4E3DE; background:#fff; cursor:pointer; color:#76746E; display:flex; align-items:center; justify-content:center;" style-hover="border-color:#2F5AC7; color:#2F5AC7;"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M9.4 2.6L11.4 4.6L5 11L2.6 11.4L3 9L9.4 2.6Z" stroke-linejoin="round"></path></svg></button>
+                <button onClick="{{ r.del }}" style="width:28px; height:28px; border-radius:6px; border:1px solid #E4E3DE; background:#fff; cursor:pointer; color:#76746E; display:flex; align-items:center; justify-content:center;" style-hover="border-color:oklch(0.55 0.18 25); color:oklch(0.55 0.18 25);"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><line x1="3" y1="4" x2="11" y2="4" stroke-linecap="round"></line><path d="M4.2 4L4.7 11.4L9.3 11.4L9.8 4" stroke-linejoin="round"></path></svg></button>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ adminEmpty }}" hint-placeholder-val="">
+            <div style="padding:50px; text-align:center; color:#9C9A93; font-size:14px;">没有符合条件的设备</div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ adminRecords }}" hint-placeholder-val="">
+      <div style="padding:24px 28px 60px;">
+        <h1 style="margin:0 0 16px; font-size:21px; font-weight:700;">出入库记录</h1>
+        <div style="display:grid; grid-template-columns:300px 1fr; gap:18px; align-items:start;">
+          <div style="background:#fff; border:1px solid #E6E5E1; border-radius:13px; padding:18px; position:sticky; top:18px;">
+            <h3 style="margin:0 0 13px; font-size:15px; font-weight:600;">快速登记</h3>
+
+            <!-- 出库/入库 切换 -->
+            <div style="display:flex; gap:5px; margin-bottom:16px; padding:3px; background:#F1F0EC; border-radius:9px;">
+              <button onClick="{{ regOut }}" style="{{ regOutStyle }}">出库</button>
+              <button onClick="{{ regIn }}" style="{{ regInStyle }}">入库</button>
+            </div>
+
+            <!-- ===== 扫码区域 ===== -->
+            <div style="margin-bottom:14px; border:1px solid #E6E5E1; border-radius:11px; overflow:hidden;">
+              <div style="padding:11px 12px 10px; background:#F8F7F4; border-bottom:1px solid #E6E5E1; display:flex; align-items:center; justify-content:space-between;">
+                <div style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#44423D;">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5" rx=".8"></rect><rect x="9" y="2" width="5" height="5" rx=".8"></rect><rect x="2" y="9" width="5" height="5" rx=".8"></rect><line x1="9" y1="9.5" x2="14" y2="9.5" stroke-linecap="round"></line><line x1="11.5" y1="9" x2="11.5" y2="14" stroke-linecap="round"></line><line x1="14" y1="11.5" x2="14" y2="14" stroke-linecap="round"></line></svg>
+                  扫码录入
+                </div>
+                <div style="display:flex; align-items:center; gap:5px; font-size:11px; color:#A6A49C;">
+                  <span style="width:6px; height:6px; border-radius:999px; background:oklch(0.62 0.12 152); display:inline-block;"></span>USB 枪常驻监听
+                </div>
+              </div>
+              <div style="padding:12px;">
+                <!-- USB扫码枪输入框 -->
+                <div style="position:relative; margin-bottom:9px;">
+                  <span style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#B6B4AC; display:flex; pointer-events:none;">
+                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"></rect><line x1="5.2" y1="2.5" x2="5.2" y2="13.5"></line><line x1="8" y1="2.5" x2="8" y2="13.5"></line><line x1="10.8" y1="2.5" x2="10.8" y2="13.5"></line></svg>
+                  </span>
+                  <input data-scan-field="1" value="{{ scanInput }}" onChange="{{ onScanChange }}" onInput="{{ onScanChange }}" onKeyDown="{{ onScanKey }}" placeholder="扫码枪对准后扫描 / 手动输入编号 + Enter" style="width:100%; height:40px; padding:0 12px 0 34px; border:1.5px dashed #CFD8F5; border-radius:9px; background:#F4F7FE; font-family:'JetBrains Mono', monospace; font-size:12.5px; color:#1C1B19;" />
+                </div>
+                <!-- 摄像头扫码按钮 -->
+                <button onClick="{{ toggleCamera }}" style="{{ camBtnStyle }}">
+                  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1.5 6V4.5A1.5 1.5 0 013 3h1.5M14.5 6V4.5A1.5 1.5 0 0013 3h-1.5M1.5 10v1.5A1.5 1.5 0 003 13h1.5M14.5 10v1.5A1.5 1.5 0 0113 13h-1.5"></path><circle cx="8" cy="8" r="2.5"></circle></svg>
+                  {{ camBtnLabel }}
+                </button>
+
+                <!-- 摄像头画面 -->
+                <sc-if value="{{ scanCamOpen }}" hint-placeholder-val="">
+                  <div style="margin-top:9px; position:relative; border-radius:9px; overflow:hidden; background:#000; aspect-ratio:4/3;">
+                    <video id="sc-vid" autoPlay playsInline muted style="width:100%; height:100%; object-fit:cover; display:block;"></video>
+                    <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none;">
+                      <div style="width:56%; aspect-ratio:1; border:2px solid rgba(255,255,255,.7); border-radius:8px; box-shadow:0 0 0 2000px rgba(0,0,0,.36);"></div>
+                    </div>
+                    <div style="position:absolute; bottom:9px; left:0; right:0; text-align:center; font-size:11px; color:rgba(255,255,255,.7);">将条形码 / 二维码对准框内</div>
+                  </div>
+                </sc-if>
+
+                <!-- 扫码匹配结果预览 -->
+                <sc-if value="{{ hasScanMatch }}" hint-placeholder-val="">
+                  <div style="margin-top:10px; padding:11px 12px; background:#EEF2FD; border:1.5px solid #C3D3F7; border-radius:9px; display:flex; align-items:flex-start; gap:10px;">
+                    <div style="width:36px; height:28px; flex-shrink:0; border-radius:6px; background:repeating-linear-gradient(135deg,#E8E7E3 0 6px,#DDD 6px 12px);"></div>
+                    <div style="flex:1; min-width:0;">
+                      <div style="font-size:13px; font-weight:600; color:#1C1B19; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ scanMatchName }}</div>
+                      <div style="display:flex; align-items:center; gap:7px; margin-top:3px; font-size:11.5px;">
+                        <span style="font-family:'JetBrains Mono', monospace; color:#76746E;">{{ scanMatchCode }}</span>
+                        <span style="{{ scanMatchDot }}"></span>
+                        <span style="color:#76746E;">{{ scanMatchStatus }}</span>
+                      </div>
+                    </div>
+                    <button onClick="{{ clearScan }}" style="flex-shrink:0; width:24px; height:24px; border-radius:6px; border:none; background:rgba(47,90,199,.15); color:#2F5AC7; cursor:pointer; display:flex; align-items:center; justify-content:center;" style-hover="background:#C3D3F7;">
+                      <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="3.5" y1="3.5" x2="10.5" y2="10.5" stroke-linecap="round"></line><line x1="10.5" y1="3.5" x2="3.5" y2="10.5" stroke-linecap="round"></line></svg>
+                    </button>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+
+            <!-- 手动选择分隔线 -->
+            <div style="display:flex; align-items:center; gap:9px; margin-bottom:12px;">
+              <div style="flex:1; height:1px; background:#EEEDE9;"></div>
+              <span style="font-size:11px; color:#B6B4AC; white-space:nowrap;">或手动选择设备</span>
+              <div style="flex:1; height:1px; background:#EEEDE9;"></div>
+            </div>
+            <select value="{{ regDevice }}" onChange="{{ onRegDevice }}" style="width:100%; height:38px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer; margin-bottom:13px;"><option value="">选择设备…</option><sc-for list="{{ regDeviceOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+
+            <label style="display:block; font-size:12px; color:#9C9A93; margin-bottom:5px;">经手人</label>
+            <input value="{{ regBy }}" onChange="{{ onRegBy }}" onInput="{{ onRegBy }}" placeholder="如：张磊" style="width:100%; height:38px; padding:0 11px; border:1px solid #E4E3DE; border-radius:8px; font-family:inherit; font-size:13px; margin-bottom:12px;" />
+            <label style="display:block; font-size:12px; color:#9C9A93; margin-bottom:5px;">项目 / 备注</label>
+            <input value="{{ regProj }}" onChange="{{ onRegProj }}" onInput="{{ onRegProj }}" placeholder="如：某汽车 TVC" style="width:100%; height:38px; padding:0 11px; border:1px solid #E4E3DE; border-radius:8px; font-family:inherit; font-size:13px; margin-bottom:15px;" />
+            <button onClick="{{ submitReg }}" style="width:100%; height:42px; border-radius:10px; border:none; background:#1C1B19; color:#fff; cursor:pointer; font-family:inherit; font-size:15px;">确认登记</button>
+          </div>
+          <div style="background:#fff; border:1px solid #E6E5E1; border-radius:13px; padding:18px;">
+            <div style="display:flex; gap:7px; flex-wrap:wrap; margin-bottom:14px;">
+              <sc-for list="{{ recFilters }}" as="f" hint-placeholder-count="6">
+                <button onClick="{{ f.select }}" style="{{ f.chipStyle }}">{{ f.label }}</button>
+              </sc-for>
+            </div>
+            <div style="display:flex; flex-direction:column;">
+              <sc-for list="{{ recRows }}" as="r" hint-placeholder-count="8">
+                <div style="display:flex; align-items:center; gap:14px; padding:11px 0; border-bottom:1px solid #F2F1ED;">
+                  <span style="{{ r.tagStyle }}">{{ r.op }}</span>
+                  <div style="flex:1; min-width:0;"><div style="font-size:13.5px; color:#1C1B19;">{{ r.dev }}</div><div style="font-size:11.5px; color:#A6A49C; margin-top:2px;">{{ r.proj }}</div></div>
+                  <div style="text-align:right; flex-shrink:0;"><div style="font-size:12.5px; color:#76746E;">{{ r.by }}</div><div style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#A6A49C; margin-top:2px;">{{ r.t }}</div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ DEVICE EDITOR ============ -->
+  <sc-if value="{{ editorOpen }}" hint-placeholder-val="">
+  <div onClick="{{ closeEditor }}" style="position:fixed; inset:0; z-index:85; background:rgba(24,23,20,.42); animation:ovIn .18s ease; display:flex; justify-content:flex-end;">
+    <div onClick="{{ stop }}" style="width:min(540px, 96vw); height:100%; background:#fff; overflow-y:auto; animation:panelIn .26s cubic-bezier(.22,.7,.3,1); box-shadow:-20px 0 60px rgba(20,20,18,.2);">
+      <div style="position:sticky; top:0; background:rgba(255,255,255,.94); backdrop-filter:blur(8px); border-bottom:1px solid #EEEDE9; padding:15px 20px; display:flex; align-items:center; justify-content:space-between; z-index:2;">
+        <h2 style="margin:0; font-size:17px; font-weight:700;">{{ editorTitle }}</h2>
+        <button onClick="{{ closeEditor }}" style="width:32px; height:32px; border-radius:8px; border:1px solid #E4E3DE; background:#fff; cursor:pointer; color:#44423D; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3.5" y1="3.5" x2="10.5" y2="10.5" stroke-linecap="round"></line><line x1="10.5" y1="3.5" x2="3.5" y2="10.5" stroke-linecap="round"></line></svg></button>
+      </div>
+      <div style="padding:20px;">
+        <div style="border:1.5px dashed #D6D4CD; border-radius:12px; background:#FAFAF8; padding:22px; display:flex; flex-direction:column; align-items:center; gap:8px; margin-bottom:22px; cursor:pointer;" style-hover="border-color:#2F5AC7; background:#F4F7FE;">
+          <div style="width:46px; height:46px; border-radius:10px; background:repeating-linear-gradient(135deg, #EFEEEA 0 7px, #E7E6E1 7px 14px); display:flex; align-items:center; justify-content:center; color:#A6A49C;"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="4" width="14" height="12" rx="1.5"></rect><circle cx="7.5" cy="8.5" r="1.3"></circle><path d="M4 14L8 10.5L11 13L13.5 11L16 13.5" stroke-linejoin="round"></path></svg></div>
+          <div style="font-size:13px; color:#44423D;">拖拽或点击上传设备图片</div>
+          <div style="font-size:11px; color:#A6A49C;">建议 4:3 · 支持 JPG / PNG</div>
+        </div>
+        <div style="font-size:11px; font-weight:600; letter-spacing:.06em; color:#9C9A93; margin-bottom:11px;">基本信息</div>
+        <div style="display:flex; flex-direction:column; gap:13px; margin-bottom:22px;">
+          <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">设备名称 *</span><input value="{{ dName }}" onChange="{{ setName }}" onInput="{{ setName }}" placeholder="如：ALEXA Mini LF 电影摄影机" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:inherit; font-size:14px;" /></label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:11px;">
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">品牌</span><input value="{{ dBrand }}" onChange="{{ setBrand }}" onInput="{{ setBrand }}" placeholder="ARRI" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:inherit; font-size:14px;" /></label>
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">型号</span><input value="{{ dModel }}" onChange="{{ setModel }}" onInput="{{ setModel }}" placeholder="Mini LF" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:inherit; font-size:14px;" /></label>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:11px;">
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">类别</span><select value="{{ dCat }}" onChange="{{ setCat }}" style="height:40px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:9px; background-color:#fff; font-family:inherit; font-size:14px; color:#1C1B19; cursor:pointer;"><sc-for list="{{ catOptions }}" as="o" hint-placeholder-count="9"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select></label>
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">编号</span><input value="{{ dCode }}" onChange="{{ setCode }}" onInput="{{ setCode }}" placeholder="自动生成或自定义" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:'JetBrains Mono', monospace; font-size:13px;" /></label>
+          </div>
+        </div>
+        <div style="font-size:11px; font-weight:600; letter-spacing:.06em; color:#9C9A93; margin-bottom:11px;">状态与归属</div>
+        <div style="display:flex; flex-direction:column; gap:13px; margin-bottom:22px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:11px;">
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">状态</span><select value="{{ dSt }}" onChange="{{ setSt }}" style="height:40px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:9px; background-color:#fff; font-family:inherit; font-size:14px; color:#1C1B19; cursor:pointer;"><sc-for list="{{ statusEditOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.key }}">{{ o.label }}</option></sc-for></select></label>
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">所属方</span><select value="{{ dOwn }}" onChange="{{ setOwn }}" style="height:40px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:9px; background-color:#fff; font-family:inherit; font-size:14px; color:#1C1B19; cursor:pointer;"><sc-for list="{{ ownerSel }}" as="o" hint-placeholder-count="3"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select></label>
+          </div>
+          <div style="display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:11px;">
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">存放位置</span><input value="{{ dLoc }}" onChange="{{ setLoc }}" onInput="{{ setLoc }}" placeholder="A-01" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:'JetBrains Mono', monospace; font-size:13px;" /></label>
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">总数</span><input value="{{ dTot }}" onChange="{{ setTot }}" onInput="{{ setTot }}" inputmode="numeric" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:'JetBrains Mono', monospace; font-size:14px;" /></label>
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">可借</span><input value="{{ dAv }}" onChange="{{ setAv }}" onInput="{{ setAv }}" inputmode="numeric" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:'JetBrains Mono', monospace; font-size:14px;" /></label>
+          </div>
+        </div>
+        <div style="font-size:11px; font-weight:600; letter-spacing:.06em; color:#9C9A93; margin-bottom:11px;">价格参考（元）</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:11px; margin-bottom:22px;">
+          <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">估值</span><input value="{{ dVal }}" onChange="{{ setVal }}" onInput="{{ setVal }}" inputmode="numeric" placeholder="0" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:'JetBrains Mono', monospace; font-size:14px;" /></label>
+          <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">日租</span><input value="{{ dDay }}" onChange="{{ setDay }}" onInput="{{ setDay }}" inputmode="numeric" placeholder="0" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:'JetBrains Mono', monospace; font-size:14px;" /></label>
+          <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">押金</span><input value="{{ dDep }}" onChange="{{ setDep }}" onInput="{{ setDep }}" inputmode="numeric" placeholder="0" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:'JetBrains Mono', monospace; font-size:14px;" /></label>
+        </div>
+        <div style="font-size:11px; font-weight:600; letter-spacing:.06em; color:#9C9A93; margin-bottom:11px;">参数与备注</div>
+        <label style="display:flex; flex-direction:column; gap:6px; margin-bottom:13px;"><span style="font-size:12.5px; color:#76746E;">关键参数（用、或逗号分隔）</span><textarea value="{{ dSpecs }}" onChange="{{ setSpecs }}" onInput="{{ setSpecs }}" placeholder="如：Super35 4.6K、LPL 卡口、17 档宽容度" style="min-height:66px; padding:10px 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:inherit; font-size:13.5px; resize:vertical; line-height:1.5;"></textarea></label>
+        <label style="display:flex; flex-direction:column; gap:6px; margin-bottom:20px;"><span style="font-size:12.5px; color:#76746E;">备注</span><textarea value="{{ dNote }}" onChange="{{ setNote }}" onInput="{{ setNote }}" placeholder="附件、随行要求等" style="min-height:56px; padding:10px 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:inherit; font-size:13.5px; resize:vertical; line-height:1.5;"></textarea></label>
+        <div style="display:flex; gap:10px;">
+          <button onClick="{{ closeEditor }}" style="flex:1; height:44px; border-radius:10px; border:1px solid #E4E3DE; background:#fff; color:#44423D; cursor:pointer; font-family:inherit; font-size:14px;">取消</button>
+          <button onClick="{{ saveDraft }}" style="flex:2; height:44px; border-radius:10px; border:none; background:#2F5AC7; color:#fff; cursor:pointer; font-family:inherit; font-size:14px;">保存设备</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ EXCEL IMPORT MODAL ============ -->
+  <sc-if value="{{ importOpen }}" hint-placeholder-val="">
+  <div onClick="{{ closeImport }}" style="position:fixed; inset:0; z-index:88; background:rgba(24,23,20,.42); animation:ovIn .18s ease; display:flex; justify-content:flex-end;">
+    <div onClick="{{ stop }}" style="width:min(720px, 96vw); height:100%; background:#fff; overflow-y:auto; animation:panelIn .26s cubic-bezier(.22,.7,.3,1); box-shadow:-20px 0 60px rgba(20,20,18,.2); display:flex; flex-direction:column;">
+
+      <div style="position:sticky; top:0; background:rgba(255,255,255,.95); backdrop-filter:blur(8px); border-bottom:1px solid #EEEDE9; padding:15px 22px; display:flex; align-items:center; justify-content:space-between; z-index:2; flex-shrink:0;">
+        <div>
+          <h2 style="margin:0 0 2px; font-size:17px; font-weight:700;">导入 Excel 设备数据</h2>
+          <p style="margin:0; font-size:12px; color:#9C9A93;">支持 .xlsx · .xls · .csv · 第一行为列标题</p>
+        </div>
+        <button onClick="{{ closeImport }}" style="width:32px; height:32px; border-radius:8px; border:1px solid #E4E3DE; background:#fff; cursor:pointer; color:#44423D; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3.5" y1="3.5" x2="10.5" y2="10.5" stroke-linecap="round"></line><line x1="10.5" y1="3.5" x2="3.5" y2="10.5" stroke-linecap="round"></line></svg></button>
+      </div>
+
+      <!-- ---- STAGE: upload ---- -->
+      <sc-if value="{{ importUpload }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:1; padding:28px 22px;">
+        <label for="import-file-input" style="display:block;">
+          <div onDrop="{{ onImportDrop }}" onDragOver="{{ onImportDragOver }}" style="border:2px dashed #D0CEC8; border-radius:16px; padding:52px 24px; display:flex; flex-direction:column; align-items:center; gap:14px; cursor:pointer; transition:border-color .15s, background .15s;" style-hover="border-color:#2F5AC7; background:#F4F7FE;">
+            <div style="width:56px; height:56px; border-radius:14px; background:#F1F0EC; display:flex; align-items:center; justify-content:center; color:#9C9A93;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-linejoin="round"></path><polyline points="14,2 14,8 20,8"></polyline><line x1="12" y1="18" x2="12" y2="12" stroke-linecap="round"></line><polyline points="9,15 12,12 15,15" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:15px; font-weight:600; color:#1C1B19; margin-bottom:5px;">拖拽文件到这里，或点击选择</div>
+              <div style="font-size:13px; color:#9C9A93;">支持 Excel (.xlsx .xls) 和 CSV 格式 · 第一行须为列标题</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; padding:10px 18px; border-radius:9px; border:1px solid #E4E3DE; background:#fff; font-size:13px; color:#2F5AC7; font-weight:500;">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 10v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2"></path><polyline points="12,5 8,1 4,5" stroke-linecap="round" stroke-linejoin="round"></polyline><line x1="8" y1="1" x2="8" y2="11" stroke-linecap="round"></line></svg>
+              选择文件
+            </div>
+          </div>
+        </label>
+        <input id="import-file-input" type="file" accept=".xlsx,.xls,.csv" onChange="{{ onImportFileInput }}" style="display:none;" />
+
+        <div style="margin-top:28px; padding:16px 18px; background:#F8F7F4; border-radius:11px; border:1px solid #EEEDE9;">
+          <div style="font-size:12px; font-weight:600; letter-spacing:.06em; color:#76746E; margin-bottom:10px;">推荐列标题（复制到你的表格第一行）</div>
+          <div style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#44423D; line-height:2; word-break:break-all;">设备名称 | 品牌 | 型号 | 类别 | 编号 | 状态 | 所属方 | 估值 | 日租 | 押金 | 总数 | 可借 | 存放位置 | 参数 | 备注</div>
+          <div style="margin-top:10px; font-size:11px; color:#A6A49C;">类别可填：电影机 / 镜头 / 灯光 / 监视器 / 支架 / 录音 / FPV穿越机 / 航拍无人机 / 附件</div>
+          <div style="font-size:11px; color:#A6A49C; margin-top:3px;">状态可填：在库 / 出库 / 预留 / 维修 / 待检 / 停用 &nbsp;·&nbsp; 所属方可填：自有 / 合作商 / 个人挂靠</div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ---- STAGE: mapping + preview ---- -->
+      <sc-if value="{{ importMapping }}" hint-placeholder-val="">
+      <div style="flex:1; padding:20px 22px 32px; display:flex; flex-direction:column; gap:18px;">
+
+        <div style="display:flex; align-items:center; gap:12px; padding:11px 14px; background:#EEF2FD; border:1px solid #C3D3F7; border-radius:10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F5AC7" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14,2 14,8 20,8"></polyline></svg>
+          <span style="font-size:13.5px; font-weight:600; color:#1C1B19; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ importFileName }}</span>
+          <span style="font-size:13px; color:#2F5AC7; font-family:'JetBrains Mono', monospace; flex-shrink:0;">{{ importTotalCount }} 行数据</span>
+          <button onClick="{{ closeImport }}" style="font-size:12px; color:#76746E; background:none; border:none; cursor:pointer; font-family:inherit; flex-shrink:0;">重新上传</button>
+        </div>
+
+        <!-- 字段映射 -->
+        <div style="background:#fff; border:1px solid #E6E5E1; border-radius:12px; overflow:hidden;">
+          <div style="padding:13px 16px; background:#FAFAF8; border-bottom:1px solid #EEEDE9; display:flex; align-items:center; gap:8px;">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="2" y1="8" x2="14" y2="8" stroke-linecap="round"></line><line x1="2" y1="4" x2="8" y2="4" stroke-linecap="round"></line><line x1="8" y1="12" x2="14" y2="12" stroke-linecap="round"></line></svg>
+            <span style="font-size:14px; font-weight:600;">字段对应</span>
+            <span style="font-size:12px; color:#9C9A93; margin-left:4px;">系统已自动识别，可手动调整</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0;">
+            <sc-for list="{{ importFields }}" as="f" hint-placeholder-count="15">
+              <div style="padding:9px 14px; border-bottom:1px solid #F2F1ED; border-right:1px solid #F2F1ED; display:flex; flex-direction:column; gap:5px;">
+                <span style="font-size:11.5px; color:#76746E;">{{ f.label }}</span>
+                <select value="{{ f.colIdx }}" onChange="{{ f.onChange }}" style="height:32px; padding:0 24px 0 9px; border:1px solid #E4E3DE; border-radius:7px; background-color:#fff; font-family:inherit; font-size:12.5px; color:#1C1B19; cursor:pointer;">
+                  <sc-for list="{{ f.headerOptions }}" as="o" hint-placeholder-count="6">
+                    <option value="{{ o.value }}">{{ o.label }}</option>
+                  </sc-for>
+                </select>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- 数据预览 -->
+        <div style="background:#fff; border:1px solid #E6E5E1; border-radius:12px; overflow:hidden;">
+          <div style="padding:13px 16px; background:#FAFAF8; border-bottom:1px solid #EEEDE9; display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="1.5"></rect><line x1="2" y1="6" x2="14" y2="6"></line><line x1="6" y1="6" x2="6" y2="14"></line></svg>
+              <span style="font-size:14px; font-weight:600;">数据预览</span>
+              <span style="font-size:12px; color:#9C9A93;">前 7 行</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:7px; font-size:13px;">
+              <span style="width:8px; height:8px; border-radius:'999px'; background:oklch(0.64 0.11 152); display:inline-block; border-radius:999px;"></span>
+              <span style="color:#44423D;"><span style="font-family:'JetBrains Mono', monospace; font-weight:600;">{{ importValidCount }}</span> 行有效</span>
+              <span style="color:#CFCDC6;">·</span>
+              <span style="color:#9C9A93;">共 {{ importTotalCount }} 行</span>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:24px 1.6fr 80px 72px 88px 72px 80px; gap:0; padding:8px 14px; background:#F8F7F4; border-bottom:1px solid #EEEDE9; font-size:11px; color:#9C9A93; font-weight:600; letter-spacing:.03em;">
+            <span></span><span>名称</span><span>品牌</span><span>类别</span><span>编号</span><span>状态</span><span style="text-align:right;">日租</span>
+          </div>
+          <sc-for list="{{ importPreviewRows }}" as="r" hint-placeholder-count="5">
+            <div style="{{ r.rowStyle }}">
+              <span style="{{ r.validDot }}"></span>
+              <span style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#1C1B19;">{{ r.name }}</span>
+              <span style="color:#76746E; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ r.brand }}</span>
+              <span style="color:#76746E;">{{ r.catLabel }}</span>
+              <span style="font-family:'JetBrains Mono', monospace; font-size:11.5px; color:#76746E; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ r.code }}</span>
+              <span style="color:#76746E;">{{ r.statusLabel }}</span>
+              <span style="font-family:'JetBrains Mono', monospace; text-align:right; color:#1C1B19;">{{ r.dailyText }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button onClick="{{ closeImport }}" style="height:44px; padding:0 18px; border-radius:10px; border:1px solid #E4E3DE; background:#fff; color:#44423D; cursor:pointer; font-family:inherit; font-size:14px;">取消</button>
+          <button onClick="{{ confirmImport }}" style="flex:1; height:44px; border-radius:10px; border:none; background:#2F5AC7; color:#fff; cursor:pointer; font-family:inherit; font-size:15px; font-weight:600;">确认导入 {{ importValidCount }} 件设备</button>
+        </div>
+
+      </div>
+      </sc-if>
+
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ SERVICE DETAIL SLIDE-OVER ============ -->
+  <sc-if value="{{ serviceOpen }}" hint-placeholder-val="">
+  <div onClick="{{ closeService }}" style="position:fixed; inset:0; z-index:70; background:rgba(24,23,20,.4); animation:ovIn .18s ease; display:flex; justify-content:flex-end;">
+    <div onClick="{{ stop }}" style="width:min(620px, 96vw); height:100%; background:#fff; overflow-y:auto; animation:panelIn .26s cubic-bezier(.22,.7,.3,1); box-shadow:-20px 0 60px rgba(20,20,18,.2);">
+      <div style="position:sticky; top:0; z-index:3; display:flex; justify-content:flex-end; padding:13px 14px 0;">
+        <button onClick="{{ closeService }}" style="width:32px; height:32px; border-radius:8px; border:1px solid #E4E3DE; background:rgba(255,255,255,.9); backdrop-filter:blur(6px); cursor:pointer; color:#44423D; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3.5" y1="3.5" x2="10.5" y2="10.5" stroke-linecap="round"></line><line x1="10.5" y1="3.5" x2="3.5" y2="10.5" stroke-linecap="round"></line></svg></button>
+      </div>
+      <div style="{{ svcDetail.heroStyle }}">
+        <span style="{{ svcDetail.domBadgeStyle }}">{{ svcDetail.domLabel }}</span>
+        <div style="margin-top:12px;">
+          <div style="font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:.16em; color:rgba(28,27,25,.45); margin-bottom:6px;">{{ svcDetail.domEn }}</div>
+          <h2 style="margin:0 0 6px; font-size:24px; font-weight:700; letter-spacing:-.01em;">{{ svcDetail.name }}</h2>
+          <p style="margin:0; font-size:14px; color:#5C5A54;">{{ svcDetail.tagline }}</p>
+        </div>
+      </div>
+      <div style="padding:20px 22px 30px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:18px;">
+          <div style="background:#F8F7F4; border-radius:11px; padding:13px;"><div style="font-size:11px; color:#9C9A93; margin-bottom:6px;">服务起价</div><div style="font-family:'JetBrains Mono', monospace; font-size:17px; font-weight:600; color:#2F5AC7;">{{ svcDetail.priceText }}</div><div style="font-size:11px; color:#A6A49C; margin-top:2px;">每{{ svcDetail.unit }}起</div></div>
+          <div style="background:#F8F7F4; border-radius:11px; padding:13px;"><div style="font-size:11px; color:#9C9A93; margin-bottom:6px;">拍摄周期</div><div style="font-size:16px; font-weight:600; color:#1C1B19;">{{ svcDetail.duration }}</div></div>
+          <div style="background:#F8F7F4; border-radius:11px; padding:13px;"><div style="font-size:11px; color:#9C9A93; margin-bottom:6px;">标准团队</div><div style="font-family:'JetBrains Mono', monospace; font-size:16px; font-weight:600; color:#1C1B19;">{{ svcDetail.crew }} 人</div></div>
+        </div>
+        <button onClick="{{ svcDetail.order }}" style="width:100%; height:48px; border-radius:11px; border:none; background:#1C1B19; color:#fff; cursor:pointer; font-family:inherit; font-size:15px; font-weight:500; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:26px;" style-hover="background:#2F5AC7;"><svg width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9l4 4 8-8" stroke-linecap="round" stroke-linejoin="round"></path></svg>一键发起服务意向</button>
+
+        <h3 style="margin:0 0 12px; font-size:15px; font-weight:600; display:flex; align-items:center; gap:8px;"><span style="width:3px; height:14px; background:#2F5AC7; border-radius:2px;"></span>硬件资源</h3>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:26px;">
+          <sc-for list="{{ svcDetail.hw }}" as="h" hint-placeholder-count="3">
+            <div style="display:flex; align-items:flex-start; gap:12px; padding:12px 14px; background:#FAFAF8; border:1px solid #EEEDE9; border-radius:10px;">
+              <span style="font-size:12px; color:#2F5AC7; background:#EEF2FD; padding:3px 9px; border-radius:6px; white-space:nowrap; flex-shrink:0; margin-top:1px;">{{ h.label }}</span>
+              <span style="font-size:13.5px; color:#44423D; line-height:1.5;">{{ h.detail }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <h3 style="margin:0 0 12px; font-size:15px; font-weight:600; display:flex; align-items:center; gap:8px;"><span style="width:3px; height:14px; background:#2F5AC7; border-radius:2px;"></span>可实现的拍摄能力</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:26px;">
+          <sc-for list="{{ svcDetail.caps }}" as="c" hint-placeholder-count="5">
+            <span style="display:inline-flex; align-items:center; gap:6px; padding:7px 13px; background:#F3F2EE; border-radius:8px; font-size:13px; color:#44423D;"><svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="#2F5AC7" stroke-width="1.8"><polyline points="2.5,7 6,10.5 11.5,4" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>{{ c }}</span>
+          </sc-for>
+        </div>
+
+        <h3 style="margin:0 0 12px; font-size:15px; font-weight:600; display:flex; align-items:center; gap:8px;"><span style="width:3px; height:14px; background:#2F5AC7; border-radius:2px;"></span>服务团队 <span style="font-size:12px; font-weight:400; color:#A6A49C;">点击查看简历</span></h3>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:26px;">
+          <sc-for list="{{ svcDetail.team }}" as="t" hint-placeholder-count="4">
+            <div onClick="{{ t.open }}" style="display:flex; align-items:center; gap:13px; padding:12px 13px; background:#fff; border:1px solid #EEEDE9; border-radius:11px; cursor:pointer; transition:border-color .15s, background .15s;" style-hover="border-color:#C3D3F7; background:#F8FAFF;">
+              <div style="{{ t.avStyle }}">{{ t.initials }}</div>
+              <div style="flex:1; min-width:0;">
+                <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:14.5px; font-weight:600; color:#1C1B19;">{{ t.name }}</span><span style="font-size:11.5px; color:#76746E;">{{ t.role }}</span></div>
+                <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:5px;">
+                  <sc-for list="{{ t.topSkills }}" as="sk" hint-placeholder-count="3"><span style="font-size:11px; color:#76746E; background:#F4F3F0; padding:2px 8px; border-radius:5px;">{{ sk }}</span></sc-for>
+                </div>
+              </div>
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#B6B4AC" stroke-width="1.5" style="flex-shrink:0;"><path d="M6 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </div>
+          </sc-for>
+        </div>
+
+        <h3 style="margin:0 0 12px; font-size:15px; font-weight:600; display:flex; align-items:center; gap:8px;"><span style="width:3px; height:14px; background:#2F5AC7; border-radius:2px;"></span>交付物</h3>
+        <div style="display:flex; flex-direction:column; gap:7px; margin-bottom:24px;">
+          <sc-for list="{{ svcDetail.deliver }}" as="d" hint-placeholder-count="3">
+            <div style="display:flex; align-items:center; gap:9px; font-size:13.5px; color:#44423D;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="oklch(0.6 0.12 152)" stroke-width="1.6"><circle cx="8" cy="8" r="6"></circle><polyline points="5.5,8 7,9.5 10.5,6" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>{{ d }}</div>
+          </sc-for>
+        </div>
+
+        <div style="padding:15px 16px; background:#F8F7F4; border-radius:11px; font-size:13px; color:#5C5A54; line-height:1.65;">{{ svcDetail.desc }}</div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ TALENT DETAIL SLIDE-OVER ============ -->
+  <sc-if value="{{ talentOpen }}" hint-placeholder-val="">
+  <div onClick="{{ closeTalent }}" style="position:fixed; inset:0; z-index:72; background:rgba(24,23,20,.42); animation:ovIn .18s ease; display:flex; justify-content:flex-end;">
+    <div onClick="{{ stop }}" style="width:min(560px, 96vw); height:100%; background:#fff; overflow-y:auto; animation:panelIn .26s cubic-bezier(.22,.7,.3,1); box-shadow:-20px 0 60px rgba(20,20,18,.2);">
+      <div style="position:sticky; top:0; background:rgba(255,255,255,.94); backdrop-filter:blur(8px); border-bottom:1px solid #EEEDE9; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; z-index:2;">
+        <span style="font-size:13px; color:#76746E;">人才档案</span>
+        <button onClick="{{ closeTalent }}" style="width:32px; height:32px; border-radius:8px; border:1px solid #E4E3DE; background:#fff; cursor:pointer; color:#44423D; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3.5" y1="3.5" x2="10.5" y2="10.5" stroke-linecap="round"></line><line x1="10.5" y1="3.5" x2="3.5" y2="10.5" stroke-linecap="round"></line></svg></button>
+      </div>
+      <div style="padding:22px;">
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom:18px;">
+          <div style="{{ talDetail.avStyle }}">{{ talDetail.initials }}</div>
+          <div style="min-width:0;">
+            <h2 style="margin:0 0 5px; font-size:22px; font-weight:700;">{{ talDetail.name }}</h2>
+            <div style="display:flex; align-items:center; gap:8px; font-size:13px; color:#76746E;"><span>{{ talDetail.role }}</span><span style="color:#CFCDC6;">·</span><span style="font-family:'JetBrains Mono', monospace;">{{ talDetail.yearsText }}</span></div>
+          </div>
+        </div>
+        <div style="font-size:14px; color:#44423D; line-height:1.6; padding:13px 15px; background:#F8F7F4; border-radius:11px; margin-bottom:22px;">{{ talDetail.specialty }}</div>
+
+        <div style="position:relative; aspect-ratio:16/9; border-radius:13px; background:repeating-linear-gradient(135deg, #F2F1ED 0 11px, #ECEBE6 11px 22px); display:flex; align-items:center; justify-content:center; margin-bottom:24px;">
+          <div style="display:flex; flex-direction:column; align-items:center; gap:8px; color:#B6B4AC;"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="12" cy="12" r="9"></circle><polygon points="10,8.5 16,12 10,15.5" fill="currentColor" stroke="none"></polygon></svg><span style="font-size:11px;">代表作品 Showreel 占位</span></div>
+        </div>
+
+        <h3 style="margin:0 0 10px; font-size:14px; font-weight:600;">简介</h3>
+        <p style="margin:0 0 22px; font-size:13.5px; color:#5C5A54; line-height:1.7;">{{ talDetail.bio }}</p>
+
+        <h3 style="margin:0 0 11px; font-size:14px; font-weight:600;">专业技能</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px;">
+          <sc-for list="{{ talDetail.skills }}" as="s" hint-placeholder-count="4"><span style="padding:6px 12px; background:#EEF2FD; color:#2F5AC7; border-radius:8px; font-size:13px;">{{ s }}</span></sc-for>
+        </div>
+
+        <h3 style="margin:0 0 11px; font-size:14px; font-weight:600;">擅长设备</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px;">
+          <sc-for list="{{ talDetail.gear }}" as="g" hint-placeholder-count="3"><span style="padding:6px 12px; background:#F3F2EE; color:#44423D; border-radius:8px; font-size:13px; font-family:'JetBrains Mono', monospace;">{{ g }}</span></sc-for>
+        </div>
+
+        <h3 style="margin:0 0 11px; font-size:14px; font-weight:600;">代表项目</h3>
+        <div style="display:flex; flex-direction:column; margin-bottom:22px;">
+          <sc-for list="{{ talDetail.projects }}" as="p" hint-placeholder-count="3">
+            <div style="display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid #F2F1ED;">
+              <div style="flex:1; min-width:0;"><div style="font-size:13.5px; color:#1C1B19;">{{ p.name }}</div><div style="font-size:11.5px; color:#A6A49C; margin-top:2px;">{{ p.role }}</div></div>
+              <span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#9C9A93; flex-shrink:0;">{{ p.year }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ talDetail.hasServices }}" hint-placeholder-val="">
+          <h3 style="margin:0 0 11px; font-size:14px; font-weight:600;">参与的服务包</h3>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <sc-for list="{{ talDetail.inServices }}" as="s" hint-placeholder-count="2">
+              <div onClick="{{ s.open }}" style="{{ s.rowStyle }}" style-hover="border-color:#CFCEC8;">
+                <span style="{{ s.dotStyle }}"></span>
+                <span style="flex:1; font-size:13.5px; color:#1C1B19;">{{ s.name }}</span>
+                <span style="font-size:11.5px; color:#76746E;">{{ s.domLabel }}</span>
+                <span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#9C9A93;">{{ s.priceText }}起</span>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#B6B4AC" stroke-width="1.5"><path d="M6 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ toastShow }}" hint-placeholder-val="">
+  <div style="position:fixed; bottom:26px; left:50%; transform:translateX(-50%); z-index:95; background:#1C1B19; color:#fff; padding:11px 20px; border-radius:10px; font-size:13.5px; box-shadow:0 12px 32px rgba(20,20,18,.28); animation:ovIn .2s ease;">{{ toastMsg }}</div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    screen: 'catalog',      // catalog | cart | dashboard | services | talent
+    layout: 'grid',         // grid | aisle | showcase
+    serviceId: null,        // open service package
+    talentId: null,         // open talent profile
+    svcDomain: 'all',       // service domain filter
+    talentRole: 'all',      // talent role filter
+    detailId: null,
+    detailQty: 1,
+    cat: 'all',
+    brand: 'all',
+    status: 'all',
+    owner: 'all',
+    search: '',
+    sort: 'featured',
+    cart: {},               // id -> qty
+    days: 3,
+    projectName: '未命名项目',
+    // admin
+    view: 'front',          // front | admin
+    adminScreen: 'home',    // home | devices | records
+    aSearch: '', aCat: 'all', aStatus: 'all', aOwner: 'all',
+    selected: [],
+    statusMenu: null,
+    editorOpen: false,
+    editorId: null,
+    draft: {},
+    recFilter: 'all',
+    regDevice: '', regOp: 'out', regBy: '', regProj: '',
+    scanInput: '', scanMatch: null, scanCamOpen: false,
+    toast: '',
+    importOpen: false, importStage: 'upload',
+    importRows: [], importHeaders: [], importColMap: {}, importFileName: '',
+  };
+
+  // ===== lifecycle for scanner =====
+  componentDidMount() {
+    this._scanBuf = ''; this._lastKey = 0; this._prevCamOpen = false;
+    this._onKey = (e) => {
+      const s = this.state;
+      if (s.view !== 'admin' || s.adminScreen !== 'records') return;
+      const tag = document.activeElement && document.activeElement.tagName;
+      if (tag === 'SELECT' || tag === 'TEXTAREA') return;
+      // if focused on the scan-input, let it handle natively
+      if (document.activeElement && document.activeElement.dataset.scanField) return;
+      const now = Date.now();
+      if (e.key === 'Enter') {
+        if (this._scanBuf.length >= 3) { this.processScanCode(this._scanBuf); }
+        this._scanBuf = '';
+      } else if (e.key.length === 1 && now - this._lastKey < 90) {
+        this._scanBuf += e.key;
+      } else {
+        this._scanBuf = e.key.length === 1 ? e.key : '';
+      }
+      this._lastKey = now;
+    };
+    window.addEventListener('keydown', this._onKey);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this._onKey);
+    this._stopCamera();
+  }
+  componentDidUpdate(pp) {
+    const open = this.state.scanCamOpen;
+    if (open !== this._prevCamOpen) {
+      this._prevCamOpen = open;
+      open ? this._startCamera() : this._stopCamera();
+    }
+  }
+
+  // ===== scanner logic =====
+  processScanCode(code) {
+    const raw = (code || '').trim().toUpperCase();
+    const it = this.EQUIP.find(e => e.code.toUpperCase() === raw || String(e.id) === raw);
+    if (it) {
+      this.setState({ scanMatch: it, regDevice: String(it.id), scanInput: '' });
+      this.toast('✓ 扫码匹配：' + it.code + ' · ' + it.name);
+    } else {
+      this.toast('未找到编号：' + code);
+      this.setState({ scanInput: '' });
+    }
+  }
+  toggleCamera() { this.setState(s => ({ scanCamOpen: !s.scanCamOpen })); }
+  _startCamera() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      this.toast('浏览器不支持摄像头访问，请用 Chrome 或 Edge');
+      this.setState({ scanCamOpen: false }); return;
+    }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      .then(stream => {
+        this._stream = stream;
+        // wait one frame for React to render the video element
+        requestAnimationFrame(() => {
+          const vid = document.getElementById('sc-vid');
+          if (vid) { vid.srcObject = stream; vid.play().catch(() => {}); }
+        });
+        if ('BarcodeDetector' in window) {
+          this._detector = new window.BarcodeDetector({ formats: ['qr_code','code_128','code_39','ean_13','ean_8','upc_a','data_matrix'] });
+          this._scanInt = setInterval(() => this._scanFrame(), 700);
+        } else {
+          this.toast('摄像头已开启（浏览器不支持自动识别，请手动输入编号）');
+        }
+      })
+      .catch(err => {
+        this.toast('无法访问摄像头：' + (err.message || err.name || '权限被拒'));
+        this.setState({ scanCamOpen: false });
+      });
+  }
+  _scanFrame() {
+    const vid = document.getElementById('sc-vid');
+    if (!vid || !this._detector || vid.readyState < 2) return;
+    this._detector.detect(vid).then(res => {
+      if (res.length > 0) {
+        this.processScanCode(res[0].rawValue);
+        this._stopCamera();
+        this.setState({ scanCamOpen: false });
+      }
+    }).catch(() => {});
+  }
+  _stopCamera() {
+    clearInterval(this._scanInt); this._scanInt = null;
+    if (this._stream) { this._stream.getTracks().forEach(t => t.stop()); this._stream = null; }
+    this._detector = null;
+  }
+
+  CATS = [
+    { id: 'cinema', label: '电影机', en: 'CINEMA' },
+    { id: 'lens', label: '镜头', en: 'LENS' },
+    { id: 'light', label: '灯光', en: 'LIGHT' },
+    { id: 'monitor', label: '监视器', en: 'MONITOR' },
+    { id: 'support', label: '支架稳定', en: 'RIG' },
+    { id: 'audio', label: '录音', en: 'AUDIO' },
+    { id: 'fpv', label: 'FPV穿越机', en: 'FPV' },
+    { id: 'drone', label: '航拍无人机', en: 'DRONE' },
+    { id: 'accessory', label: '附件', en: 'ACCY' },
+  ];
+
+  STATUS = {
+    in:       { label: '在库',   color: 'oklch(0.64 0.11 152)' },
+    reserved: { label: '已预留', color: 'oklch(0.74 0.12 78)' },
+    out:      { label: '已出库', color: 'oklch(0.62 0.08 255)' },
+    repair:   { label: '维修中', color: 'oklch(0.62 0.16 32)' },
+    inspect:  { label: '待检查', color: 'oklch(0.70 0.03 100)' },
+    retired:  { label: '停用',   color: 'oklch(0.52 0.02 0)' },
+  };
+
+  EQUIP = [
+    { id:1, name:'ALEXA Mini LF 电影摄影机', brand:'ARRI', model:'Mini LF', cat:'cinema', code:'CAM-001', st:'in', own:'自有', val:320000, day:3800, dep:80000, tot:3, av:2, loc:'A-01', specs:['Large Format 4.5K','LPL / PL 卡口','14+ 档宽容度','ARRIRAW / ProRes'], note:'机身含手柄、CFast 卡仓与原厂箱，租用默认配 2 块 V 口电池。' },
+    { id:2, name:'ALEXA 35 电影摄影机', brand:'ARRI', model:'ALEXA 35', cat:'cinema', code:'CAM-002', st:'in', own:'自有', val:380000, day:4200, dep:90000, tot:2, av:2, loc:'A-02', specs:['Super35 4.6K','LPL 卡口','17 档宽容度','EI 2560 双原生'], note:'旗舰机身，建议搭配 Master Prime 套装使用。' },
+    { id:3, name:'V-RAPTOR 8K VV 电影摄影机', brand:'RED', model:'V-RAPTOR', cat:'cinema', code:'CAM-003', st:'out', own:'自有', val:260000, day:2800, dep:60000, tot:2, av:0, loc:'A-03', specs:['8K VV 全画幅','RF / PL 卡口','8K 120fps','REDCODE RAW'], note:'当前两台均在外借项目，预计本周五归还。' },
+    { id:4, name:'VENICE 2 电影摄影机', brand:'Sony', model:'VENICE 2', cat:'cinema', code:'CAM-004', st:'reserved', own:'自有', val:290000, day:3200, dep:70000, tot:1, av:1, loc:'A-04', specs:['8.6K 全画幅','双原生 ISO','内录 X-OCN','PL / E 卡口'], note:'已被网剧项目预留，可协调档期。' },
+    { id:5, name:'URSA Cine 12K 电影摄影机', brand:'Blackmagic', model:'URSA Cine', cat:'cinema', code:'CAM-005', st:'in', own:'自有', val:150000, day:1600, dep:30000, tot:1, av:1, loc:'A-05', specs:['12K RGBW','内置 8TB','PL / EF / LPL','Blackmagic RAW'], note:'' },
+    { id:6, name:'FX9 全画幅摄影机', brand:'Sony', model:'FX9', cat:'cinema', code:'CAM-006', st:'in', own:'自有', val:80000, day:900, dep:15000, tot:3, av:3, loc:'A-06', specs:['全画幅 6K 传感器','双原生 ISO','E 卡口','S-Cinetone'], note:'适合纪录片与采访场景。' },
+    { id:7, name:'FX6 全画幅摄影机', brand:'Sony', model:'FX6', cat:'cinema', code:'CAM-007', st:'in', own:'合作商', val:38000, day:650, dep:10000, tot:4, av:3, loc:'A-07', specs:['全画幅 4K 120p','可变 ND','E 卡口','轻便机身'], note:'合作商挂靠设备，结算按合作价。' },
+
+    { id:8, name:'Master Prime 定焦镜头套装', brand:'ARRI / ZEISS', model:'Master Prime', cat:'lens', code:'LEN-001', st:'in', own:'自有', val:600000, day:2600, dep:60000, tot:1, av:1, loc:'B-01', specs:['16/25/35/50/85mm','T1.3 大光圈','PL 卡口','整套防潮箱'], note:'套装六支，租用需登记并由设备组随行。' },
+    { id:9, name:'S7/i 全画幅定焦套装', brand:'Cooke', model:'S7/i FF', cat:'lens', code:'LEN-002', st:'in', own:'自有', val:700000, day:2400, dep:60000, tot:1, av:1, loc:'B-02', specs:['25/32/40/50/75mm','T2.0','Cooke Look','/i 元数据'], note:'' },
+    { id:10, name:'CN-E 电影定焦套装', brand:'Canon', model:'CN-E', cat:'lens', code:'LEN-003', st:'in', own:'自有', val:180000, day:1200, dep:25000, tot:1, av:1, loc:'B-03', specs:['24/35/50/85mm','T1.5','EF 卡口','性价比之选'], note:'' },
+    { id:11, name:'Vespid 全画幅定焦套装', brand:'DZOFilm', model:'Vespid', cat:'lens', code:'LEN-004', st:'in', own:'合作商', val:60000, day:700, dep:12000, tot:2, av:2, loc:'B-04', specs:['全画幅覆盖','T2.1','PL / EF 可换','轻量'], note:'合作商挂靠。' },
+    { id:12, name:'EZ 电影变焦镜头', brand:'Angénieux', model:'EZ-1/2', cat:'lens', code:'LEN-005', st:'repair', own:'自有', val:130000, day:1100, dep:22000, tot:2, av:1, loc:'B-05', specs:['可换后组','S35 / FF','变焦比 3x','法版工艺'], note:'其中一支镜头送检维修中。' },
+    { id:13, name:'探针 / 微距镜头', brand:'Laowa', model:'Probe', cat:'lens', code:'LEN-006', st:'in', own:'自有', val:20000, day:400, dep:6000, tot:2, av:2, loc:'B-06', specs:['24mm 探针','2:1 微距','可防水','广告特写'], note:'适合产品与美食微距镜头。' },
+
+    { id:14, name:'SkyPanel S60-C 柔光灯', brand:'ARRI', model:'S60-C', cat:'light', code:'LIT-001', st:'in', own:'自有', val:60000, day:800, dep:12000, tot:4, av:3, loc:'C-01', specs:['RGBW LED','2800-10000K','450W','含柔光格栅'], note:'' },
+    { id:15, name:'LS 600x Pro 聚光灯', brand:'Aputure', model:'600x Pro', cat:'light', code:'LIT-002', st:'in', own:'自有', val:12000, day:360, dep:4000, tot:6, av:5, loc:'C-02', specs:['双色温','600W','Bowens 卡口','防雨'], note:'常用主光，库存充足。' },
+    { id:16, name:'Nova P600c 柔光板', brand:'Aputure', model:'P600c', cat:'light', code:'LIT-003', st:'in', own:'自有', val:18000, day:420, dep:5000, tot:3, av:3, loc:'C-03', specs:['RGBWW 面光','600W','内置电池仓','超薄'], note:'' },
+    { id:17, name:'Titan Tube 灯管套装(8 支)', brand:'Astera', model:'Titan Tube', cat:'light', code:'LIT-004', st:'reserved', own:'自有', val:40000, day:600, dep:8000, tot:2, av:1, loc:'C-04', specs:['8 支套装','无线 CRMX','内置电池','像素映射'], note:'一套已预留给直播项目。' },
+    { id:18, name:'M18 HMI 镝灯', brand:'ARRI', model:'M18', cat:'light', code:'LIT-005', st:'in', own:'合作商', val:50000, day:700, dep:10000, tot:2, av:2, loc:'C-05', specs:['1800W HMI','日光色温','含镇流器','高亮硬光'], note:'合作商挂靠设备。' },
+    { id:19, name:'RR Rainbow 灯管套装', brand:'Quasar', model:'RR Rainbow', cat:'light', code:'LIT-006', st:'in', own:'自有', val:16000, day:300, dep:4000, tot:4, av:4, loc:'C-06', specs:['RGBX 灯管','多规格','DMX 控制','氛围光'], note:'' },
+
+    { id:20, name:'Cine 7 监视器', brand:'SmallHD', model:'Cine 7', cat:'monitor', code:'MON-001', st:'in', own:'自有', val:18000, day:300, dep:4000, tot:4, av:3, loc:'D-01', specs:['7" 1800nit','SDI / HDMI','LUT / 波形','可装电池'], note:'' },
+    { id:21, name:'1303 HDR 导演监视器', brand:'SmallHD', model:'1303 HDR', cat:'monitor', code:'MON-002', st:'in', own:'自有', val:40000, day:500, dep:8000, tot:2, av:2, loc:'D-02', specs:['13" 1500nit','HDR 预览','多画面','导演村'], note:'' },
+    { id:22, name:'LVM-171S 监看监视器', brand:'TVLogic', model:'LVM-171S', cat:'monitor', code:'MON-003', st:'in', own:'自有', val:30000, day:400, dep:6000, tot:2, av:2, loc:'D-03', specs:['17" 广色域','调色级','SDI','机房监看'], note:'' },
+    { id:23, name:'Shogun 7 录机监视器', brand:'Atomos', model:'Shogun 7', cat:'monitor', code:'MON-004', st:'inspect', own:'自有', val:12000, day:220, dep:3000, tot:3, av:2, loc:'D-04', specs:['7" HDR','ProRes RAW','SDI / HDMI','录监一体'], note:'一台归库待检查。' },
+
+    { id:24, name:'Video 18 流体云台脚架', brand:'Sachtler', model:'Video 18', cat:'support', code:'SUP-001', st:'in', own:'自有', val:30000, day:280, dep:4000, tot:4, av:4, loc:'E-01', specs:['承重 2-22kg','碳纤脚管','流体阻尼','含云台'], note:'' },
+    { id:25, name:'Ronin 2 专业稳定器', brand:'DJI', model:'Ronin 2', cat:'support', code:'SUP-002', st:'in', own:'自有', val:40000, day:600, dep:10000, tot:2, av:2, loc:'E-02', specs:['承重 13.6kg','车载 / 飞行','含配件箱','专业级'], note:'' },
+    { id:26, name:'RS 4 Pro 手持稳定器', brand:'DJI', model:'RS 4 Pro', cat:'support', code:'SUP-003', st:'out', own:'自有', val:6000, day:200, dep:3000, tot:5, av:2, loc:'E-03', specs:['承重 4.5kg','碳纤臂','LiDAR 对焦','手持'], note:'三台外借中。' },
+    { id:27, name:'2575 D 专业云台', brand:"O'Connor", model:'2575 D', cat:'support', code:'SUP-004', st:'in', own:'合作商', val:90000, day:700, dep:12000, tot:1, av:1, loc:'E-04', specs:['顶级流体头','无级阻尼','重负载','合作商'], note:'合作商挂靠。' },
+    { id:28, name:'C-Stand 灯架套装(10 支)', brand:'Matthews', model:'C-Stand', cat:'support', code:'SUP-005', st:'in', own:'自有', val:12000, day:150, dep:1500, tot:1, av:1, loc:'E-05', specs:['10 支套装','含旗板臂','沙袋配套','灯位必备'], note:'按套出租。' },
+    { id:29, name:'Dana Dolly 轨道套装', brand:'Dana', model:'Dana Dolly', cat:'support', code:'SUP-006', st:'in', own:'自有', val:20000, day:350, dep:5000, tot:1, av:1, loc:'E-06', specs:['便携轨道','可调轮距','含轨道管','移动镜头'], note:'' },
+
+    { id:30, name:'888 多通道调音台', brand:'Sound Devices', model:'888', cat:'audio', code:'AUD-001', st:'in', own:'自有', val:60000, day:700, dep:10000, tot:1, av:1, loc:'F-01', specs:['8 路输入','32-bit 浮点','内置时码','现场混录'], note:'' },
+    { id:31, name:'MKH 416 指向性枪麦', brand:'Sennheiser', model:'MKH 416', cat:'audio', code:'AUD-002', st:'in', own:'自有', val:8000, day:150, dep:2000, tot:3, av:3, loc:'F-02', specs:['超心型','抗潮湿','行业标准','含防风'], note:'' },
+    { id:32, name:'MTP60 无线话筒套装', brand:'Wisycom', model:'MTP60', cat:'audio', code:'AUD-003', st:'in', own:'合作商', val:90000, day:600, dep:12000, tot:2, av:2, loc:'F-03', specs:['宽频无线','多通道','低延迟','合作商'], note:'合作商挂靠。' },
+    { id:33, name:'F8n Pro 现场录音机', brand:'Zoom', model:'F8n Pro', cat:'audio', code:'AUD-004', st:'in', own:'个人挂靠', val:8000, day:200, dep:2500, tot:2, av:2, loc:'F-04', specs:['8 输入','32-bit','双 SD','含时码'], note:'个人挂靠设备。' },
+
+    { id:34, name:'Avata 2 穿越机套装', brand:'DJI', model:'Avata 2', cat:'fpv', code:'FPV-001', st:'in', own:'自有', val:8000, day:350, dep:4000, tot:3, av:3, loc:'G-01', specs:['Cinewhoop','O4 高清图传','约 23min','含眼镜遥控'], note:'即开即飞，适合室内穿梭。' },
+    { id:35, name:'5 寸自组穿越机', brand:'Custom', model:'5" FPV', cat:'fpv', code:'FPV-002', st:'in', own:'个人挂靠', val:6000, day:300, dep:3000, tot:4, av:4, loc:'G-02', specs:['5 寸轴距','高清数字图传','极速机动','需专业飞手'], note:'个人挂靠，建议搭配飞手服务。' },
+    { id:36, name:'Cinewhoop 室内穿越机', brand:'Custom', model:'Cinewhoop', cat:'fpv', code:'FPV-003', st:'reserved', own:'自有', val:9000, day:380, dep:4000, tot:2, av:1, loc:'G-03', specs:['涵道保护','室内安全','稳定运镜','含护栏'], note:'一台已预留。' },
+    { id:37, name:'穿越机飞手套装', brand:'DJI', model:'Goggles 3', cat:'fpv', code:'FPV-004', st:'in', own:'自有', val:9000, day:250, dep:3000, tot:2, av:2, loc:'G-04', specs:['Goggles 3 眼镜','RC 遥控','高清回传','配套使用'], note:'眼镜 + 遥控套装。' },
+
+    { id:38, name:'Inspire 3 专业航拍无人机', brand:'DJI', model:'Inspire 3', cat:'drone', code:'DRN-001', st:'out', own:'自有', val:110000, day:2200, dep:30000, tot:2, av:1, loc:'H-01', specs:['全画幅 8K','DL 卡口','15km O3 Pro','双控'], note:'需持证飞手，一台外借。' },
+    { id:39, name:'Mavic 3 Cine 航拍无人机', brand:'DJI', model:'Mavic 3 Cine', cat:'drone', code:'DRN-002', st:'in', own:'自有', val:28000, day:800, dep:10000, tot:3, av:2, loc:'H-02', specs:['4/3 CMOS','Apple ProRes','5.1K 50fps','便携'], note:'' },
+    { id:40, name:'Air 3 航拍无人机', brand:'DJI', model:'Air 3', cat:'drone', code:'DRN-003', st:'in', own:'合作商', val:12000, day:500, dep:5000, tot:4, av:4, loc:'H-03', specs:['双摄','4K 100fps','46min 续航','轻巧'], note:'合作商挂靠。' },
+
+    { id:41, name:'V-Mount 电池套装', brand:'Core SWX', model:'V-Mount', cat:'accessory', code:'ACC-001', st:'in', own:'自有', val:30000, day:200, dep:3000, tot:10, av:8, loc:'I-01', specs:['多块装','D-tap 输出','含充电器','大容量'], note:'按套出租。' },
+    { id:42, name:'Nucleus-M 无线跟焦', brand:'Tilta', model:'Nucleus-M', cat:'accessory', code:'ACC-002', st:'in', own:'自有', val:12000, day:250, dep:4000, tot:3, av:3, loc:'I-02', specs:['三马达','无线手轮','低延迟','含支架'], note:'' },
+    { id:43, name:'Bolt 6 LT 无线图传', brand:'Teradek', model:'Bolt 6 LT', cat:'accessory', code:'ACC-003', st:'in', own:'自有', val:40000, day:450, dep:8000, tot:2, av:2, loc:'I-03', specs:['零延迟','750ft','多接收','5GHz'], note:'' },
+    { id:44, name:'CFexpress / SSD 存储套装', brand:'Angelbird', model:'Storage', cat:'accessory', code:'ACC-004', st:'in', own:'自有', val:30000, day:300, dep:5000, tot:6, av:5, loc:'I-04', specs:['多卡组合','高速读写','含读卡器','含硬盘箱'], note:'按套出租，归还需清空数据。' },
+    { id:45, name:'电影滤镜套装', brand:'NiSi', model:'Cine Filter', cat:'accessory', code:'ACC-005', st:'in', own:'合作商', val:20000, day:200, dep:3000, tot:3, av:3, loc:'I-05', specs:['ND / 黑柔','多尺寸','含滤镜包','合作商'], note:'合作商挂靠。' },
+    { id:46, name:'Delta Pro 移动电站', brand:'EcoFlow', model:'Delta Pro', cat:'accessory', code:'ACC-006', st:'in', own:'自有', val:25000, day:300, dep:4000, tot:4, av:3, loc:'I-06', specs:['3.6kWh','市电级输出','快充','外景供电'], note:'外景常备电源。' },
+  ];
+
+  RECORDS = [
+    { t:'今天 14:20', dev:'RED V-RAPTOR 8K VV', op:'出库', by:'张磊', proj:'某汽车品牌 TVC' },
+    { t:'今天 11:05', dev:'DJI Inspire 3', op:'出库', by:'李娜', proj:'城市形象宣传片' },
+    { t:'昨天 18:40', dev:'Aputure LS 600x Pro ×2', op:'入库', by:'王浩', proj:'直播多机位' },
+    { t:'昨天 16:12', dev:'Angénieux EZ 变焦', op:'报修', by:'设备组', proj:'例行检修' },
+    { t:'昨天 09:30', dev:'Sony VENICE 2', op:'预留', by:'陈曦', proj:'网剧 第二季' },
+    { t:'06-13 20:15', dev:'DJI RS 4 Pro ×3', op:'出库', by:'刘洋', proj:'美食短视频' },
+  ];
+
+  fmt(n) { return '¥' + Number(n).toLocaleString('en-US'); }
+
+  opColor(op) {
+    return ({ '出库':'oklch(0.62 0.08 255)', '入库':'oklch(0.64 0.11 152)', '报修':'oklch(0.62 0.16 32)', '预留':'oklch(0.74 0.12 78)' })[op] || '#9C9A93';
+  }
+  opTagStyle(op) {
+    const c = this.opColor(op);
+    return { fontSize:'11px', padding:'2px 9px', borderRadius:'6px', color:c, background:'color-mix(in oklch, '+c+' 14%, white)', fontWeight:500, flexShrink:0, whiteSpace:'nowrap' };
+  }
+
+  catLabel(id) { const c = this.CATS.find(c => c.id === id); return c ? c.label : id; }
+  catEn(id) { const c = this.CATS.find(c => c.id === id); return c ? c.en : ''; }
+
+  enrich(it) {
+    const s = this.STATUS[it.st];
+    const qty = this.state.cart[it.id] || 0;
+    return {
+      ...it,
+      en: this.catEn(it.cat),
+      catLabel: this.catLabel(it.cat),
+      statusLabel: s.label,
+      statusColor: s.color,
+      dotStyle: { width:'6px', height:'6px', borderRadius:'999px', background:s.color, flexShrink:0, display:'inline-block' },
+      availText: '可借 ' + it.av + '/' + it.tot,
+      totText: it.tot + ' / ' + it.av + ' 可借',
+      dailyText: this.fmt(it.day),
+      depositText: this.fmt(it.dep),
+      valueText: this.fmt(it.val),
+      ownerLabel: it.own,
+      ownerBadge: it.own === '自有' ? null : it.own,
+      inCart: qty > 0,
+      notInCart: qty === 0,
+      cartQty: qty,
+      hasNote: !!it.note,
+      open: () => this.openDetail(it.id),
+      add: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.addToCart(it.id, 1); },
+    };
+  }
+
+  filtered() {
+    const { cat, brand, status, owner, search, sort } = this.state;
+    let list = this.EQUIP.slice();
+    if (cat !== 'all') list = list.filter(i => i.cat === cat);
+    if (brand !== 'all') list = list.filter(i => i.brand === brand);
+    if (status !== 'all') list = list.filter(i => i.st === status);
+    if (owner !== 'all') list = list.filter(i => i.own === owner);
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter(i => (i.name + ' ' + i.brand + ' ' + i.model + ' ' + i.code).toLowerCase().includes(q));
+    }
+    if (sort === 'priceAsc') list.sort((a,b) => a.day - b.day);
+    else if (sort === 'priceDesc') list.sort((a,b) => b.day - a.day);
+    else if (sort === 'avail') list.sort((a,b) => b.av - a.av);
+    return list;
+  }
+
+  // navigation
+  goCatalog() { this.setState({ screen:'catalog' }); }
+  goCart() { this.setState({ screen:'cart' }); }
+  goDashboard() { this.setState({ screen:'dashboard' }); }
+  goServices() { this.setState({ screen:'services' }); }
+  goTalent() { this.setState({ screen:'talent' }); }
+  openService(id) { this.setState({ serviceId:id }); }
+  closeService() { this.setState({ serviceId:null }); }
+  openTalent(id) { this.setState({ talentId:id, serviceId:null }); }
+  closeTalent() { this.setState({ talentId:null }); }
+  orderService(s) { this.toast('已提交「' + s.name + '」服务意向，顾问将尽快与你联系'); this.setState({ serviceId:null }); }
+
+  DOMAINS = [
+    { id:'auto',   label:'汽车广告',  en:'AUTOMOTIVE', color:'oklch(0.55 0.14 25)' },
+    { id:'motion', label:'动态影像',  en:'MOTION·TVC', color:'oklch(0.50 0.13 285)' },
+    { id:'aerial', label:'专业航拍',  en:'AERIAL',     color:'oklch(0.54 0.12 232)' },
+    { id:'event',  label:'活动拍摄',  en:'LIVE EVENT', color:'oklch(0.58 0.13 45)' },
+    { id:'course', label:'课件录制',  en:'COURSEWARE', color:'oklch(0.53 0.10 165)' },
+    { id:'ai',     label:'AI 制作',   en:'AI STUDIO',  color:'oklch(0.52 0.14 305)' },
+  ];
+
+  ROLES = [
+    { id:'director', label:'导演 / 创意' },
+    { id:'dp',       label:'摄影指导' },
+    { id:'aerial',   label:'航拍飞手' },
+    { id:'fpv',      label:'FPV 飞手' },
+    { id:'rig',      label:'稳定器操作' },
+    { id:'light',    label:'灯光指导' },
+    { id:'audio',    label:'录音师' },
+    { id:'color',    label:'调色师' },
+    { id:'ai',       label:'AI 视觉' },
+  ];
+
+  TALENT = [
+    { id:'t1', name:'林深', initials:'林', role:'摄影指导 DP', roleKey:'dp', years:12, color:'oklch(0.52 0.12 258)',
+      specialty:'高质感品牌广告与情绪叙事', skills:['大画幅影像','运动镜头','自然光塑造','广告叙事'], gear:['ALEXA 35','Master Prime','VENICE 2'],
+      bio:'从业十二年的摄影指导，专注高端汽车与品牌广告，作品以克制的光影和扎实的运动镜头见长，与多家 4A 与品牌方长期合作。',
+      projects:[{name:'某新能源汽车 全球发布片',year:'2025',role:'摄影指导'},{name:'国际美妆品牌 形象 TVC',year:'2024',role:'摄影指导'},{name:'城市形象片《晨光》',year:'2024',role:'摄影指导'}] },
+    { id:'t2', name:'周屿', initials:'周', role:'航拍飞手', roleKey:'aerial', years:9, color:'oklch(0.54 0.11 232)',
+      specialty:'大场景航拍与跟车追拍', skills:['Inspire 3 操控','跟车航拍','编队飞行','AOPA 持证'], gear:['DJI Inspire 3','Mavic 3 Cine','Air 3'],
+      bio:'AOPA 持证飞手，九年航拍经验，擅长复杂环境下的跟车与大场景调度，多次完成高速公路、山地与城市夜景的高难度航拍。',
+      projects:[{name:'汽车品牌 公路跟拍片',year:'2025',role:'航拍'},{name:'山地旅游 宣传片',year:'2024',role:'航拍'},{name:'大型活动 开幕航拍',year:'2023',role:'航拍'}] },
+    { id:'t3', name:'苏越', initials:'苏', role:'FPV 穿越机飞手', roleKey:'fpv', years:5, color:'oklch(0.55 0.13 150)',
+      specialty:'高速穿梭与室内一镜到底', skills:['室内穿越','一镜到底','自组穿越机','极限机动'], gear:['DJI Avata 2','5寸自组机','Cinewhoop'],
+      bio:'新生代 FPV 飞手，自组与调试穿越机，擅长室内一镜到底与工业场景穿梭运镜，为广告与空间展示提供独特视角。',
+      projects:[{name:'餐饮空间 一镜到底',year:'2025',role:'FPV'},{name:'工厂产线 穿越片',year:'2024',role:'FPV'},{name:'酒店开业 穿梭宣传',year:'2024',role:'FPV'}] },
+    { id:'t4', name:'高远', initials:'高', role:'稳定器操作', roleKey:'rig', years:10, color:'oklch(0.50 0.10 210)',
+      specialty:'长镜头调度与车载拍摄', skills:['Ronin 2','斯坦尼康','长镜头调度','车载拍摄'], gear:['DJI Ronin 2','RS 4 Pro',"O'Connor 2575"],
+      bio:'十年稳定器与斯坦尼康操作经验，擅长复杂走位的长镜头一次成型，是动态广告与活动现场的可靠运镜搭档。',
+      projects:[{name:'汽车 棚内环绕片',year:'2025',role:'稳定器'},{name:'品牌 一镜到底广告',year:'2024',role:'斯坦尼康'},{name:'演唱会 跟拍',year:'2023',role:'稳定器'}] },
+    { id:'t5', name:'何晚', initials:'何', role:'灯光指导', roleKey:'light', years:11, color:'oklch(0.57 0.12 70)',
+      specialty:'影棚布光与氛围光塑造', skills:['影棚布光','大场景照明','氛围光','HMI 硬光'], gear:['SkyPanel S60-C','Nova P600c','M18 HMI'],
+      bio:'十一年灯光经验，从棚内静物到大场景外景皆能掌控，以精准的氛围光和质感塑造为画面注入电影感。',
+      projects:[{name:'美妆 TVC 棚拍',year:'2025',role:'灯光指导'},{name:'汽车 夜景广告',year:'2024',role:'灯光指导'},{name:'纪录片 自然光补光',year:'2023',role:'灯光指导'}] },
+    { id:'t6', name:'沈淮', initials:'沈', role:'调色师', roleKey:'color', years:8, color:'oklch(0.50 0.12 300)',
+      specialty:'广告调性与胶片仿真', skills:['DaVinci Resolve','HDR 调色','广告调性','胶片仿真'], gear:['DaVinci 调色台','TVLogic 监视器'],
+      bio:'八年调色经验，擅长为品牌定制专属色彩调性，HDR 与胶片仿真俱佳，让成片在不同平台都保持统一观感。',
+      projects:[{name:'多支 汽车广告 调色',year:'2025',role:'调色'},{name:'院线 短片调色',year:'2024',role:'调色'},{name:'时尚大片 调色',year:'2024',role:'调色'}] },
+    { id:'t7', name:'陆风', initials:'陆', role:'录音师', roleKey:'audio', years:9, color:'oklch(0.52 0.10 145)',
+      specialty:'同期录音与现场混音', skills:['同期录音','无线话筒','现场混音','时码同步'], gear:['Sound Devices 888','MKH 416','Wisycom MTP60'],
+      bio:'九年现场录音经验，擅长复杂环境下的同期收音与多路无线管理，为活动与访谈提供干净可靠的声音素材。',
+      projects:[{name:'大型论坛 现场收音',year:'2025',role:'录音'},{name:'访谈纪录片 同期',year:'2024',role:'录音'},{name:'综艺 多机位收音',year:'2023',role:'录音'}] },
+    { id:'t8', name:'顾辰', initials:'顾', role:'AI 视觉设计师', roleKey:'ai', years:4, color:'oklch(0.52 0.13 318)',
+      specialty:'AI 分镜与虚拟影像生成', skills:['AI 分镜生成','数字人','风格迁移','虚拟场景'], gear:['Stable Diffusion','Runway','Nuke 合成'],
+      bio:'融合 AI 生成与传统后期的视觉设计师，擅长用 AI 快速产出分镜与概念影像，并将其与实拍无缝合成。',
+      projects:[{name:'品牌 AI 概念片',year:'2025',role:'AI 视觉'},{name:'数字人 口播项目',year:'2024',role:'AI 视觉'},{name:'虚拟场景 广告',year:'2024',role:'合成'}] },
+    { id:'t9', name:'江岚', initials:'江', role:'导演 / 创意', roleKey:'director', years:13, color:'oklch(0.50 0.11 35)',
+      specialty:'广告创意与现场调度', skills:['广告创意','分镜设计','现场调度','品牌叙事'], gear:['创意统筹','分镜脚本'],
+      bio:'十三年广告导演经验，从创意提案到现场执行全流程把控，以清晰的品牌叙事和高效的现场调度著称。',
+      projects:[{name:'新能源汽车 发布片',year:'2025',role:'导演'},{name:'美妆品牌 系列 TVC',year:'2024',role:'导演'},{name:'城市形象 宣传片',year:'2023',role:'导演'}] },
+  ];
+
+  SERVICES = [
+    { id:'s1', name:'专业航拍服务包', domain:'aerial', tagline:'空中视角，一镜入魂', priceFrom:18000, unit:'天', duration:'1–3 天', crew:3,
+      hw:[{label:'航拍无人机',detail:'DJI Inspire 3（8K）/ Mavic 3 Cine / Air 3'},{label:'FPV 穿越机',detail:'Avata 2 / 5 寸自组机（室内一镜到底）'},{label:'镜头组',detail:'DL 18 / 24 / 35 / 50mm 全焦段'}],
+      caps:['跟车追拍与公路大场景','建筑 / 地貌俯瞰揭示','室内 FPV 一镜到底','编队灯光夜景','螺旋上升揭示运镜'],
+      deliver:['4K / 8K 航拍原片','调色成片','30s 精剪版'], talent:['t2','t3','t1'],
+      desc:'以航拍无人机 + FPV 穿越机双线配置，覆盖从万米大场景到室内穿梭的全维度空中视角，适合汽车、文旅、城市形象等需要恢弘画面的项目。' },
+    { id:'s2', name:'汽车广告拍摄包', domain:'auto', tagline:'让金属也有呼吸感', priceFrom:38000, unit:'天', duration:'2–4 天', crew:6,
+      hw:[{label:'电影机',detail:'ALEXA 35 / VENICE 2'},{label:'镜头',detail:'Master Prime 定焦套装'},{label:'运动设备',detail:'跟车炮台 + Ronin 2 + 灯光车'}],
+      caps:['跟车动态拍摄','棚内转盘环绕','流体运镜','局部金属特写','夜景光绘'],
+      deliver:['正片 + 多版本剪辑','车型特写素材库','调色成片'], talent:['t1','t4','t5','t2'],
+      desc:'专为汽车影像打造的高配置服务包，电影机 + 顶级定焦 + 跟车炮台，配合资深摄影、灯光与航拍团队，呈现金属质感与速度张力。' },
+    { id:'s3', name:'TVC / 动态影像包', domain:'motion', tagline:'为品牌讲一个故事', priceFrom:32000, unit:'天', duration:'2–5 天', crew:7,
+      hw:[{label:'电影机',detail:'VENICE 2 / ALEXA Mini LF'},{label:'镜头',detail:'Cooke S7/i 全画幅定焦'},{label:'灯光',detail:'SkyPanel + 移动轨道'}],
+      caps:['情绪化叙事','高速慢动作','产品微距','棚拍合成','大场景调度'],
+      deliver:['品牌主片','15s / 30s 投放版','拍摄花絮'], talent:['t9','t1','t5','t6'],
+      desc:'从创意分镜到成片交付的一站式品牌影像服务，导演 + 摄影 + 灯光 + 调色全链路，适合产品上新、品牌形象与节点营销。' },
+    { id:'s4', name:'活动 / 现场拍摄包', domain:'event', tagline:'不错过每一个高光时刻', priceFrom:12000, unit:'天', duration:'1–2 天', crew:5,
+      hw:[{label:'多机位',detail:'Sony FX9 ×3 多机位'},{label:'传输',detail:'Teradek 无线图传'},{label:'收音',detail:'枪麦 + 无线话筒套装'}],
+      caps:['多机位实时切换','直播导播','当日快剪交付','嘉宾采访','航拍全景'],
+      deliver:['活动全程记录','精剪集锦','直播信号'], talent:['t7','t4','t2'],
+      desc:'面向发布会、论坛、演出等现场的多机位拍摄包，支持直播导播与当日快剪，确保每个高光瞬间被专业记录。' },
+    { id:'s5', name:'课件 / 知识影像包', domain:'course', tagline:'让专业被清晰看见', priceFrom:6800, unit:'天', duration:'按量', crew:3,
+      hw:[{label:'摄影机',detail:'Sony FX6 ×2 双机位'},{label:'辅助',detail:'提词器 + 影棚柔光'},{label:'收音',detail:'领夹 + 录音棚环境'}],
+      caps:['双机位讲解拍摄','绿幕抠像','PPT / 板书合成','提词录制','章节化交付'],
+      deliver:['成套课件视频','字幕版本','封面图'], talent:['t5','t7','t6'],
+      desc:'为知识付费、企业培训与教学机构定制的高性价比影像包，标准化布光与收音，批量产出清晰专业的课件视频。' },
+    { id:'s6', name:'AI 制作 / 虚拟影像包', domain:'ai', tagline:'用 AI 扩展想象的边界', priceFrom:9800, unit:'项', duration:'3–7 天', crew:3,
+      hw:[{label:'实拍',detail:'绿幕棚 + 动捕（按需）'},{label:'AI 管线',detail:'SD / Runway / 数字人生成'},{label:'合成',detail:'Nuke / AE 合成管线'}],
+      caps:['AI 分镜生成','数字人口播','风格迁移','虚拟场景搭建','概念预演'],
+      deliver:['AI 成片','可迭代工程文件','分镜资产'], talent:['t8','t9','t6'],
+      desc:'结合实拍与 AI 生成的新型影像服务，快速产出概念片、数字人与虚拟场景，适合预算有限或需要超现实表达的项目。' },
+  ];
+
+  domainOf(id) { return this.DOMAINS.find(d => d.id === id) || { label:id, en:'', color:'#888' }; }
+  talentById(id) { return this.TALENT.find(t => t.id === id); }
+  roleLabel(k) { const r = this.ROLES.find(r => r.id === k); return r ? r.label : k; }
+  openDetail(id) { this.setState({ detailId:id, detailQty:1 }); }
+  closeDetail() { this.setState({ detailId:null }); }
+
+  // cart
+  addToCart(id, n) { this.setState(s => ({ cart: { ...s.cart, [id]: (s.cart[id]||0) + (n||1) } })); }
+  setQty(id, n) { this.setState(s => { const c = { ...s.cart }; if (n <= 0) delete c[id]; else c[id] = n; return { cart:c }; }); }
+  clearCart() { this.setState({ cart:{} }); }
+
+  navBtn(active) {
+    return { display:'flex', alignItems:'center', gap:'6px', height:'34px', padding:'0 13px', borderRadius:'9px', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:'13.5px', background: active ? '#1C1B19' : 'transparent', color: active ? '#fff' : '#44423D', fontWeight: active ? 500 : 400, transition:'background .12s' };
+  }
+
+  // ===== admin: mutation & nav =====
+  get logEntries() { if (!this._log) this._log = this.RECORDS.map((r, i) => ({ ...r, id: 'L' + i })); return this._log; }
+  nextId() { return Math.max(0, ...this.EQUIP.map(e => e.id)) + 1; }
+  pushLog(op, dev, by, proj) { this.logEntries.unshift({ id: 'L' + Date.now(), t: '刚刚', op, dev, by: by || '—', proj: proj || '—' }); }
+  goAdmin() { this.setState({ view: 'admin', adminScreen: 'home' }); }
+  goFront() { this.setState({ view: 'front', screen: 'catalog' }); }
+  setAdmin(s) { this.setState({ adminScreen: s, statusMenu: null }); }
+  toast(msg) { this.setState({ toast: msg }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: '' }), 2200); }
+  setStatus(id, k) { const it = this.EQUIP.find(e => e.id === id); if (it && it.st !== k) { it.st = k; this.pushLog('改状态', it.name, '设备组', this.STATUS[k].label); this.toast(it.name + ' → ' + this.STATUS[k].label); } this.setState({ statusMenu: null }); }
+  toggleStatusMenu(id) { this.setState(s => ({ statusMenu: s.statusMenu === id ? null : id })); }
+  toggleSelect(id) { this.setState(s => ({ selected: s.selected.includes(id) ? s.selected.filter(x => x !== id) : [...s.selected, id] })); }
+  selectAll(ids) { this.setState(s => ({ selected: s.selected.length === ids.length ? [] : ids.slice() })); }
+  batchStatus(k) { this.state.selected.forEach(id => { const it = this.EQUIP.find(e => e.id === id); if (it) it.st = k; }); this.toast('已批量更新 ' + this.state.selected.length + ' 项'); this.setState({ selected: [] }); }
+  _del(ids) { for (let i = this.EQUIP.length - 1; i >= 0; i--) if (ids.includes(this.EQUIP[i].id)) this.EQUIP.splice(i, 1); }
+  batchDelete() { const n = this.state.selected.length; this._del(this.state.selected); this.toast('已删除 ' + n + ' 项'); this.setState({ selected: [] }); }
+  deleteDevice(id) { this._del([id]); this.toast('已删除该设备'); this.setState({ statusMenu: null }); }
+  openEditor(id) { let d; if (id) { const it = this.EQUIP.find(e => e.id === id); d = { ...it, specsText: (it.specs || []).join('、') }; } else { d = { id: null, name: '', brand: '', model: '', cat: 'cinema', code: '', st: 'in', own: '自有', val: '', day: '', dep: '', tot: 1, av: 1, loc: '', note: '', specsText: '' }; } this.setState({ editorOpen: true, editorId: id || null, draft: d, view: 'admin' }); }
+  closeEditor() { this.setState({ editorOpen: false }); }
+  setDraft(k, v) { this.setState(s => ({ draft: { ...s.draft, [k]: v } })); }
+  saveDraft() { const d = this.state.draft; if (!d.name || !d.name.trim()) { this.toast('请填写设备名称'); return; } const specs = (d.specsText || '').split(/[、,，\n]/).map(x => x.trim()).filter(Boolean); const rec = { name: d.name.trim(), brand: d.brand || '—', model: d.model || '', cat: d.cat, code: d.code || ('NEW-' + this.nextId()), st: d.st, own: d.own, val: Number(d.val) || 0, day: Number(d.day) || 0, dep: Number(d.dep) || 0, tot: Number(d.tot) || 1, av: Number(d.av) || 0, loc: d.loc || '—', specs, note: d.note || '' }; if (this.state.editorId) { Object.assign(this.EQUIP.find(e => e.id === this.state.editorId), rec); this.toast('已保存修改'); } else { this.EQUIP.unshift({ id: this.nextId(), ...rec }); this.pushLog('入库', rec.name, '设备组', '新设备登记'); this.toast('已新增设备'); } this.setState({ editorOpen: false }); }
+  submitReg() { const s = this.state; if (!s.regDevice) { this.toast('请选择设备'); return; } const it = this.EQUIP.find(e => e.id === Number(s.regDevice)); const op = { out: '出库', in: '入库' }[s.regOp]; if (it) { if (s.regOp === 'out') { it.av = Math.max(0, it.av - 1); if (it.av === 0) it.st = 'out'; } else { it.av = Math.min(it.tot, it.av + 1); it.st = 'in'; } this.pushLog(op, it.name, s.regBy, s.regProj); } this.toast('已登记' + op); this.setState({ regDevice: '', regBy: '', regProj: '' }); }
+
+  // ===== Excel import =====
+  openImport() { this.setState({ importOpen:true, importStage:'upload', importRows:[], importHeaders:[], importColMap:{}, importFileName:'' }); }
+  closeImport() { this.setState({ importOpen:false }); }
+  _autoDetectCols(headers) {
+    const PATTERNS = { name:/名称|设备名|device/i, brand:/品牌|制造商|brand/i, model:/型号|规格/i, cat:/类别|分类|类型|category/i, code:/编号|资产|asset|code/i, st:/状态|status/i, own:/所属|归属|owner/i, val:/估值|价值|value|单价/i, day:/日租|租金|daily/i, dep:/押金|保证金|deposit/i, tot:/总数|总量|合计|total/i, av:/可借|可用|available|在库/i, loc:/位置|货架|location/i, specs:/参数|规格参数|specs|配置/i, note:/备注|说明|note|remark/i };
+    const map = {};
+    headers.forEach((h, i) => { for (const [f, re] of Object.entries(PATTERNS)) { if (re.test(h) && !(f in map)) { map[f] = i; break; } } });
+    return map;
+  }
+  _parseImportRow(row, colMap) {
+    const get = f => { const i = colMap[f]; return (i !== undefined && row[i] !== undefined && row[i] !== null) ? String(row[i]).trim() : ''; };
+    const catMap = {'电影机':'cinema','摄影机':'cinema','镜头':'lens','灯光':'light','监视器':'monitor','支架':'support','稳定器':'support','云台':'support','录音':'audio','音频':'audio','fpv':'fpv','穿越机':'fpv','无人机':'drone','航拍':'drone','附件':'accessory','配件':'accessory'};
+    const stMap = {'在库':'in','可借':'in','出库':'out','已出库':'out','预留':'reserved','已预留':'reserved','维修':'repair','维修中':'repair','待检':'inspect','待检查':'inspect','停用':'retired'};
+    const name = get('name');
+    const catRaw = get('cat'); let cat = 'accessory';
+    if (catRaw) { const hit = this.CATS.find(c => c.id === catRaw.toLowerCase() || c.label === catRaw); if (hit) cat = hit.id; else { for (const [k,v] of Object.entries(catMap)) { if (catRaw.includes(k)) { cat=v; break; } } } }
+    const stRaw = get('st'); const st = stMap[stRaw] || (this.STATUS[stRaw] ? stRaw : 'in');
+    const own = get('own') || '自有';
+    return { name, brand:get('brand'), model:get('model'), cat, code:get('code'), st, own, loc:get('loc')||'—', val:Number(get('val'))||0, day:Number(get('day'))||0, dep:Number(get('dep'))||0, tot:Math.max(1,Number(get('tot'))||1), av:Math.max(0,Number(get('av'))||1), specs:(get('specs')||'').split(/[、,，]/).map(x=>x.trim()).filter(Boolean), note:get('note')||'', _valid:!!name, _err:name?'':('缺少设备名称') };
+  }
+  handleImportFile(file) {
+    if (!file) return;
+    if (typeof window.XLSX === 'undefined') { this.toast('SheetJS 未加载，请检查网络'); return; }
+    this.setState({ importFileName: file.name });
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const wb = window.XLSX.read(new Uint8Array(e.target.result), { type:'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const raw = window.XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
+        if (!raw.length) { this.toast('表格为空'); return; }
+        const headers = raw[0].map(h => String(h).trim());
+        const rows = raw.slice(1).filter(r => r.some(c => String(c||'').trim()));
+        this.setState({ importHeaders:headers, importRows:rows, importColMap:this._autoDetectCols(headers), importStage:'mapping' });
+      } catch(err) { this.toast('解析失败：'+(err.message||err)); }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+  setImportCol(field, val) { this.setState(s => ({ importColMap:{...s.importColMap,[field]:val===''?undefined:Number(val)} })); }
+  confirmImport() {
+    const { importRows, importColMap } = this.state;
+    const parsed = importRows.map(r => this._parseImportRow(r, importColMap));
+    const valid = parsed.filter(r => r._valid);
+    const skip = parsed.length - valid.length;
+    const base = this.nextId();
+    valid.forEach((rec, i) => { const { _valid, _err, ...clean } = rec; this.EQUIP.unshift({ id: base+i, ...clean }); this.pushLog('入库', clean.name, '批量导入', 'Excel 导入'); });
+    this.toast('已导入 '+valid.length+' 件设备'+(skip?' · 跳过 '+skip+' 行':''));
+    this.setState({ importOpen:false });
+  }
+
+  renderVals() {
+    const st = this.state;
+    const list = this.filtered();
+    const cards = list.map(i => this.enrich(i));
+
+    // categories (rail + chips)
+    const counts = {};
+    this.EQUIP.forEach(i => { counts[i.cat] = (counts[i.cat]||0) + 1; });
+    const railBase = { display:'flex', alignItems:'center', justifyContent:'space-between', width:'100%', padding:'8px 11px', borderRadius:'8px', border:'none', fontSize:'13px', cursor:'pointer', fontFamily:'inherit', textAlign:'left', transition:'background .12s' };
+    const chipBase = { padding:'7px 14px', borderRadius:'999px', fontSize:'13px', cursor:'pointer', whiteSpace:'nowrap', fontFamily:'inherit', transition:'all .12s' };
+    const mkCat = (id, label, count) => {
+      const active = st.cat === id;
+      return {
+        id, label, count, en: id === 'all' ? 'ALL' : this.catEn(id),
+        active,
+        select: () => this.setState({ cat:id }),
+        railStyle: { ...railBase, background: active ? '#EEF2FD' : 'transparent', color: active ? '#2F5AC7' : '#44423D', fontWeight: active ? 600 : 400 },
+        chipStyle: { ...chipBase, background: active ? '#1C1B19' : '#fff', color: active ? '#fff' : '#44423D', border: active ? '1px solid #1C1B19' : '1px solid #E4E3DE' },
+      };
+    };
+    const cats = [ mkCat('all', '全部器材', this.EQUIP.length), ...this.CATS.map(c => mkCat(c.id, c.label, counts[c.id]||0)) ];
+
+    // aisles (group filtered by category)
+    const aisles = this.CATS.map(c => {
+      const items = list.filter(i => i.cat === c.id).map(i => this.enrich(i));
+      return { id:c.id, label:c.label, en:c.en, count:items.length, items, viewAll: () => this.setState({ cat:c.id, layout:'grid' }) };
+    }).filter(a => a.count > 0);
+
+    // filter option lists
+    const brandSet = Array.from(new Set(this.EQUIP.map(i => i.brand))).sort();
+    const brandOptions = [{ value:'all', label:'全部品牌' }, ...brandSet.map(b => ({ value:b, label:b }))];
+    const statusOptions = [{ value:'all', label:'全部状态' }, ...Object.keys(this.STATUS).map(k => ({ value:k, label:this.STATUS[k].label }))];
+    const ownerOptions = [{ value:'all', label:'全部所属方' }, { value:'自有', label:'公司自有' }, { value:'合作商', label:'合作商家' }, { value:'个人挂靠', label:'个人挂靠' }];
+
+    // layouts
+    const loBase = { padding:'7px 14px', borderRadius:'8px', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:'13px', transition:'all .12s' };
+    const layouts = [
+      { id:'grid', label:'货架网格' },
+      { id:'aisle', label:'分区货架' },
+      { id:'showcase', label:'大图筛选' },
+    ].map(l => {
+      const active = st.layout === l.id;
+      return { ...l, select: () => this.setState({ layout:l.id }), style: { ...loBase, background: active ? '#fff' : 'transparent', color: active ? '#1C1B19' : '#76746E', fontWeight: active ? 600 : 400, boxShadow: active ? '0 1px 3px rgba(20,20,18,.10)' : 'none' } };
+    });
+
+    // detail
+    const detRaw = st.detailId ? this.EQUIP.find(i => i.id === st.detailId) : null;
+    let detail = null;
+    if (detRaw) {
+      detail = this.enrich(detRaw);
+      detail.records = [
+        { t:'06-12', op:'入库', by:'设备组 · 清洁检测', tagStyle:this.opTagStyle('入库') },
+        { t:'06-08', op:'出库', by:'张磊 · 广告项目', tagStyle:this.opTagStyle('出库') },
+        { t:'05-30', op:'入库', by:'王浩 · 归还入库', tagStyle:this.opTagStyle('入库') },
+      ];
+    }
+
+    // cart
+    const cartIds = Object.keys(st.cart);
+    const cartItems = cartIds.map(id => {
+      const it = this.enrich(this.EQUIP.find(e => e.id === Number(id)));
+      const qty = st.cart[id];
+      return { ...it, qty, lineTotal: this.fmt(it.day * qty * st.days),
+        inc: () => this.addToCart(Number(id), 1),
+        dec: () => this.setQty(Number(id), qty - 1),
+        remove: () => this.setQty(Number(id), 0) };
+    });
+    const cartCount = cartIds.reduce((s,id) => s + st.cart[id], 0);
+    const sumDailyN = cartIds.reduce((s,id) => s + this.EQUIP.find(e => e.id === Number(id)).day * st.cart[id], 0);
+    const sumDepN = cartIds.reduce((s,id) => s + this.EQUIP.find(e => e.id === Number(id)).dep * st.cart[id], 0);
+
+    // dashboard stats
+    const totalUnits = this.EQUIP.reduce((s,i) => s + i.tot, 0);
+    const availUnits = this.EQUIP.reduce((s,i) => s + i.av, 0);
+    const outCount = this.EQUIP.filter(i => i.st === 'out').length;
+    const fixCount = this.EQUIP.filter(i => i.st === 'repair' || i.st === 'inspect').length;
+    const valTotal = this.EQUIP.reduce((s,i) => s + i.val * i.tot, 0);
+    const availRate = Math.round(availUnits / totalUnits * 100);
+    const stats = [
+      { label:'设备型号(SKU)', value:String(this.EQUIP.length), unit:'种', sub:'共 ' + totalUnits + ' 件实物' },
+      { label:'当前可借', value:String(availUnits), unit:'件', sub:'可借率 ' + availRate + '%' },
+      { label:'外借中', value:String(outCount), unit:'型号', sub:'正在项目使用' },
+      { label:'维修 / 待检', value:String(fixCount), unit:'型号', sub:'需关注处理' },
+      { label:'设备总估值', value:'¥' + (valTotal/10000).toFixed(0) + '万', unit:'', sub:'按实物数量计' },
+      { label:'分类数', value:String(this.CATS.length), unit:'类', sub:'覆盖全流程器材' },
+    ];
+
+    // status distribution (by SKU count)
+    const statusBars = Object.keys(this.STATUS).map(k => {
+      const count = this.EQUIP.filter(i => i.st === k).length;
+      const pct = count / this.EQUIP.length * 100;
+      const color = this.STATUS[k].color;
+      return { key:k, label:this.STATUS[k].label, count, pct, pctText: Math.round(pct) + '%',
+        barStyle: { width: pct + '%', background:color, height:'100%' },
+        dotStyle: { width:'9px', height:'9px', borderRadius:'3px', background:color, flexShrink:0, display:'inline-block' } };
+    }).filter(b => b.count > 0);
+
+    // owner distribution
+    const owners = ['自有','合作商','个人挂靠'];
+    const ownerLabels = { '自有':'公司自有', '合作商':'合作商家', '个人挂靠':'个人挂靠' };
+    const ownerColors = { '自有':'oklch(0.55 0.13 258)', '合作商':'oklch(0.64 0.11 152)', '个人挂靠':'oklch(0.74 0.10 78)' };
+    const ownerBars = owners.map(o => {
+      const count = this.EQUIP.filter(i => i.own === o).length;
+      const pct = count / this.EQUIP.length * 100;
+      return { label:ownerLabels[o], count, pctText: Math.round(pct) + '%',
+        barStyle: { width: pct + '%', height:'100%', background:ownerColors[o] } };
+    });
+
+    // category bars
+    const maxCat = Math.max(...this.CATS.map(c => this.EQUIP.filter(i => i.cat === c.id).reduce((s,i)=>s+i.tot,0)));
+    const catBars = this.CATS.map(c => {
+      const items = this.EQUIP.filter(i => i.cat === c.id);
+      const tot = items.reduce((s,i)=>s+i.tot,0);
+      const av = items.reduce((s,i)=>s+i.av,0);
+      return { label:c.label, availText: av + '/' + tot,
+        barStyle: { width: (tot/maxCat*100) + '%', height:'100%', background:'oklch(0.55 0.13 258)', borderRadius:'5px' } };
+    });
+
+    const records = this.logEntries.slice(0, 6).map(r => ({ ...r, tagStyle: this.opTagStyle(r.op) }));
+
+    // ===== ADMIN =====
+    const statusList = Object.keys(this.STATUS).map(k => ({ key: k, label: this.STATUS[k].label, color: this.STATUS[k].color }));
+    const adminNav = [ { id: 'home', label: '工作台' }, { id: 'devices', label: '设备管理' }, { id: 'records', label: '出入库记录' } ].map(n => { const active = st.adminScreen === n.id; return { ...n, active, select: () => this.setAdmin(n.id), navStyle: { display:'flex', alignItems:'center', gap:'9px', width:'100%', padding:'9px 11px', borderRadius:'8px', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:'13.5px', textAlign:'left', background: active ? 'rgba(255,255,255,.10)' : 'transparent', color: active ? '#fff' : '#A8A6A0', fontWeight: active ? 600 : 400 } }; });
+    let arows = this.EQUIP.slice();
+    if (st.aCat !== 'all') arows = arows.filter(i => i.cat === st.aCat);
+    if (st.aStatus !== 'all') arows = arows.filter(i => i.st === st.aStatus);
+    if (st.aOwner !== 'all') arows = arows.filter(i => i.own === st.aOwner);
+    if (st.aSearch.trim()) { const q = st.aSearch.trim().toLowerCase(); arows = arows.filter(i => (i.name + ' ' + i.brand + ' ' + i.model + ' ' + i.code).toLowerCase().includes(q)); }
+    const allIds = arows.map(i => i.id);
+    const ROWCOLS = '34px 92px 1.7fr 84px 116px 80px 60px 78px 86px 78px';
+    const stPill = (k) => { const c = this.STATUS[k].color; return { display:'inline-flex', alignItems:'center', gap:'5px', fontSize:'12px', padding:'3px 9px', borderRadius:'6px', color:c, background:'color-mix(in oklch, '+c+' 13%, white)', border:'1px solid color-mix(in oklch, '+c+' 26%, white)', cursor:'pointer', whiteSpace:'nowrap', fontFamily:'inherit' }; };
+    const adminRows = arows.map(i => ({ ...i, catLabel: this.catLabel(i.cat), statusLabel: this.STATUS[i.st].label, pillStyle: stPill(i.st), dotStyle: { width:'6px', height:'6px', borderRadius:'999px', background:this.STATUS[i.st].color, display:'inline-block' }, dailyText: this.fmt(i.day), qtyText: i.av + ' / ' + i.tot, selected: st.selected.includes(i.id), menuOpen: st.statusMenu === i.id, rowStyle: { display:'grid', gridTemplateColumns: ROWCOLS, alignItems:'center', gap:'10px', padding:'9px 16px', borderBottom:'1px solid #F2F1ED', background: st.selected.includes(i.id) ? '#F4F8FF' : '#fff' }, qtyStyle: { fontFamily:"'JetBrains Mono', monospace", fontSize:'12px', textAlign:'right', color: i.av === 0 ? 'oklch(0.55 0.18 25)' : '#44423D' }, toggleSel: () => this.toggleSelect(i.id), openMenu: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.toggleStatusMenu(i.id); }, edit: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.openEditor(i.id); }, del: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.deleteDevice(i.id); }, menuItems: statusList.map(s2 => ({ ...s2, dotStyle: { width:'7px', height:'7px', borderRadius:'999px', background:s2.color, display:'inline-block' }, pick: () => this.setStatus(i.id, s2.key) })) }));
+    const todayOut = this.logEntries.filter(r => /今天|刚刚/.test(r.t) && r.op === '出库').length;
+    const todayIn = this.logEntries.filter(r => /今天|刚刚/.test(r.t) && r.op === '入库').length;
+    const cnt = (k) => this.EQUIP.filter(i => i.st === k).length;
+    const mkStat = (label, value, unit, accent) => ({ label, value, unit, accent, dot: { width:'8px', height:'8px', borderRadius:'3px', background:accent, display:'inline-block' } });
+    const aStats = [ mkStat('今日出库', String(todayOut || 2), '次', '#2F5AC7'), mkStat('今日入库', String(todayIn || 1), '次', 'oklch(0.6 0.12 152)'), mkStat('待检设备', String(cnt('inspect')), '件', 'oklch(0.66 0.04 100)'), mkStat('维修中', String(cnt('repair')), '件', 'oklch(0.62 0.16 32)'), mkStat('外借中', String(cnt('out')), '型号', 'oklch(0.62 0.08 255)'), mkStat('待归还', String(cnt('out') + cnt('reserved')), '项', 'oklch(0.74 0.12 78)') ];
+    const todos = [ { op:'到期', text:'RED V-RAPTOR 8K VV 预计今日 18:00 归还', sub:'某汽车品牌 TVC · 张磊', tagStyle:this.opTagStyle('出库') }, { op:'待检', text:'Atomos Shogun 7 已归库，待验收入库', sub:'设备组检查后置为在库', tagStyle:this.opTagStyle('预留') }, { op:'维修', text:'Angénieux EZ 变焦 维修进行中', sub:'送检第 3 天 · 跟进维修商', tagStyle:this.opTagStyle('报修') }, { op:'预留', text:'Sony VENICE 2 已被网剧第二季预留', sub:'确认档期 06-20 起', tagStyle:this.opTagStyle('预留') }, { op:'库存', text:'DJI RS 4 Pro 可借 2/5，临近不足', sub:'建议协调归还或补充', tagStyle:this.opTagStyle('改状态') } ];
+    const quickActions = [ { label:'新增设备', desc:'录入一台新器材', go:() => this.openEditor(null) }, { label:'登记出库', desc:'设备出库登记', go:() => this.setState({ adminScreen:'records', regOp:'out' }) }, { label:'登记入库', desc:'归还入库登记', go:() => this.setState({ adminScreen:'records', regOp:'in' }) }, { label:'设备管理', desc:'查看全部台账', go:() => this.setAdmin('devices') } ];
+    let recRows = this.logEntries.slice();
+    if (st.recFilter !== 'all') recRows = recRows.filter(r => r.op === st.recFilter);
+    recRows = recRows.map(r => ({ ...r, tagStyle: this.opTagStyle(r.op) }));
+    const recFilters = [['all','全部'],['出库','出库'],['入库','入库'],['改状态','状态变更'],['预留','预留'],['报修','报修']].map(([k,l]) => { const active = st.recFilter === k; return { key:k, label:l, active, select: () => this.setState({ recFilter:k }), chipStyle: { padding:'5px 12px', borderRadius:'999px', border: active ? '1px solid #1C1B19' : '1px solid #E4E3DE', background: active ? '#1C1B19' : '#fff', color: active ? '#fff' : '#76746E', fontSize:'12.5px', cursor:'pointer', fontFamily:'inherit' } }; });
+    const regDeviceOptions = this.EQUIP.map(i => ({ value: String(i.id), label: i.code + ' · ' + i.name }));
+    const segStyle = (active) => ({ flex:1, padding:'8px', borderRadius:'7px', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:'13px', background: active ? '#fff' : 'transparent', color: active ? '#1C1B19' : '#76746E', fontWeight: active ? 600 : 400, boxShadow: active ? '0 1px 2px rgba(20,20,18,.08)' : 'none' });
+    const catOptions = this.CATS.map(c => ({ value:c.id, label:c.label }));
+    const ownerSel = [ { value:'自有', label:'公司自有' }, { value:'合作商', label:'合作商家' }, { value:'个人挂靠', label:'个人挂靠' } ];
+    const dd = st.draft || {};
+
+    // ===== SERVICES & TALENT =====
+    const avatar = (color, size, fs) => ({ width:size, height:size, borderRadius:'999px', background:color, color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', fontSize:fs, fontWeight:600, flexShrink:0, fontFamily:"'Noto Sans SC', sans-serif" });
+    const chip = (active) => ({ padding:'8px 16px', borderRadius:'999px', fontSize:'13.5px', cursor:'pointer', whiteSpace:'nowrap', fontFamily:'inherit', border: active?'1px solid #1C1B19':'1px solid #E4E3DE', background: active?'#1C1B19':'#fff', color: active?'#fff':'#44423D' });
+
+    const svcDomains = [{ id:'all', label:'全部领域' }, ...this.DOMAINS.map(d => ({ id:d.id, label:d.label }))].map(d => {
+      const active = st.svcDomain === d.id;
+      return { ...d, select:()=>this.setState({ svcDomain:d.id }), chipStyle: chip(active) };
+    });
+    let svcList = this.SERVICES.slice();
+    if (st.svcDomain !== 'all') svcList = svcList.filter(s => s.domain === st.svcDomain);
+    const serviceCards = svcList.map(s => {
+      const dom = this.domainOf(s.domain);
+      const leads = s.talent.map(id => this.talentById(id)).filter(Boolean);
+      return { ...s, domLabel:dom.label, domEn:dom.en, domColor:dom.color,
+        heroStyle:{ position:'relative', aspectRatio:'16 / 9', background:'color-mix(in oklch, '+dom.color+' 15%, white)', borderBottom:'1px solid color-mix(in oklch, '+dom.color+' 24%, white)', display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'14px 16px' },
+        domBadgeStyle:{ alignSelf:'flex-start', fontSize:'11px', fontWeight:600, letterSpacing:'.04em', padding:'4px 11px', borderRadius:'999px', background:'#fff', color:dom.color, border:'1px solid color-mix(in oklch, '+dom.color+' 30%, white)' },
+        priceText:this.fmt(s.priceFrom), hwCount:s.hw.length, capCount:s.caps.length, crewCount:leads.length,
+        leadAvatars: leads.slice(0,4).map((t,i) => ({ ...t, avStyle:{ ...avatar(t.color,'27px','11px'), marginLeft: i===0?'0':'-7px', border:'2px solid #fff', boxShadow:'0 0 0 .5px rgba(0,0,0,.04)' } })),
+        open:()=>this.openService(s.id), order:(e)=>{ if(e&&e.stopPropagation)e.stopPropagation(); this.orderService(s); } };
+    });
+
+    const talentRoles = [{ id:'all', label:'全部人员' }, ...this.ROLES].map(r => {
+      const active = st.talentRole === r.id;
+      return { ...r, select:()=>this.setState({ talentRole:r.id }), chipStyle: chip(active) };
+    });
+    let talList = this.TALENT.slice();
+    if (st.talentRole !== 'all') talList = talList.filter(t => t.roleKey === st.talentRole);
+    const talentCards = talList.map(t => ({ ...t,
+      avStyle: avatar(t.color,'54px','20px'),
+      rolePillStyle:{ fontSize:'11.5px', padding:'3px 10px', borderRadius:'999px', background:'color-mix(in oklch, '+t.color+' 12%, white)', color:t.color, border:'1px solid color-mix(in oklch, '+t.color+' 26%, white)', whiteSpace:'nowrap' },
+      topSkills: t.skills.slice(0,3),
+      signature: t.projects[0] ? t.projects[0].name : '',
+      yearsText: t.years + ' 年经验',
+      open:()=>this.openTalent(t.id) }));
+
+    const svcRaw = st.serviceId ? this.SERVICES.find(s => s.id === st.serviceId) : null;
+    let svcDetail = null;
+    if (svcRaw) {
+      const dom = this.domainOf(svcRaw.domain);
+      svcDetail = { ...svcRaw, domLabel:dom.label, domEn:dom.en, domColor:dom.color,
+        heroStyle:{ position:'relative', minHeight:'150px', marginTop:'-58px', background:'linear-gradient(135deg, color-mix(in oklch, '+dom.color+' 24%, white), color-mix(in oklch, '+dom.color+' 7%, white))', display:'flex', flexDirection:'column', justifyContent:'flex-end', padding:'22px' },
+        domBadgeStyle:{ alignSelf:'flex-start', fontSize:'11px', fontWeight:600, letterSpacing:'.08em', padding:'4px 12px', borderRadius:'999px', background:'#fff', color:dom.color },
+        priceText:this.fmt(svcRaw.priceFrom),
+        team: svcRaw.talent.map(id => this.talentById(id)).filter(Boolean).map(t => ({ ...t, avStyle:avatar(t.color,'44px','16px'), topSkills:t.skills.slice(0,3), open:()=>this.openTalent(t.id) })),
+        order:()=>this.orderService(svcRaw) };
+    }
+
+    const talRaw = st.talentId ? this.talentById(st.talentId) : null;
+    let talDetail = null;
+    if (talRaw) {
+      const inServices = this.SERVICES.filter(s => s.talent.includes(talRaw.id)).map(s => {
+        const dom = this.domainOf(s.domain);
+        return { ...s, domLabel:dom.label, domColor:dom.color, priceText:this.fmt(s.priceFrom),
+          rowStyle:{ display:'flex', alignItems:'center', gap:'11px', padding:'11px 13px', borderRadius:'10px', border:'1px solid #EEEDE9', cursor:'pointer', background:'#fff' },
+          dotStyle:{ width:'8px', height:'8px', borderRadius:'3px', background:dom.color, flexShrink:0 },
+          open:()=>this.openService(s.id) };
+      });
+      talDetail = { ...talRaw, avStyle:avatar(talRaw.color,'74px','28px'), yearsText:talRaw.years+' 年经验', inServices, hasServices: inServices.length>0 };
+    }
+
+    return {
+      // shell
+      goCatalog: () => this.goCatalog(),
+      goCart: () => this.goCart(),
+      goDashboard: () => this.goDashboard(),
+      goServices: () => this.goServices(),
+      goTalent: () => this.goTalent(),
+      navCatStyle: this.navBtn(st.screen === 'catalog'),
+      navDashStyle: this.navBtn(st.screen === 'dashboard'),
+      navCartStyle: this.navBtn(st.screen === 'cart'),
+      navSvcStyle: this.navBtn(st.screen === 'services'),
+      navTalentStyle: this.navBtn(st.screen === 'talent'),
+
+      // services & talent
+      showServices: st.screen === 'services',
+      showTalent: st.screen === 'talent',
+      svcDomains, serviceCards, svcResultCount: svcList.length, svcTotal: this.SERVICES.length,
+      talentRoles, talentCards, talentCount: talList.length, talentTotal: this.TALENT.length,
+      serviceOpen: !!svcDetail, svcDetail,
+      talentOpen: !!talDetail, talDetail,
+      closeService: () => this.closeService(),
+      closeTalent: () => this.closeTalent(),
+      searchVal: st.search,
+      onSearch: (e) => this.setState({ search: e.target.value }),
+      cartCount,
+      cartHasItems: cartCount > 0,
+      stop: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+
+      // screen flags
+      showCatalog: st.screen === 'catalog',
+      showCart: st.screen === 'cart',
+      showDashboard: st.screen === 'dashboard',
+
+      // catalog header
+      totalCount: this.EQUIP.length,
+      totalAvail: availUnits,
+      layouts,
+      layoutGrid: st.layout === 'grid',
+      layoutAisle: st.layout === 'aisle',
+      layoutShowcase: st.layout === 'showcase',
+      resultCount: list.length,
+      sortVal: st.sort,
+      onSort: (e) => this.setState({ sort: e.target.value }),
+
+      // filters
+      cats,
+      aisles,
+      brandOptions, statusOptions, ownerOptions,
+      brandVal: st.brand, statusVal: st.status, ownerVal: st.owner,
+      onBrand: (e) => this.setState({ brand: e.target.value }),
+      onStatus: (e) => this.setState({ status: e.target.value }),
+      onOwner: (e) => this.setState({ owner: e.target.value }),
+      resetFilters: () => this.setState({ cat:'all', brand:'all', status:'all', owner:'all', search:'' }),
+
+      // grid
+      cards,
+      hasResults: list.length > 0,
+      noResults: list.length === 0,
+
+      // detail
+      detailOpen: !!detail,
+      detail,
+      detailQty: st.detailQty,
+      incDetailQty: () => this.setState(s => ({ detailQty: s.detailQty + 1 })),
+      decDetailQty: () => this.setState(s => ({ detailQty: Math.max(1, s.detailQty - 1) })),
+      detailAdd: () => { this.addToCart(st.detailId, st.detailQty); this.setState({ detailId:null, screen:'cart' }); },
+      closeDetail: () => this.closeDetail(),
+
+      // cart
+      cartItems,
+      cartEmpty: cartCount === 0,
+      projectName: st.projectName,
+      onProjectName: (e) => this.setState({ projectName: e.target.value }),
+      daysVal: st.days,
+      incDays: () => this.setState(s => ({ days: Math.min(90, s.days + 1) })),
+      decDays: () => this.setState(s => ({ days: Math.max(1, s.days - 1) })),
+      sumDaily: this.fmt(sumDailyN),
+      sumRent: this.fmt(sumDailyN * st.days),
+      sumDeposit: this.fmt(sumDepN),
+      sumTotal: this.fmt(sumDailyN * st.days + sumDepN),
+      clearCart: () => this.clearCart(),
+
+      // dashboard
+      today: '2026-06-15',
+      stats, statusBars, ownerBars, catBars, records,
+
+      // ===== admin =====
+      frontView: st.view === 'front',
+      adminView: st.view === 'admin',
+      goAdmin: () => this.goAdmin(),
+      goFront: () => this.goFront(),
+      adminNav,
+      adminHome: st.adminScreen === 'home',
+      adminDevices: st.adminScreen === 'devices',
+      adminRecords: st.adminScreen === 'records',
+      aStats, todos, todoCount: todos.length, quickActions,
+      adminRows, adminEmpty: arows.length === 0, adminCount: arows.length, totalSkus: this.EQUIP.length,
+      aSearch: st.aSearch, onASearch: (e) => this.setState({ aSearch: e.target.value }),
+      aCat: st.aCat, onACat: (e) => this.setState({ aCat: e.target.value }),
+      aStatus: st.aStatus, onAStatus: (e) => this.setState({ aStatus: e.target.value }),
+      aOwner: st.aOwner, onAOwner: (e) => this.setState({ aOwner: e.target.value }),
+      catFilterOptions: [{ value:'all', label:'全部类别' }, ...this.CATS.map(c => ({ value:c.id, label:c.label }))],
+      statusFilterOptions: [{ value:'all', label:'全部状态' }, ...statusList.map(s2 => ({ value:s2.key, label:s2.label }))],
+      ownerFilterOptions: [{ value:'all', label:'全部所属方' }, { value:'自有', label:'公司自有' }, { value:'合作商', label:'合作商家' }, { value:'个人挂靠', label:'个人挂靠' }],
+      selCount: st.selected.length, hasSel: st.selected.length > 0,
+      allSelected: allIds.length > 0 && st.selected.length === allIds.length,
+      onSelectAll: () => this.selectAll(allIds), clearSel: () => this.setState({ selected: [] }),
+      batchInOptions: statusList.map(s2 => ({ ...s2, pick: () => this.batchStatus(s2.key) })),
+      batchDelete: () => this.batchDelete(), openNew: () => this.openEditor(null),
+      closeMenus: () => { if (this.state.statusMenu !== null) this.setState({ statusMenu: null }); },
+      recRows, recFilters, regDeviceOptions,
+      regDevice: st.regDevice, onRegDevice: (e) => this.setState({ regDevice: e.target.value, scanMatch: this.EQUIP.find(i=>String(i.id)===e.target.value)||null }),
+      regOp: st.regOp, regOut: () => this.setState({ regOp: 'out' }), regIn: () => this.setState({ regOp: 'in' }),
+      regOutStyle: segStyle(st.regOp === 'out'), regInStyle: segStyle(st.regOp === 'in'),
+      regBy: st.regBy, onRegBy: (e) => this.setState({ regBy: e.target.value }),
+      regProj: st.regProj, onRegProj: (e) => this.setState({ regProj: e.target.value }),
+      submitReg: () => { this.submitReg(); this.setState({ scanMatch: null }); },
+      // scan
+      scanInput: st.scanInput,
+      onScanChange: (e) => this.setState({ scanInput: e.target.value }),
+      onScanKey: (e) => { if (e.key === 'Enter') { this.processScanCode(st.scanInput); } },
+      hasScanMatch: !!st.scanMatch,
+      noScanMatch: !st.scanMatch,
+      scanMatchName: st.scanMatch ? st.scanMatch.name : '',
+      scanMatchCode: st.scanMatch ? st.scanMatch.code : '',
+      scanMatchBrand: st.scanMatch ? st.scanMatch.brand : '',
+      scanMatchStatus: st.scanMatch ? this.STATUS[st.scanMatch.st].label : '',
+      scanMatchDot: st.scanMatch ? { width:'7px', height:'7px', borderRadius:'999px', background:this.STATUS[st.scanMatch.st].color, display:'inline-block', flexShrink:0 } : {},
+      clearScan: () => this.setState({ scanMatch: null, scanInput: '', regDevice: '' }),
+      scanCamOpen: st.scanCamOpen,
+      toggleCamera: () => this.toggleCamera(),
+      camBtnLabel: st.scanCamOpen ? '关闭摄像头' : '摄像头扫码',
+      camBtnStyle: { width:'100%', height:'38px', borderRadius:'9px', border: st.scanCamOpen ? '1.5px solid #2F5AC7' : '1px dashed #CFCDC6', background: st.scanCamOpen ? '#EEF2FD' : '#FAFAF8', color: st.scanCamOpen ? '#2F5AC7' : '#76746E', cursor:'pointer', fontFamily:'inherit', fontSize:'13px', display:'flex', alignItems:'center', justifyContent:'center', gap:'7px' },
+      editorOpen: st.editorOpen, editorTitle: st.editorId ? '编辑设备' : '新增设备',
+      catOptions, ownerSel, statusEditOptions: statusList,
+      dName: dd.name || '', dBrand: dd.brand || '', dModel: dd.model || '', dCat: dd.cat || 'cinema', dCode: dd.code || '', dSt: dd.st || 'in', dOwn: dd.own || '自有', dVal: dd.val ?? '', dDay: dd.day ?? '', dDep: dd.dep ?? '', dTot: dd.tot ?? 1, dAv: dd.av ?? 0, dLoc: dd.loc || '', dNote: dd.note || '', dSpecs: dd.specsText || '',
+      setName: (e) => this.setDraft('name', e.target.value), setBrand: (e) => this.setDraft('brand', e.target.value), setModel: (e) => this.setDraft('model', e.target.value), setCat: (e) => this.setDraft('cat', e.target.value), setCode: (e) => this.setDraft('code', e.target.value), setSt: (e) => this.setDraft('st', e.target.value), setOwn: (e) => this.setDraft('own', e.target.value), setVal: (e) => this.setDraft('val', e.target.value), setDay: (e) => this.setDraft('day', e.target.value), setDep: (e) => this.setDraft('dep', e.target.value), setTot: (e) => this.setDraft('tot', e.target.value), setAv: (e) => this.setDraft('av', e.target.value), setLoc: (e) => this.setDraft('loc', e.target.value), setNote: (e) => this.setDraft('note', e.target.value), setSpecs: (e) => this.setDraft('specsText', e.target.value),
+      saveDraft: () => this.saveDraft(), closeEditor: () => this.closeEditor(),
+      toastMsg: st.toast, toastShow: !!st.toast,
+      // import
+      importOpen: st.importOpen, openImport: () => this.openImport(), closeImport: () => this.closeImport(),
+      importUpload: st.importStage === 'upload', importMapping: st.importStage === 'mapping',
+      importFileName: st.importFileName, importTotalCount: st.importRows.length,
+      onImportDrop: (e) => { e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files[0]; if(f) this.handleImportFile(f); },
+      onImportDragOver: (e) => { e.preventDefault(); e.stopPropagation(); },
+      onImportFileInput: (e) => { const f = e.target.files && e.target.files[0]; if(f) this.handleImportFile(f); },
+      importValidCount: st.importRows.length ? st.importRows.filter(r => this._parseImportRow(r, st.importColMap)._valid).length : 0,
+      importPreviewRows: st.importRows.slice(0,7).map((r,ri) => { const rec = this._parseImportRow(r, st.importColMap); return { ...rec, rowNum:ri+1, catLabel:this.catLabel(rec.cat), statusLabel:(this.STATUS[rec.st]||{}).label||rec.st, dailyText:rec.day?this.fmt(rec.day):'—', validDot:{ width:'7px', height:'7px', borderRadius:'999px', background:rec._valid?'oklch(0.64 0.11 152)':'oklch(0.62 0.16 32)', display:'inline-block', flexShrink:0, marginRight:'4px' }, rowStyle:{ display:'grid', gridTemplateColumns:'24px 1.6fr 80px 72px 88px 72px 80px', gap:0, padding:'9px 14px', borderBottom:'1px solid #F2F1ED', fontSize:'12.5px', alignItems:'center', background:rec._valid?'#fff':'#FFF8F5' }, errText:rec._err||'' }; }),
+      importFields: [{key:'name',label:'设备名称 *'},{key:'brand',label:'品牌'},{key:'model',label:'型号'},{key:'cat',label:'类别'},{key:'code',label:'编号'},{key:'st',label:'状态'},{key:'own',label:'所属方'},{key:'val',label:'估值 ¥'},{key:'day',label:'日租 ¥'},{key:'dep',label:'押金 ¥'},{key:'tot',label:'总数'},{key:'av',label:'可借'},{key:'loc',label:'存放位置'},{key:'specs',label:'参数'},{key:'note',label:'备注'}].map(f => ({ ...f, colIdx: st.importColMap[f.key]!==undefined ? String(st.importColMap[f.key]) : '', headerOptions:[{value:'',label:'（不导入）'},...st.importHeaders.map((h,i)=>({value:String(i),label:h||('列 '+(i+1))}))], onChange:(e)=>this.setImportCol(f.key,e.target.value) })),
+      confirmImport: () => this.confirmImport(),
+    };
+  }
+}
+</script>
+</body>
+</html>

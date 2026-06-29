@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div onClick="{{ item.open }}" style="display:flex; flex-direction:column; background:#fff; border:1px solid #E9E8E4; border-radius:12px; overflow:hidden; cursor:pointer; transition:border-color .15s ease, box-shadow .15s ease, transform .15s ease;" style-hover="border-color:#CFCEC8; box-shadow:0 8px 24px rgba(20,20,18,.08); transform:translateY(-2px);">
+  <div style="position:relative; aspect-ratio:4 / 3; background:repeating-linear-gradient(135deg, #F4F3F0 0 9px, #EFEEEA 9px 18px); display:flex; align-items:center; justify-content:center;">
+    <div style="font-family:'JetBrains Mono', ui-monospace, monospace; font-size:11px; letter-spacing:.06em; color:#AEACA3; text-transform:uppercase;">{{ item.model }}</div>
+    <div style="position:absolute; top:10px; left:11px; font-family:'JetBrains Mono', ui-monospace, monospace; font-size:9px; letter-spacing:.14em; color:#BCBAB1;">{{ item.en }}</div>
+  </div>
+  <div style="padding:13px 14px 14px; display:flex; flex-direction:column; gap:7px; flex:1;">
+    <div style="font-family:'JetBrains Mono', ui-monospace, monospace; font-size:10px; letter-spacing:.07em; color:#9C9A93; text-transform:uppercase;">{{ item.brand }}</div>
+    <div style="font-size:14px; font-weight:500; color:#1C1B19; line-height:1.35; height:38px; overflow:hidden;">{{ item.name }}</div>
+    <div style="display:flex; align-items:center; gap:7px; font-size:12px; color:#76746E;">
+      <span style="{{ item.dotStyle }}"></span>
+      <span>{{ item.statusLabel }}</span>
+      <span style="color:#CFCDC6;">·</span>
+      <span style="font-family:'JetBrains Mono', ui-monospace, monospace; font-size:11px; color:#9C9A93;">{{ item.availText }}</span>
+    </div>
+    <div style="margin-top:5px; padding-top:11px; border-top:1px solid #F2F1ED; display:flex; align-items:flex-end; justify-content:space-between; gap:8px;">
+      <div style="display:flex; align-items:baseline; gap:3px;">
+        <span style="font-family:'JetBrains Mono', ui-monospace, monospace; font-size:16px; font-weight:600; color:#1C1B19;">{{ item.dailyText }}</span>
+        <span style="font-size:11px; color:#9C9A93;">/天</span>
+      </div>
+      <sc-if value="{{ item.inCart }}" hint-placeholder-val="">
+        <button onClick="{{ item.add }}" style="font-size:12px; font-family:inherit; padding:6px 11px; border-radius:8px; border:1px solid #2F5AC7; background:#2F5AC7; color:#fff; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:5px;">已加入 · {{ item.cartQty }}</button>
+      </sc-if>
+      <sc-if value="{{ item.notInCart }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ item.add }}" style="font-size:12px; font-family:inherit; padding:6px 11px; border-radius:8px; border:1px solid #DAD8D2; background:#fff; color:#2F5AC7; cursor:pointer; white-space:nowrap;" style-hover="border-color:#2F5AC7; background:#EEF2FD;">加入清单</button>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:248,&quot;height&quot;:320},&quot;item&quot;:{&quot;editor&quot;:null,&quot;default&quot;:{}}}"></script>
+</body>
+</html>

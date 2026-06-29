@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ font-family:'Noto Sans SC', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; color:#1C1B19; background:#FAFAF8; -webkit-font-smoothing:antialiased; }
+  ::selection{ background:#D9E2FA; }
+  *::-webkit-scrollbar{ height:8px; width:8px; }
+  *::-webkit-scrollbar-thumb{ background:#DAD8D2; border-radius:8px; }
+  *::-webkit-scrollbar-track{ background:transparent; }
+  select{ -webkit-appearance:none; appearance:none; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M3 4.5L6 7.5L9 4.5' stroke='%2376746E' stroke-width='1.3' fill='none' stroke-linecap='round'/></svg>"); background-repeat:no-repeat; background-position:right 9px center; }
+  input:focus, select:focus{ outline:none; border-color:#2F5AC7 !important; }
+  @keyframes ovIn{ from{ opacity:0; } to{ opacity:1; } }
+  @keyframes panelIn{ from{ transform:translateX(30px); opacity:.4; } to{ transform:translateX(0); opacity:1; } }
+</style>
+</helmet>
+
+<div style="min-height:100vh; display:flex; flex-direction:column; background:#FAFAF8;">
+
+  <sc-if value="{{ frontView }}" hint-placeholder-val="{{ true }}">
+  <header style="position:sticky; top:0; z-index:40; background:rgba(250,250,248,.88); backdrop-filter:blur(12px); border-bottom:1px solid #E9E8E4; padding:0 22px; height:62px; display:flex; align-items:center; gap:18px;">
+    <div onClick="{{ goCatalog }}" style="display:flex; align-items:center; gap:10px; cursor:pointer; flex-shrink:0;">
+      <img src="assets/logo.png" alt="景彩文化" style="height:30px; width:auto; display:block;" />
+      <div style="display:flex; flex-direction:column; line-height:1.12;">
+        <span style="font-size:15px; font-weight:700; letter-spacing:.02em; color:#1C1B19;">景彩文化</span>
+        <span style="font-size:9px; letter-spacing:.18em; color:#A6A49C; font-family:'JetBrains Mono', monospace;">器材超市 · EQUIPMENT</span>
+      </div>
+    </div>
+
+    <nav style="display:flex; align-items:center; gap:4px; margin-left:8px;">
+      <button onClick="{{ goCatalog }}" style="{{ navCatStyle }}">器材超市</button>
+      <button onClick="{{ goDashboard }}" style="{{ navDashStyle }}">库存总览</button>
+    </nav>
+
+    <div style="flex:1; display:flex; justify-content:center; min-width:0;">
+      <div style="position:relative; width:100%; max-width:420px;">
+        <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#A6A49C; display:flex;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"></circle><line x1="11" y1="11" x2="14.5" y2="14.5" stroke-linecap="round"></line></svg></span>
+        <input value="{{ searchVal }}" onChange="{{ onSearch }}" onInput="{{ onSearch }}" placeholder="搜索设备、型号、品牌、编号…" style="width:100%; height:38px; padding:0 14px 0 34px; border:1px solid #E4E3DE; border-radius:10px; background:#fff; font-family:inherit; font-size:13px; color:#1C1B19;" />
+      </div>
+    </div>
+
+    <button onClick="{{ goCart }}" style="{{ navCartStyle }}">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="2.5" width="10" height="12" rx="1.6"></rect><line x1="5.6" y1="6" x2="10.4" y2="6" stroke-linecap="round"></line><line x1="5.6" y1="8.6" x2="10.4" y2="8.6" stroke-linecap="round"></line><line x1="5.6" y1="11.2" x2="8.6" y2="11.2" stroke-linecap="round"></line></svg>
+      <span>我的清单</span>
+      <sc-if value="{{ cartHasItems }}" hint-placeholder-val="">
+        <span style="min-width:18px; height:18px; padding:0 5px; border-radius:999px; background:#2F5AC7; color:#fff; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono', monospace;">{{ cartCount }}</span>
+      </sc-if>
+    </button>
+    <div style="width:1px; height:22px; background:#E4E3DE; margin:0 2px;"></div>
+    <button onClick="{{ goAdmin }}" style="display:flex; align-items:center; gap:6px; height:34px; padding:0 13px; border-radius:9px; border:1px solid #E4E3DE; background:#fff; cursor:pointer; font-family:inherit; font-size:13px; color:#44423D;" style-hover="border-color:#1C1B19; background:#1C1B19; color:#fff;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.5" y="3" width="11" height="8" rx="1.2"></rect><line x1="6" y1="13.6" x2="10" y2="13.6" stroke-linecap="round"></line><line x1="8" y1="11" x2="8" y2="13.6"></line></svg>后台管理</button>
+  </header>
+
+  <!-- ============ CATALOG ============ -->
+  <sc-if value="{{ showCatalog }}" hint-placeholder-val="{{ true }}">
+  <main style="flex:1; max-width:1440px; width:100%; margin:0 auto; padding:22px 22px 60px;">
+
+    <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+      <div>
+        <h1 style="margin:0 0 4px; font-size:24px; font-weight:700; letter-spacing:-.01em;">器材超市</h1>
+        <p style="margin:0; font-size:13px; color:#76746E;">逛着挑设备 · 加入清单凑一套 · 共 <span style="font-family:'JetBrains Mono', monospace; color:#44423D;">{{ totalCount }}</span> 件器材，当前可借 <span style="font-family:'JetBrains Mono', monospace; color:#44423D;">{{ totalAvail }}</span> 件</p>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div style="font-size:12px; color:#9C9A93;">布局方案</div>
+        <div style="display:flex; padding:3px; background:#F1F0EC; border-radius:10px; gap:2px;">
+          <sc-for list="{{ layouts }}" as="lo" hint-placeholder-count="3">
+            <button onClick="{{ lo.select }}" style="{{ lo.style }}">{{ lo.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:18px;">
+      <div style="font-size:13px; color:#76746E;">共 <span style="font-family:'JetBrains Mono', monospace; color:#1C1B19; font-weight:500;">{{ resultCount }}</span> 件结果</div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:12px; color:#9C9A93;">排序</span>
+        <select value="{{ sortVal }}" onChange="{{ onSort }}" style="height:34px; padding:0 30px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;">
+          <option value="featured">推荐</option>
+          <option value="priceAsc">日租 低→高</option>
+          <option value="priceDesc">日租 高→低</option>
+          <option value="avail">可借数量</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- LAYOUT A: 货架网格 (rail + grid) -->
+    <sc-if value="{{ layoutGrid }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex; gap:24px; align-items:flex-start;">
+      <aside style="width:218px; flex-shrink:0; position:sticky; top:84px;">
+        <div style="font-size:11px; font-weight:600; letter-spacing:.08em; color:#9C9A93; text-transform:uppercase; margin-bottom:9px;">分类</div>
+        <div style="display:flex; flex-direction:column; gap:2px; margin-bottom:18px;">
+          <sc-for list="{{ cats }}" as="c" hint-placeholder-count="10">
+            <button onClick="{{ c.select }}" style="{{ c.railStyle }}"><span>{{ c.label }}</span><span style="font-family:'JetBrains Mono', monospace; font-size:11px; opacity:.7;">{{ c.count }}</span></button>
+          </sc-for>
+        </div>
+        <div style="height:1px; background:#EAE9E5; margin:0 0 16px;"></div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <label style="display:flex; flex-direction:column; gap:5px; font-size:12px; color:#9C9A93;">品牌
+            <select value="{{ brandVal }}" onChange="{{ onBrand }}" style="height:34px; padding:0 28px 0 10px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ brandOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px; font-size:12px; color:#9C9A93;">状态
+            <select value="{{ statusVal }}" onChange="{{ onStatus }}" style="height:34px; padding:0 28px 0 10px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ statusOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+          </label>
+          <button onClick="{{ resetFilters }}" style="margin-top:4px; align-self:flex-start; font-size:12px; color:#2F5AC7; background:none; border:none; cursor:pointer; padding:0; font-family:inherit;">重置筛选</button>
+        </div>
+      </aside>
+      <div style="flex:1; min-width:0;">
+        <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(216px, 1fr)); gap:16px;">
+            <sc-for list="{{ cards }}" as="c" hint-placeholder-count="12">
+              <dc-import name="Card" item="{{ c }}" hint-size="216px,320px"></dc-import>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noResults }}" hint-placeholder-val="">
+          <div style="padding:80px 0; text-align:center; color:#9C9A93; font-size:14px;">没有符合条件的器材，试试 <button onClick="{{ resetFilters }}" style="color:#2F5AC7; background:none; border:none; cursor:pointer; font-size:14px; font-family:inherit;">重置筛选</button></div>
+        </sc-if>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- LAYOUT B: 分区货架 (aisles) -->
+    <sc-if value="{{ layoutAisle }}" hint-placeholder-val="">
+    <div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+        <sc-for list="{{ cats }}" as="c" hint-placeholder-count="10">
+          <button onClick="{{ c.select }}" style="{{ c.chipStyle }}">{{ c.label }}</button>
+        </sc-for>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px;">
+        <select value="{{ brandVal }}" onChange="{{ onBrand }}" style="height:34px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ brandOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+        <select value="{{ statusVal }}" onChange="{{ onStatus }}" style="height:34px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ statusOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+      </div>
+      <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; flex-direction:column; gap:30px;">
+          <sc-for list="{{ aisles }}" as="aisle" hint-placeholder-count="4">
+            <section>
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:13px;">
+                <h2 style="margin:0; font-size:16px; font-weight:600;">{{ aisle.label }}</h2>
+                <span style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#A6A49C;">{{ aisle.en }}</span>
+                <span style="font-size:12px; color:#9C9A93;">· {{ aisle.count }} 件</span>
+                <div style="flex:1; height:1px; background:#EAE9E5;"></div>
+                <button onClick="{{ aisle.viewAll }}" style="font-size:12px; color:#2F5AC7; background:none; border:none; cursor:pointer; font-family:inherit; white-space:nowrap;">查看全部 →</button>
+              </div>
+              <div style="display:flex; gap:14px; overflow-x:auto; padding-bottom:8px; scroll-snap-type:x proximity;">
+                <sc-for list="{{ aisle.items }}" as="c" hint-placeholder-count="5">
+                  <div style="width:218px; flex-shrink:0; scroll-snap-align:start;"><dc-import name="Card" item="{{ c }}" hint-size="218px,320px"></dc-import></div>
+                </sc-for>
+              </div>
+            </section>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ noResults }}" hint-placeholder-val="">
+        <div style="padding:80px 0; text-align:center; color:#9C9A93; font-size:14px;">没有符合条件的器材，试试 <button onClick="{{ resetFilters }}" style="color:#2F5AC7; background:none; border:none; cursor:pointer; font-size:14px; font-family:inherit;">重置筛选</button></div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- LAYOUT C: 大图筛选 (toolbar + spacious grid) -->
+    <sc-if value="{{ layoutShowcase }}" hint-placeholder-val="">
+    <div>
+      <div style="background:#fff; border:1px solid #E9E8E4; border-radius:14px; padding:16px 18px; margin-bottom:24px; display:flex; flex-direction:column; gap:14px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <sc-for list="{{ cats }}" as="c" hint-placeholder-count="10">
+            <button onClick="{{ c.select }}" style="{{ c.chipStyle }}">{{ c.label }}</button>
+          </sc-for>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; padding-top:13px; border-top:1px solid #F2F1ED;">
+          <span style="font-size:12px; color:#9C9A93;">精细筛选</span>
+          <select value="{{ brandVal }}" onChange="{{ onBrand }}" style="height:34px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ brandOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+          <select value="{{ statusVal }}" onChange="{{ onStatus }}" style="height:34px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ statusOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+          <button onClick="{{ resetFilters }}" style="font-size:12px; color:#2F5AC7; background:none; border:none; cursor:pointer; padding:0; font-family:inherit;">重置</button>
+        </div>
+      </div>
+      <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:22px;">
+          <sc-for list="{{ cards }}" as="c" hint-placeholder-count="9">
+            <dc-import name="Card" item="{{ c }}" hint-size="300px,380px"></dc-import>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ noResults }}" hint-placeholder-val="">
+        <div style="padding:80px 0; text-align:center; color:#9C9A93; font-size:14px;">没有符合条件的器材，试试 <button onClick="{{ resetFilters }}" style="color:#2F5AC7; background:none; border:none; cursor:pointer; font-size:14px; font-family:inherit;">重置筛选</button></div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+  </main>
+  </sc-if>
+
+  <!-- ============ CART / 我的清单 ============ -->
+  <sc-if value="{{ showCart }}" hint-placeholder-val="">
+  <main style="flex:1; max-width:1040px; width:100%; margin:0 auto; padding:26px 22px 60px;">
+    <button onClick="{{ goCatalog }}" style="display:flex; align-items:center; gap:6px; font-size:13px; color:#76746E; background:none; border:none; cursor:pointer; padding:0; margin-bottom:16px; font-family:inherit;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8.5 3L4.5 7L8.5 11" stroke-linecap="round" stroke-linejoin="round"></path></svg> 返回器材超市</button>
+
+    <sc-if value="{{ cartEmpty }}" hint-placeholder-val="">
+      <div style="padding:90px 0; text-align:center;">
+        <div style="width:56px; height:56px; margin:0 auto 18px; border-radius:14px; background:#F1F0EC; display:flex; align-items:center; justify-content:center; color:#B6B4AC;"><svg width="26" height="26" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="2.5" width="10" height="12" rx="1.6"></rect><line x1="5.6" y1="6" x2="10.4" y2="6" stroke-linecap="round"></line><line x1="5.6" y1="8.6" x2="10.4" y2="8.6" stroke-linecap="round"></line></svg></div>
+        <h2 style="margin:0 0 6px; font-size:18px;">清单还是空的</h2>
+        <p style="margin:0 0 20px; color:#9C9A93; font-size:13px;">去器材超市挑设备，凑一套这次拍摄要用的器材</p>
+        <button onClick="{{ goCatalog }}" style="padding:10px 20px; border-radius:10px; background:#1C1B19; color:#fff; border:none; cursor:pointer; font-size:14px; font-family:inherit;">去逛器材超市</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ cartHasItems }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex; gap:26px; align-items:flex-start; flex-wrap:wrap;">
+      <div style="flex:1; min-width:320px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px;">
+          <h1 style="margin:0; font-size:22px; font-weight:700;">我的清单</h1>
+          <span style="font-size:13px; color:#9C9A93;">{{ cartCount }} 件设备</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <sc-for list="{{ cartItems }}" as="c" hint-placeholder-count="3">
+            <div style="display:flex; gap:14px; align-items:center; background:#fff; border:1px solid #E9E8E4; border-radius:12px; padding:13px;">
+              <div onClick="{{ c.open }}" style="width:78px; height:60px; flex-shrink:0; border-radius:8px; background:repeating-linear-gradient(135deg, #F4F3F0 0 8px, #EFEEEA 8px 16px); display:flex; align-items:center; justify-content:center; cursor:pointer;"><span style="font-family:'JetBrains Mono', monospace; font-size:9px; color:#B6B4AC;">{{ c.en }}</span></div>
+              <div style="flex:1; min-width:0;">
+                <div onClick="{{ c.open }}" style="font-size:14px; font-weight:500; cursor:pointer;">{{ c.name }}</div>
+                <div style="display:flex; align-items:center; gap:7px; margin-top:4px; font-size:12px; color:#9C9A93;"><span style="font-family:'JetBrains Mono', monospace;">{{ c.code }}</span><span style="{{ c.dotStyle }}"></span><span>{{ c.statusLabel }}</span></div>
+              </div>
+              <div style="text-align:right; flex-shrink:0;">
+                <div style="font-family:'JetBrains Mono', monospace; font-size:13px; color:#76746E;">{{ c.dailyText }}<span style="font-size:11px; color:#A6A49C;">/天</span></div>
+              </div>
+              <div style="display:flex; align-items:center; gap:0; border:1px solid #E4E3DE; border-radius:8px; overflow:hidden; flex-shrink:0;">
+                <button onClick="{{ c.dec }}" style="width:30px; height:32px; border:none; background:#fff; cursor:pointer; color:#44423D; font-size:16px; display:flex; align-items:center; justify-content:center;">−</button>
+                <span style="width:30px; text-align:center; font-family:'JetBrains Mono', monospace; font-size:13px;">{{ c.qty }}</span>
+                <button onClick="{{ c.inc }}" style="width:30px; height:32px; border:none; background:#fff; cursor:pointer; color:#44423D; font-size:16px; display:flex; align-items:center; justify-content:center;">+</button>
+              </div>
+              <div style="width:92px; text-align:right; flex-shrink:0; font-family:'JetBrains Mono', monospace; font-size:14px; font-weight:600;">{{ c.lineTotal }}</div>
+              <button onClick="{{ c.remove }}" style="width:30px; height:30px; border:none; background:none; cursor:pointer; color:#B6B4AC; display:flex; align-items:center; justify-content:center; flex-shrink:0;" style-hover="color:#C8543E;"><svg width="15" height="15" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3.5" y1="3.5" x2="10.5" y2="10.5" stroke-linecap="round"></line><line x1="10.5" y1="3.5" x2="3.5" y2="10.5" stroke-linecap="round"></line></svg></button>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <aside style="width:300px; flex-shrink:0; position:sticky; top:84px; background:#fff; border:1px solid #E9E8E4; border-radius:14px; padding:18px;">
+        <div style="font-size:12px; color:#9C9A93; margin-bottom:6px;">项目名称</div>
+        <input value="{{ projectName }}" onChange="{{ onProjectName }}" onInput="{{ onProjectName }}" style="width:100%; height:38px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:inherit; font-size:14px; font-weight:500; color:#1C1B19; margin-bottom:16px;" />
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+          <span style="font-size:13px; color:#44423D;">租期</span>
+          <div style="display:flex; align-items:center; gap:0; border:1px solid #E4E3DE; border-radius:8px; overflow:hidden;">
+            <button onClick="{{ decDays }}" style="width:30px; height:32px; border:none; background:#fff; cursor:pointer; color:#44423D; font-size:16px;">−</button>
+            <span style="min-width:44px; text-align:center; font-family:'JetBrains Mono', monospace; font-size:13px;">{{ daysVal }} 天</span>
+            <button onClick="{{ incDays }}" style="width:30px; height:32px; border:none; background:#fff; cursor:pointer; color:#44423D; font-size:16px;">+</button>
+          </div>
+        </div>
+        <div style="height:1px; background:#EEEDE9; margin:0 0 14px;"></div>
+        <div style="display:flex; flex-direction:column; gap:10px; font-size:13px;">
+          <div style="display:flex; justify-content:space-between; color:#76746E;"><span>设备日租小计</span><span style="font-family:'JetBrains Mono', monospace; color:#1C1B19;">{{ sumDaily }}</span></div>
+          <div style="display:flex; justify-content:space-between; color:#76746E;"><span>租期合计 ×{{ daysVal }} 天</span><span style="font-family:'JetBrains Mono', monospace; color:#1C1B19;">{{ sumRent }}</span></div>
+          <div style="display:flex; justify-content:space-between; color:#76746E;"><span>押金合计</span><span style="font-family:'JetBrains Mono', monospace; color:#1C1B19;">{{ sumDeposit }}</span></div>
+        </div>
+        <div style="height:1px; background:#EEEDE9; margin:14px 0;"></div>
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:18px;"><span style="font-size:14px; font-weight:600;">预估总额</span><span style="font-family:'JetBrains Mono', monospace; font-size:20px; font-weight:600; color:#2F5AC7;">{{ sumTotal }}</span></div>
+        <button style="width:100%; height:42px; border-radius:10px; background:#1C1B19; color:#fff; border:none; cursor:pointer; font-size:14px; font-family:inherit; margin-bottom:9px;">生成询价单</button>
+        <button onClick="{{ clearCart }}" style="width:100%; height:38px; border-radius:10px; background:#fff; color:#76746E; border:1px solid #E4E3DE; cursor:pointer; font-size:13px; font-family:inherit;">清空清单</button>
+        <p style="margin:14px 0 0; font-size:11px; color:#B6B4AC; line-height:1.5;">日租与押金为参考价，最终以正式报价单为准。</p>
+      </aside>
+    </div>
+    </sc-if>
+  </main>
+  </sc-if>
+
+  <!-- ============ DASHBOARD / 库存总览 ============ -->
+  <sc-if value="{{ showDashboard }}" hint-placeholder-val="">
+  <main style="flex:1; max-width:1320px; width:100%; margin:0 auto; padding:26px 22px 60px;">
+    <div style="margin-bottom:22px;">
+      <h1 style="margin:0 0 4px; font-size:24px; font-weight:700; letter-spacing:-.01em;">库存总览</h1>
+      <p style="margin:0; font-size:13px; color:#76746E;">设备台账实时概览 · 截至 <span style="font-family:'JetBrains Mono', monospace;">{{ today }}</span></p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:14px; margin-bottom:26px;">
+      <sc-for list="{{ stats }}" as="s" hint-placeholder-count="6">
+        <div style="background:#fff; border:1px solid #E9E8E4; border-radius:13px; padding:16px 17px;">
+          <div style="font-size:12px; color:#9C9A93; margin-bottom:10px;">{{ s.label }}</div>
+          <div style="display:flex; align-items:baseline; gap:5px;"><span style="font-family:'JetBrains Mono', monospace; font-size:26px; font-weight:600; color:#1C1B19;">{{ s.value }}</span><span style="font-size:12px; color:#A6A49C;">{{ s.unit }}</span></div>
+          <div style="font-size:11px; color:#A6A49C; margin-top:7px;">{{ s.sub }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:18px; margin-bottom:18px;">
+      <div style="background:#fff; border:1px solid #E9E8E4; border-radius:14px; padding:19px;">
+        <h3 style="margin:0 0 16px; font-size:15px; font-weight:600;">状态分布</h3>
+        <div style="display:flex; height:14px; border-radius:7px; overflow:hidden; margin-bottom:16px; background:#F1F0EC;">
+          <sc-for list="{{ statusBars }}" as="b" hint-placeholder-count="5">
+            <div style="{{ b.barStyle }}"></div>
+          </sc-for>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 18px;">
+          <sc-for list="{{ statusBars }}" as="b" hint-placeholder-count="6">
+            <div style="display:flex; align-items:center; gap:8px; font-size:13px;"><span style="{{ b.dotStyle }}"></span><span style="color:#44423D;">{{ b.label }}</span><span style="flex:1;"></span><span style="font-family:'JetBrains Mono', monospace; color:#1C1B19;">{{ b.count }}</span><span style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#A6A49C; width:38px; text-align:right;">{{ b.pctText }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff; border:1px solid #E9E8E4; border-radius:14px; padding:19px;">
+        <h3 style="margin:0 0 16px; font-size:15px; font-weight:600;">类别库存</h3>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <sc-for list="{{ catBars }}" as="c" hint-placeholder-count="9">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="width:70px; font-size:13px; color:#44423D; flex-shrink:0;">{{ c.label }}</span>
+              <div style="flex:1; height:8px; border-radius:5px; background:#F1F0EC; overflow:hidden;"><div style="{{ c.barStyle }}"></div></div>
+              <span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#76746E; width:54px; text-align:right; flex-shrink:0;">{{ c.availText }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr; gap:18px;">
+      <div style="background:#fff; border:1px solid #E9E8E4; border-radius:14px; padding:19px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;"><h3 style="margin:0; font-size:15px; font-weight:600;">最近出入库记录</h3><span style="font-size:12px; color:#A6A49C;">实时</span></div>
+        <div style="display:flex; flex-direction:column;">
+          <sc-for list="{{ records }}" as="r" hint-placeholder-count="6">
+            <div style="display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #F2F1ED;">
+              <span style="{{ r.tagStyle }}">{{ r.op }}</span>
+              <div style="flex:1; min-width:0;"><div style="font-size:13px; color:#1C1B19;">{{ r.dev }}</div><div style="font-size:11px; color:#A6A49C; margin-top:2px;">{{ r.proj }}</div></div>
+              <div style="text-align:right; flex-shrink:0;"><div style="font-size:12px; color:#76746E;">{{ r.by }}</div><div style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#A6A49C; margin-top:2px;">{{ r.t }}</div></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </main>
+  </sc-if>
+  </sc-if>
+
+  <!-- ============ DETAIL SLIDE-OVER ============ -->
+  <sc-if value="{{ detailOpen }}" hint-placeholder-val="">
+  <div onClick="{{ closeDetail }}" style="position:fixed; inset:0; z-index:60; background:rgba(24,23,20,.38); animation:ovIn .18s ease; display:flex; justify-content:flex-end;">
+    <div onClick="{{ stop }}" style="width:min(560px, 94vw); height:100%; background:#fff; overflow-y:auto; animation:panelIn .26s cubic-bezier(.22,.7,.3,1); box-shadow:-20px 0 60px rgba(20,20,18,.18);">
+      <div style="position:sticky; top:0; background:rgba(255,255,255,.92); backdrop-filter:blur(8px); border-bottom:1px solid #EEEDE9; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; z-index:2;">
+        <div style="display:flex; align-items:center; gap:9px; font-size:13px; color:#76746E;"><span>{{ detail.catLabel }}</span><span style="color:#CFCDC6;">/</span><span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#9C9A93;">{{ detail.code }}</span></div>
+        <button onClick="{{ closeDetail }}" style="width:32px; height:32px; border-radius:8px; border:1px solid #E4E3DE; background:#fff; cursor:pointer; color:#44423D; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3.5" y1="3.5" x2="10.5" y2="10.5" stroke-linecap="round"></line><line x1="10.5" y1="3.5" x2="3.5" y2="10.5" stroke-linecap="round"></line></svg></button>
+      </div>
+      <div style="padding:20px;">
+        <div style="position:relative; aspect-ratio:16 / 10; border-radius:14px; background:repeating-linear-gradient(135deg, #F4F3F0 0 11px, #EFEEEA 11px 22px); display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
+          <span style="font-family:'JetBrains Mono', monospace; font-size:13px; letter-spacing:.05em; color:#AEACA3;">{{ detail.model }}</span>
+          <span style="position:absolute; top:13px; left:14px; font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:.14em; color:#BCBAB1;">{{ detail.en }}</span>
+          <span style="position:absolute; bottom:12px; right:14px; font-size:11px; color:#B6B4AC;">产品图占位</span>
+        </div>
+
+        <div style="font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:.07em; color:#9C9A93; text-transform:uppercase; margin-bottom:6px;">{{ detail.brand }}</div>
+        <h2 style="margin:0 0 12px; font-size:21px; font-weight:700; line-height:1.25;">{{ detail.name }}</h2>
+        <div style="display:flex; align-items:center; gap:9px; font-size:13px; color:#76746E; margin-bottom:20px; flex-wrap:wrap;"><span style="display:flex; align-items:center; gap:6px;"><span style="{{ detail.dotStyle }}"></span>{{ detail.statusLabel }}</span><span style="color:#CFCDC6;">·</span><span style="font-family:'JetBrains Mono', monospace;">{{ detail.availText }}</span></div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:20px;">
+          <div style="background:#F8F7F4; border-radius:11px; padding:13px;"><div style="font-size:11px; color:#9C9A93; margin-bottom:6px;">日租参考</div><div style="font-family:'JetBrains Mono', monospace; font-size:17px; font-weight:600; color:#2F5AC7;">{{ detail.dailyText }}</div></div>
+          <div style="background:#F8F7F4; border-radius:11px; padding:13px;"><div style="font-size:11px; color:#9C9A93; margin-bottom:6px;">押金参考</div><div style="font-family:'JetBrains Mono', monospace; font-size:17px; font-weight:600; color:#1C1B19;">{{ detail.depositText }}</div></div>
+          <div style="background:#F8F7F4; border-radius:11px; padding:13px;"><div style="font-size:11px; color:#9C9A93; margin-bottom:6px;">设备估值</div><div style="font-family:'JetBrains Mono', monospace; font-size:17px; font-weight:600; color:#1C1B19;">{{ detail.valueText }}</div></div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:24px;">
+          <div style="display:flex; align-items:center; gap:0; border:1px solid #E4E3DE; border-radius:9px; overflow:hidden;">
+            <button onClick="{{ decDetailQty }}" style="width:36px; height:42px; border:none; background:#fff; cursor:pointer; color:#44423D; font-size:18px;">−</button>
+            <span style="min-width:40px; text-align:center; font-family:'JetBrains Mono', monospace; font-size:15px;">{{ detailQty }}</span>
+            <button onClick="{{ incDetailQty }}" style="width:36px; height:42px; border:none; background:#fff; cursor:pointer; color:#44423D; font-size:18px;">+</button>
+          </div>
+          <button onClick="{{ detailAdd }}" style="flex:1; height:46px; border-radius:11px; background:#1C1B19; color:#fff; border:none; cursor:pointer; font-size:15px; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="3.5" x2="8" y2="12.5" stroke-linecap="round"></line><line x1="3.5" y1="8" x2="12.5" y2="8" stroke-linecap="round"></line></svg>加入清单</button>
+        </div>
+
+        <h3 style="margin:0 0 11px; font-size:14px; font-weight:600;">关键参数</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;">
+          <sc-for list="{{ detail.specs }}" as="sp" hint-placeholder-count="4">
+            <span style="padding:6px 12px; background:#F3F2EE; border-radius:8px; font-size:13px; color:#44423D;">{{ sp }}</span>
+          </sc-for>
+        </div>
+
+        <h3 style="margin:0 0 11px; font-size:14px; font-weight:600;">台账信息</h3>
+        <div style="display:flex; flex-direction:column; gap:0; margin-bottom:24px; border:1px solid #EEEDE9; border-radius:11px; overflow:hidden;">
+          <div style="display:flex; justify-content:space-between; padding:11px 14px; font-size:13px; border-bottom:1px solid #F2F1ED;"><span style="color:#9C9A93;">编号</span><span style="font-family:'JetBrains Mono', monospace; color:#1C1B19;">{{ detail.code }}</span></div>
+          <div style="display:flex; justify-content:space-between; padding:11px 14px; font-size:13px; border-bottom:1px solid #F2F1ED;"><span style="color:#9C9A93;">存放位置</span><span style="font-family:'JetBrains Mono', monospace; color:#1C1B19;">货架 {{ detail.loc }}</span></div>
+          <div style="display:flex; justify-content:space-between; padding:11px 14px; font-size:13px;"><span style="color:#9C9A93;">总数 / 可借</span><span style="font-family:'JetBrains Mono', monospace; color:#1C1B19;">{{ detail.totText }}</span></div>
+        </div>
+
+        <sc-if value="{{ detail.hasNote }}" hint-placeholder-val="">
+          <h3 style="margin:0 0 9px; font-size:14px; font-weight:600;">备注</h3>
+          <p style="margin:0 0 24px; font-size:13px; color:#76746E; line-height:1.6;">{{ detail.note }}</p>
+        </sc-if>
+
+        <h3 style="margin:0 0 11px; font-size:14px; font-weight:600;">出入库记录</h3>
+        <div style="display:flex; flex-direction:column;">
+          <sc-for list="{{ detail.records }}" as="r" hint-placeholder-count="3">
+            <div style="display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid #F2F1ED; font-size:13px;"><span style="{{ r.tagStyle }}">{{ r.op }}</span><span style="flex:1; color:#44423D;">{{ r.by }}</span><span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#A6A49C;">{{ r.t }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ ADMIN ============ -->
+  <sc-if value="{{ adminView }}" hint-placeholder-val="">
+  <div onClick="{{ closeMenus }}" style="display:flex; min-height:100vh; background:#F4F3F0;">
+    <aside style="width:216px; flex-shrink:0; background:#191A1E; color:#E8E7E3; display:flex; flex-direction:column; position:sticky; top:0; height:100vh;">
+      <div style="padding:18px 18px 15px; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,.08);">
+        <img src="assets/logo.png" alt="景彩文化" style="height:26px; width:auto; display:block;" />
+        <div style="display:flex; flex-direction:column; line-height:1.18;">
+          <span style="font-size:13.5px; font-weight:700; color:#fff;">景彩文化</span>
+          <span style="font-size:9px; letter-spacing:.14em; color:#7C7A74; font-family:'JetBrains Mono', monospace;">后台管理 ADMIN</span>
+        </div>
+      </div>
+      <nav style="flex:1; padding:14px 12px; display:flex; flex-direction:column; gap:3px;">
+        <div style="font-size:10px; letter-spacing:.12em; color:#67655F; padding:2px 11px 8px;">运营</div>
+        <sc-for list="{{ adminNav }}" as="n" hint-placeholder-count="3">
+          <button onClick="{{ n.select }}" style="{{ n.navStyle }}">{{ n.label }}</button>
+        </sc-for>
+      </nav>
+      <div style="padding:13px 12px; border-top:1px solid rgba(255,255,255,.08);">
+        <button onClick="{{ goFront }}" style="display:flex; align-items:center; gap:8px; width:100%; padding:9px 12px; border-radius:8px; border:none; background:rgba(255,255,255,.06); color:#C9C7C1; cursor:pointer; font-family:inherit; font-size:13px;" style-hover="background:rgba(255,255,255,.12);"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8.5 3L4.5 7L8.5 11" stroke-linecap="round" stroke-linejoin="round"></path></svg>返回前台超市</button>
+      </div>
+    </aside>
+
+    <div style="flex:1; min-width:0;">
+
+      <sc-if value="{{ adminHome }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:24px 28px 60px;">
+        <h1 style="margin:0 0 3px; font-size:21px; font-weight:700;">工作台</h1>
+        <p style="margin:0 0 20px; font-size:13px; color:#76746E;">今天 <span style="font-family:'JetBrains Mono', monospace;">{{ today }}</span> · 设备台账实时状态</p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px; margin-bottom:20px;">
+          <sc-for list="{{ aStats }}" as="s" hint-placeholder-count="6">
+            <div style="background:#fff; border:1px solid #E6E5E1; border-radius:11px; padding:14px 15px;">
+              <div style="display:flex; align-items:center; gap:7px; margin-bottom:9px;"><span style="{{ s.dot }}"></span><span style="font-size:12px; color:#76746E;">{{ s.label }}</span></div>
+              <div style="display:flex; align-items:baseline; gap:4px;"><span style="font-family:'JetBrains Mono', monospace; font-size:24px; font-weight:600;">{{ s.value }}</span><span style="font-size:11px; color:#A6A49C;">{{ s.unit }}</span></div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid; grid-template-columns:1.45fr 1fr; gap:16px;">
+          <div style="background:#fff; border:1px solid #E6E5E1; border-radius:13px; padding:18px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;"><h3 style="margin:0; font-size:15px; font-weight:600;">今日待办 · 到期归还</h3><span style="font-size:12px; color:#A6A49C;">{{ todoCount }} 项</span></div>
+            <div style="display:flex; flex-direction:column;">
+              <sc-for list="{{ todos }}" as="t" hint-placeholder-count="5">
+                <div style="display:flex; align-items:flex-start; gap:11px; padding:11px 0; border-bottom:1px solid #F2F1ED;">
+                  <span style="{{ t.tagStyle }}">{{ t.op }}</span>
+                  <div style="flex:1; min-width:0;"><div style="font-size:13.5px; color:#1C1B19;">{{ t.text }}</div><div style="font-size:11.5px; color:#A6A49C; margin-top:2px;">{{ t.sub }}</div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff; border:1px solid #E6E5E1; border-radius:13px; padding:18px;">
+            <h3 style="margin:0 0 12px; font-size:15px; font-weight:600;">快捷入口</h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <sc-for list="{{ quickActions }}" as="q" hint-placeholder-count="4">
+                <button onClick="{{ q.go }}" style="display:flex; flex-direction:column; gap:3px; align-items:flex-start; text-align:left; padding:14px 13px; border-radius:10px; border:1px solid #E6E5E1; background:#FAFAF8; cursor:pointer; font-family:inherit;" style-hover="border-color:#2F5AC7; background:#EEF2FD;">
+                  <span style="font-size:13.5px; font-weight:600; color:#1C1B19;">{{ q.label }}</span>
+                  <span style="font-size:11.5px; color:#9C9A93;">{{ q.desc }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ adminDevices }}" hint-placeholder-val="">
+      <div style="padding:24px 28px 60px;">
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:14px; margin-bottom:16px; flex-wrap:wrap;">
+          <div><h1 style="margin:0 0 2px; font-size:21px; font-weight:700;">设备管理</h1><p style="margin:0; font-size:13px; color:#76746E;">共 <span style="font-family:'JetBrains Mono', monospace;">{{ totalSkus }}</span> 个型号 · 当前 <span style="font-family:'JetBrains Mono', monospace;">{{ adminCount }}</span> 条</p></div>
+          <button onClick="{{ openNew }}" style="display:flex; align-items:center; gap:7px; height:38px; padding:0 16px; border-radius:9px; border:none; background:#2F5AC7; color:#fff; cursor:pointer; font-family:inherit; font-size:14px;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="8" y1="3.5" x2="8" y2="12.5" stroke-linecap="round"></line><line x1="3.5" y1="8" x2="12.5" y2="8" stroke-linecap="round"></line></svg>新增设备</button>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
+          <div style="position:relative; flex:1; min-width:200px; max-width:320px;">
+            <span style="position:absolute; left:11px; top:50%; transform:translateY(-50%); color:#A6A49C; display:flex;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"></circle><line x1="11" y1="11" x2="14.5" y2="14.5" stroke-linecap="round"></line></svg></span>
+            <input value="{{ aSearch }}" onChange="{{ onASearch }}" onInput="{{ onASearch }}" placeholder="搜索名称 / 型号 / 编号" style="width:100%; height:36px; padding:0 12px 0 33px; border:1px solid #E4E3DE; border-radius:8px; background:#fff; font-family:inherit; font-size:13px;" />
+          </div>
+          <select value="{{ aCat }}" onChange="{{ onACat }}" style="height:36px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ catFilterOptions }}" as="o" hint-placeholder-count="10"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+          <select value="{{ aStatus }}" onChange="{{ onAStatus }}" style="height:36px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ statusFilterOptions }}" as="o" hint-placeholder-count="7"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+          <select value="{{ aOwner }}" onChange="{{ onAOwner }}" style="height:36px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer;"><sc-for list="{{ ownerFilterOptions }}" as="o" hint-placeholder-count="4"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+        </div>
+        <sc-if value="{{ hasSel }}" hint-placeholder-val="">
+          <div style="display:flex; align-items:center; gap:12px; padding:9px 14px; background:#1C1B19; border-radius:10px; margin-bottom:12px; color:#fff; flex-wrap:wrap;">
+            <span style="font-size:13px;">已选 <span style="font-family:'JetBrains Mono', monospace;">{{ selCount }}</span> 项</span>
+            <div style="width:1px; height:16px; background:rgba(255,255,255,.22);"></div>
+            <span style="font-size:12px; color:#B8B6B0;">批量改状态</span>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <sc-for list="{{ batchInOptions }}" as="b" hint-placeholder-count="6">
+                <button onClick="{{ b.pick }}" style="font-size:12px; padding:4px 10px; border-radius:6px; border:1px solid rgba(255,255,255,.22); background:transparent; color:#fff; cursor:pointer; font-family:inherit;" style-hover="background:rgba(255,255,255,.12);">{{ b.label }}</button>
+              </sc-for>
+            </div>
+            <div style="flex:1;"></div>
+            <button onClick="{{ batchDelete }}" style="font-size:12px; padding:5px 12px; border-radius:6px; border:none; background:oklch(0.55 0.18 25); color:#fff; cursor:pointer; font-family:inherit;">删除所选</button>
+            <button onClick="{{ clearSel }}" style="font-size:12px; padding:5px 12px; border-radius:6px; border:1px solid rgba(255,255,255,.22); background:transparent; color:#fff; cursor:pointer; font-family:inherit;">取消</button>
+          </div>
+        </sc-if>
+        <div style="background:#fff; border:1px solid #E6E5E1; border-radius:12px;">
+          <div style="display:grid; grid-template-columns:34px 92px 1.7fr 84px 116px 80px 60px 78px 86px 78px; align-items:center; gap:10px; padding:11px 16px; border-bottom:1px solid #EAE9E5; background:#FAFAF8; font-size:11px; color:#9C9A93; letter-spacing:.03em;">
+            <span><input type="checkbox" checked="{{ allSelected }}" onChange="{{ onSelectAll }}" style="cursor:pointer; accent-color:#2F5AC7;" /></span>
+            <span>编号</span><span>名称</span><span>类别</span><span>状态</span><span>所属方</span><span>位置</span><span style="text-align:right;">可借/总</span><span style="text-align:right;">日租</span><span style="text-align:center;">操作</span>
+          </div>
+          <sc-for list="{{ adminRows }}" as="r" hint-placeholder-count="12">
+            <div style="{{ r.rowStyle }}">
+              <span><input type="checkbox" checked="{{ r.selected }}" onChange="{{ r.toggleSel }}" style="cursor:pointer; accent-color:#2F5AC7;" /></span>
+              <span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#76746E;">{{ r.code }}</span>
+              <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                <div style="width:34px; height:26px; flex-shrink:0; border-radius:5px; background:repeating-linear-gradient(135deg, #F4F3F0 0 6px, #EFEEEA 6px 12px);"></div>
+                <div style="min-width:0;"><div style="font-size:13px; color:#1C1B19; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ r.name }}</div><div style="font-size:11px; color:#A6A49C; font-family:'JetBrains Mono', monospace;">{{ r.brand }}</div></div>
+              </div>
+              <span style="font-size:12.5px; color:#44423D;">{{ r.catLabel }}</span>
+              <div style="position:relative;">
+                <button onClick="{{ r.openMenu }}" style="{{ r.pillStyle }}"><span style="{{ r.dotStyle }}"></span>{{ r.statusLabel }}<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 4.5L6 7.5L9 4.5" stroke-linecap="round"></path></svg></button>
+                <sc-if value="{{ r.menuOpen }}" hint-placeholder-val="">
+                  <div onClick="{{ stop }}" style="position:absolute; top:30px; left:0; z-index:30; background:#fff; border:1px solid #E4E3DE; border-radius:9px; box-shadow:0 12px 30px rgba(20,20,18,.16); padding:5px; min-width:118px;">
+                    <sc-for list="{{ r.menuItems }}" as="m" hint-placeholder-count="6">
+                      <button onClick="{{ m.pick }}" style="display:flex; align-items:center; gap:8px; width:100%; padding:7px 9px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-family:inherit; font-size:13px; color:#44423D; text-align:left;" style-hover="background:#F3F2EE;"><span style="{{ m.dotStyle }}"></span>{{ m.label }}</button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+              <span style="font-size:12.5px; color:#44423D;">{{ r.own }}</span>
+              <span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#76746E;">{{ r.loc }}</span>
+              <span style="{{ r.qtyStyle }}">{{ r.qtyText }}</span>
+              <span style="font-family:'JetBrains Mono', monospace; font-size:13px; text-align:right; color:#1C1B19;">{{ r.dailyText }}</span>
+              <div style="display:flex; align-items:center; justify-content:center; gap:5px;">
+                <button onClick="{{ r.edit }}" style="width:28px; height:28px; border-radius:6px; border:1px solid #E4E3DE; background:#fff; cursor:pointer; color:#76746E; display:flex; align-items:center; justify-content:center;" style-hover="border-color:#2F5AC7; color:#2F5AC7;"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M9.4 2.6L11.4 4.6L5 11L2.6 11.4L3 9L9.4 2.6Z" stroke-linejoin="round"></path></svg></button>
+                <button onClick="{{ r.del }}" style="width:28px; height:28px; border-radius:6px; border:1px solid #E4E3DE; background:#fff; cursor:pointer; color:#76746E; display:flex; align-items:center; justify-content:center;" style-hover="border-color:oklch(0.55 0.18 25); color:oklch(0.55 0.18 25);"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><line x1="3" y1="4" x2="11" y2="4" stroke-linecap="round"></line><path d="M4.2 4L4.7 11.4L9.3 11.4L9.8 4" stroke-linejoin="round"></path></svg></button>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ adminEmpty }}" hint-placeholder-val="">
+            <div style="padding:50px; text-align:center; color:#9C9A93; font-size:14px;">没有符合条件的设备</div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ adminRecords }}" hint-placeholder-val="">
+      <div style="padding:24px 28px 60px;">
+        <h1 style="margin:0 0 16px; font-size:21px; font-weight:700;">出入库记录</h1>
+        <div style="display:grid; grid-template-columns:300px 1fr; gap:18px; align-items:start;">
+          <div style="background:#fff; border:1px solid #E6E5E1; border-radius:13px; padding:18px; position:sticky; top:18px;">
+            <h3 style="margin:0 0 13px; font-size:15px; font-weight:600;">快速登记</h3>
+            <div style="display:flex; gap:5px; margin-bottom:14px; padding:3px; background:#F1F0EC; border-radius:9px;">
+              <button onClick="{{ regOut }}" style="{{ regOutStyle }}">出库</button>
+              <button onClick="{{ regIn }}" style="{{ regInStyle }}">入库</button>
+            </div>
+            <label style="display:block; font-size:12px; color:#9C9A93; margin-bottom:5px;">设备</label>
+            <select value="{{ regDevice }}" onChange="{{ onRegDevice }}" style="width:100%; height:38px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:8px; background-color:#fff; font-family:inherit; font-size:13px; color:#44423D; cursor:pointer; margin-bottom:12px;"><option value="">选择设备…</option><sc-for list="{{ regDeviceOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
+            <label style="display:block; font-size:12px; color:#9C9A93; margin-bottom:5px;">经手人</label>
+            <input value="{{ regBy }}" onChange="{{ onRegBy }}" onInput="{{ onRegBy }}" placeholder="如：张磊" style="width:100%; height:38px; padding:0 11px; border:1px solid #E4E3DE; border-radius:8px; font-family:inherit; font-size:13px; margin-bottom:12px;" />
+            <label style="display:block; font-size:12px; color:#9C9A93; margin-bottom:5px;">项目 / 备注</label>
+            <input value="{{ regProj }}" onChange="{{ onRegProj }}" onInput="{{ onRegProj }}" placeholder="如：某汽车 TVC" style="width:100%; height:38px; padding:0 11px; border:1px solid #E4E3DE; border-radius:8px; font-family:inherit; font-size:13px; margin-bottom:15px;" />
+            <button onClick="{{ submitReg }}" style="width:100%; height:42px; border-radius:10px; border:none; background:#1C1B19; color:#fff; cursor:pointer; font-family:inherit; font-size:14px; margin-bottom:9px;">确认登记</button>
+            <button style="width:100%; height:40px; border-radius:10px; border:1px dashed #CFCDC6; background:#FAFAF8; color:#76746E; cursor:pointer; font-family:inherit; font-size:13px; display:flex; align-items:center; justify-content:center; gap:7px;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"></rect><line x1="5.2" y1="2.5" x2="5.2" y2="13.5"></line><line x1="8" y1="2.5" x2="8" y2="13.5"></line><line x1="10.8" y1="2.5" x2="10.8" y2="13.5"></line></svg>扫码登记</button>
+          </div>
+          <div style="background:#fff; border:1px solid #E6E5E1; border-radius:13px; padding:18px;">
+            <div style="display:flex; gap:7px; flex-wrap:wrap; margin-bottom:14px;">
+              <sc-for list="{{ recFilters }}" as="f" hint-placeholder-count="6">
+                <button onClick="{{ f.select }}" style="{{ f.chipStyle }}">{{ f.label }}</button>
+              </sc-for>
+            </div>
+            <div style="display:flex; flex-direction:column;">
+              <sc-for list="{{ recRows }}" as="r" hint-placeholder-count="8">
+                <div style="display:flex; align-items:center; gap:14px; padding:11px 0; border-bottom:1px solid #F2F1ED;">
+                  <span style="{{ r.tagStyle }}">{{ r.op }}</span>
+                  <div style="flex:1; min-width:0;"><div style="font-size:13.5px; color:#1C1B19;">{{ r.dev }}</div><div style="font-size:11.5px; color:#A6A49C; margin-top:2px;">{{ r.proj }}</div></div>
+                  <div style="text-align:right; flex-shrink:0;"><div style="font-size:12.5px; color:#76746E;">{{ r.by }}</div><div style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#A6A49C; margin-top:2px;">{{ r.t }}</div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ DEVICE EDITOR ============ -->
+  <sc-if value="{{ editorOpen }}" hint-placeholder-val="">
+  <div onClick="{{ closeEditor }}" style="position:fixed; inset:0; z-index:85; background:rgba(24,23,20,.42); animation:ovIn .18s ease; display:flex; justify-content:flex-end;">
+    <div onClick="{{ stop }}" style="width:min(540px, 96vw); height:100%; background:#fff; overflow-y:auto; animation:panelIn .26s cubic-bezier(.22,.7,.3,1); box-shadow:-20px 0 60px rgba(20,20,18,.2);">
+      <div style="position:sticky; top:0; background:rgba(255,255,255,.94); backdrop-filter:blur(8px); border-bottom:1px solid #EEEDE9; padding:15px 20px; display:flex; align-items:center; justify-content:space-between; z-index:2;">
+        <h2 style="margin:0; font-size:17px; font-weight:700;">{{ editorTitle }}</h2>
+        <button onClick="{{ closeEditor }}" style="width:32px; height:32px; border-radius:8px; border:1px solid #E4E3DE; background:#fff; cursor:pointer; color:#44423D; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3.5" y1="3.5" x2="10.5" y2="10.5" stroke-linecap="round"></line><line x1="10.5" y1="3.5" x2="3.5" y2="10.5" stroke-linecap="round"></line></svg></button>
+      </div>
+      <div style="padding:20px;">
+        <div style="border:1.5px dashed #D6D4CD; border-radius:12px; background:#FAFAF8; padding:22px; display:flex; flex-direction:column; align-items:center; gap:8px; margin-bottom:22px; cursor:pointer;" style-hover="border-color:#2F5AC7; background:#F4F7FE;">
+          <div style="width:46px; height:46px; border-radius:10px; background:repeating-linear-gradient(135deg, #EFEEEA 0 7px, #E7E6E1 7px 14px); display:flex; align-items:center; justify-content:center; color:#A6A49C;"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="4" width="14" height="12" rx="1.5"></rect><circle cx="7.5" cy="8.5" r="1.3"></circle><path d="M4 14L8 10.5L11 13L13.5 11L16 13.5" stroke-linejoin="round"></path></svg></div>
+          <div style="font-size:13px; color:#44423D;">拖拽或点击上传设备图片</div>
+          <div style="font-size:11px; color:#A6A49C;">建议 4:3 · 支持 JPG / PNG</div>
+        </div>
+        <div style="font-size:11px; font-weight:600; letter-spacing:.06em; color:#9C9A93; margin-bottom:11px;">基本信息</div>
+        <div style="display:flex; flex-direction:column; gap:13px; margin-bottom:22px;">
+          <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">设备名称 *</span><input value="{{ dName }}" onChange="{{ setName }}" onInput="{{ setName }}" placeholder="如：ALEXA Mini LF 电影摄影机" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:inherit; font-size:14px;" /></label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:11px;">
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">品牌</span><input value="{{ dBrand }}" onChange="{{ setBrand }}" onInput="{{ setBrand }}" placeholder="ARRI" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:inherit; font-size:14px;" /></label>
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">型号</span><input value="{{ dModel }}" onChange="{{ setModel }}" onInput="{{ setModel }}" placeholder="Mini LF" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:inherit; font-size:14px;" /></label>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:11px;">
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">类别</span><select value="{{ dCat }}" onChange="{{ setCat }}" style="height:40px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:9px; background-color:#fff; font-family:inherit; font-size:14px; color:#1C1B19; cursor:pointer;"><sc-for list="{{ catOptions }}" as="o" hint-placeholder-count="9"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select></label>
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">编号</span><input value="{{ dCode }}" onChange="{{ setCode }}" onInput="{{ setCode }}" placeholder="自动生成或自定义" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:'JetBrains Mono', monospace; font-size:13px;" /></label>
+          </div>
+        </div>
+        <div style="font-size:11px; font-weight:600; letter-spacing:.06em; color:#9C9A93; margin-bottom:11px;">状态与归属</div>
+        <div style="display:flex; flex-direction:column; gap:13px; margin-bottom:22px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:11px;">
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">状态</span><select value="{{ dSt }}" onChange="{{ setSt }}" style="height:40px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:9px; background-color:#fff; font-family:inherit; font-size:14px; color:#1C1B19; cursor:pointer;"><sc-for list="{{ statusEditOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.key }}">{{ o.label }}</option></sc-for></select></label>
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">所属方</span><select value="{{ dOwn }}" onChange="{{ setOwn }}" style="height:40px; padding:0 28px 0 11px; border:1px solid #E4E3DE; border-radius:9px; background-color:#fff; font-family:inherit; font-size:14px; color:#1C1B19; cursor:pointer;"><sc-for list="{{ ownerSel }}" as="o" hint-placeholder-count="3"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select></label>
+          </div>
+          <div style="display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:11px;">
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">存放位置</span><input value="{{ dLoc }}" onChange="{{ setLoc }}" onInput="{{ setLoc }}" placeholder="A-01" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:'JetBrains Mono', monospace; font-size:13px;" /></label>
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">总数</span><input value="{{ dTot }}" onChange="{{ setTot }}" onInput="{{ setTot }}" inputmode="numeric" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:'JetBrains Mono', monospace; font-size:14px;" /></label>
+            <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">可借</span><input value="{{ dAv }}" onChange="{{ setAv }}" onInput="{{ setAv }}" inputmode="numeric" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:'JetBrains Mono', monospace; font-size:14px;" /></label>
+          </div>
+        </div>
+        <div style="font-size:11px; font-weight:600; letter-spacing:.06em; color:#9C9A93; margin-bottom:11px;">价格参考（元）</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:11px; margin-bottom:22px;">
+          <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">估值</span><input value="{{ dVal }}" onChange="{{ setVal }}" onInput="{{ setVal }}" inputmode="numeric" placeholder="0" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:'JetBrains Mono', monospace; font-size:14px;" /></label>
+          <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">日租</span><input value="{{ dDay }}" onChange="{{ setDay }}" onInput="{{ setDay }}" inputmode="numeric" placeholder="0" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:'JetBrains Mono', monospace; font-size:14px;" /></label>
+          <label style="display:flex; flex-direction:column; gap:6px;"><span style="font-size:12.5px; color:#76746E;">押金</span><input value="{{ dDep }}" onChange="{{ setDep }}" onInput="{{ setDep }}" inputmode="numeric" placeholder="0" style="height:40px; padding:0 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:'JetBrains Mono', monospace; font-size:14px;" /></label>
+        </div>
+        <div style="font-size:11px; font-weight:600; letter-spacing:.06em; color:#9C9A93; margin-bottom:11px;">参数与备注</div>
+        <label style="display:flex; flex-direction:column; gap:6px; margin-bottom:13px;"><span style="font-size:12.5px; color:#76746E;">关键参数（用、或逗号分隔）</span><textarea value="{{ dSpecs }}" onChange="{{ setSpecs }}" onInput="{{ setSpecs }}" placeholder="如：Super35 4.6K、LPL 卡口、17 档宽容度" style="min-height:66px; padding:10px 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:inherit; font-size:13.5px; resize:vertical; line-height:1.5;"></textarea></label>
+        <label style="display:flex; flex-direction:column; gap:6px; margin-bottom:20px;"><span style="font-size:12.5px; color:#76746E;">备注</span><textarea value="{{ dNote }}" onChange="{{ setNote }}" onInput="{{ setNote }}" placeholder="附件、随行要求等" style="min-height:56px; padding:10px 12px; border:1px solid #E4E3DE; border-radius:9px; font-family:inherit; font-size:13.5px; resize:vertical; line-height:1.5;"></textarea></label>
+        <div style="display:flex; gap:10px;">
+          <button onClick="{{ closeEditor }}" style="flex:1; height:44px; border-radius:10px; border:1px solid #E4E3DE; background:#fff; color:#44423D; cursor:pointer; font-family:inherit; font-size:14px;">取消</button>
+          <button onClick="{{ saveDraft }}" style="flex:2; height:44px; border-radius:10px; border:none; background:#2F5AC7; color:#fff; cursor:pointer; font-family:inherit; font-size:14px;">保存设备</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ toastShow }}" hint-placeholder-val="">
+  <div style="position:fixed; bottom:26px; left:50%; transform:translateX(-50%); z-index:95; background:#1C1B19; color:#fff; padding:11px 20px; border-radius:10px; font-size:13.5px; box-shadow:0 12px 32px rgba(20,20,18,.28); animation:ovIn .2s ease;">{{ toastMsg }}</div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    screen: 'catalog',      // catalog | cart | dashboard
+    layout: 'grid',         // grid | aisle | showcase
+    detailId: null,
+    detailQty: 1,
+    cat: 'all',
+    brand: 'all',
+    status: 'all',
+    owner: 'all',
+    search: '',
+    sort: 'featured',
+    cart: {},               // id -> qty
+    days: 3,
+    projectName: '未命名项目',
+    // admin
+    view: 'front',          // front | admin
+    adminScreen: 'home',    // home | devices | records
+    aSearch: '', aCat: 'all', aStatus: 'all', aOwner: 'all',
+    selected: [],
+    statusMenu: null,
+    editorOpen: false,
+    editorId: null,
+    draft: {},
+    recFilter: 'all',
+    regDevice: '', regOp: 'out', regBy: '', regProj: '',
+    toast: '',
+  };
+
+  CATS = [
+    { id: 'cinema', label: '电影机', en: 'CINEMA' },
+    { id: 'lens', label: '镜头', en: 'LENS' },
+    { id: 'light', label: '灯光', en: 'LIGHT' },
+    { id: 'monitor', label: '监视器', en: 'MONITOR' },
+    { id: 'support', label: '支架稳定', en: 'RIG' },
+    { id: 'audio', label: '录音', en: 'AUDIO' },
+    { id: 'fpv', label: 'FPV穿越机', en: 'FPV' },
+    { id: 'drone', label: '航拍无人机', en: 'DRONE' },
+    { id: 'accessory', label: '附件', en: 'ACCY' },
+  ];
+
+  STATUS = {
+    in:       { label: '在库',   color: 'oklch(0.64 0.11 152)' },
+    reserved: { label: '已预留', color: 'oklch(0.74 0.12 78)' },
+    out:      { label: '已出库', color: 'oklch(0.62 0.08 255)' },
+    repair:   { label: '维修中', color: 'oklch(0.62 0.16 32)' },
+    inspect:  { label: '待检查', color: 'oklch(0.70 0.03 100)' },
+    retired:  { label: '停用',   color: 'oklch(0.52 0.02 0)' },
+  };
+
+  EQUIP = [
+    { id:1, name:'ALEXA Mini LF 电影摄影机', brand:'ARRI', model:'Mini LF', cat:'cinema', code:'CAM-001', st:'in', own:'自有', val:320000, day:3800, dep:80000, tot:3, av:2, loc:'A-01', specs:['Large Format 4.5K','LPL / PL 卡口','14+ 档宽容度','ARRIRAW / ProRes'], note:'机身含手柄、CFast 卡仓与原厂箱，租用默认配 2 块 V 口电池。' },
+    { id:2, name:'ALEXA 35 电影摄影机', brand:'ARRI', model:'ALEXA 35', cat:'cinema', code:'CAM-002', st:'in', own:'自有', val:380000, day:4200, dep:90000, tot:2, av:2, loc:'A-02', specs:['Super35 4.6K','LPL 卡口','17 档宽容度','EI 2560 双原生'], note:'旗舰机身，建议搭配 Master Prime 套装使用。' },
+    { id:3, name:'V-RAPTOR 8K VV 电影摄影机', brand:'RED', model:'V-RAPTOR', cat:'cinema', code:'CAM-003', st:'out', own:'自有', val:260000, day:2800, dep:60000, tot:2, av:0, loc:'A-03', specs:['8K VV 全画幅','RF / PL 卡口','8K 120fps','REDCODE RAW'], note:'当前两台均在外借项目，预计本周五归还。' },
+    { id:4, name:'VENICE 2 电影摄影机', brand:'Sony', model:'VENICE 2', cat:'cinema', code:'CAM-004', st:'reserved', own:'自有', val:290000, day:3200, dep:70000, tot:1, av:1, loc:'A-04', specs:['8.6K 全画幅','双原生 ISO','内录 X-OCN','PL / E 卡口'], note:'已被网剧项目预留，可协调档期。' },
+    { id:5, name:'URSA Cine 12K 电影摄影机', brand:'Blackmagic', model:'URSA Cine', cat:'cinema', code:'CAM-005', st:'in', own:'自有', val:150000, day:1600, dep:30000, tot:1, av:1, loc:'A-05', specs:['12K RGBW','内置 8TB','PL / EF / LPL','Blackmagic RAW'], note:'' },
+    { id:6, name:'FX9 全画幅摄影机', brand:'Sony', model:'FX9', cat:'cinema', code:'CAM-006', st:'in', own:'自有', val:80000, day:900, dep:15000, tot:3, av:3, loc:'A-06', specs:['全画幅 6K 传感器','双原生 ISO','E 卡口','S-Cinetone'], note:'适合纪录片与采访场景。' },
+    { id:7, name:'FX6 全画幅摄影机', brand:'Sony', model:'FX6', cat:'cinema', code:'CAM-007', st:'in', own:'合作商', val:38000, day:650, dep:10000, tot:4, av:3, loc:'A-07', specs:['全画幅 4K 120p','可变 ND','E 卡口','轻便机身'], note:'合作商挂靠设备，结算按合作价。' },
+
+    { id:8, name:'Master Prime 定焦镜头套装', brand:'ARRI / ZEISS', model:'Master Prime', cat:'lens', code:'LEN-001', st:'in', own:'自有', val:600000, day:2600, dep:60000, tot:1, av:1, loc:'B-01', specs:['16/25/35/50/85mm','T1.3 大光圈','PL 卡口','整套防潮箱'], note:'套装六支，租用需登记并由设备组随行。' },
+    { id:9, name:'S7/i 全画幅定焦套装', brand:'Cooke', model:'S7/i FF', cat:'lens', code:'LEN-002', st:'in', own:'自有', val:700000, day:2400, dep:60000, tot:1, av:1, loc:'B-02', specs:['25/32/40/50/75mm','T2.0','Cooke Look','/i 元数据'], note:'' },
+    { id:10, name:'CN-E 电影定焦套装', brand:'Canon', model:'CN-E', cat:'lens', code:'LEN-003', st:'in', own:'自有', val:180000, day:1200, dep:25000, tot:1, av:1, loc:'B-03', specs:['24/35/50/85mm','T1.5','EF 卡口','性价比之选'], note:'' },
+    { id:11, name:'Vespid 全画幅定焦套装', brand:'DZOFilm', model:'Vespid', cat:'lens', code:'LEN-004', st:'in', own:'合作商', val:60000, day:700, dep:12000, tot:2, av:2, loc:'B-04', specs:['全画幅覆盖','T2.1','PL / EF 可换','轻量'], note:'合作商挂靠。' },
+    { id:12, name:'EZ 电影变焦镜头', brand:'Angénieux', model:'EZ-1/2', cat:'lens', code:'LEN-005', st:'repair', own:'自有', val:130000, day:1100, dep:22000, tot:2, av:1, loc:'B-05', specs:['可换后组','S35 / FF','变焦比 3x','法版工艺'], note:'其中一支镜头送检维修中。' },
+    { id:13, name:'探针 / 微距镜头', brand:'Laowa', model:'Probe', cat:'lens', code:'LEN-006', st:'in', own:'自有', val:20000, day:400, dep:6000, tot:2, av:2, loc:'B-06', specs:['24mm 探针','2:1 微距','可防水','广告特写'], note:'适合产品与美食微距镜头。' },
+
+    { id:14, name:'SkyPanel S60-C 柔光灯', brand:'ARRI', model:'S60-C', cat:'light', code:'LIT-001', st:'in', own:'自有', val:60000, day:800, dep:12000, tot:4, av:3, loc:'C-01', specs:['RGBW LED','2800-10000K','450W','含柔光格栅'], note:'' },
+    { id:15, name:'LS 600x Pro 聚光灯', brand:'Aputure', model:'600x Pro', cat:'light', code:'LIT-002', st:'in', own:'自有', val:12000, day:360, dep:4000, tot:6, av:5, loc:'C-02', specs:['双色温','600W','Bowens 卡口','防雨'], note:'常用主光，库存充足。' },
+    { id:16, name:'Nova P600c 柔光板', brand:'Aputure', model:'P600c', cat:'light', code:'LIT-003', st:'in', own:'自有', val:18000, day:420, dep:5000, tot:3, av:3, loc:'C-03', specs:['RGBWW 面光','600W','内置电池仓','超薄'], note:'' },
+    { id:17, name:'Titan Tube 灯管套装(8 支)', brand:'Astera', model:'Titan Tube', cat:'light', code:'LIT-004', st:'reserved', own:'自有', val:40000, day:600, dep:8000, tot:2, av:1, loc:'C-04', specs:['8 支套装','无线 CRMX','内置电池','像素映射'], note:'一套已预留给直播项目。' },
+    { id:18, name:'M18 HMI 镝灯', brand:'ARRI', model:'M18', cat:'light', code:'LIT-005', st:'in', own:'合作商', val:50000, day:700, dep:10000, tot:2, av:2, loc:'C-05', specs:['1800W HMI','日光色温','含镇流器','高亮硬光'], note:'合作商挂靠设备。' },
+    { id:19, name:'RR Rainbow 灯管套装', brand:'Quasar', model:'RR Rainbow', cat:'light', code:'LIT-006', st:'in', own:'自有', val:16000, day:300, dep:4000, tot:4, av:4, loc:'C-06', specs:['RGBX 灯管','多规格','DMX 控制','氛围光'], note:'' },
+
+    { id:20, name:'Cine 7 监视器', brand:'SmallHD', model:'Cine 7', cat:'monitor', code:'MON-001', st:'in', own:'自有', val:18000, day:300, dep:4000, tot:4, av:3, loc:'D-01', specs:['7" 1800nit','SDI / HDMI','LUT / 波形','可装电池'], note:'' },
+    { id:21, name:'1303 HDR 导演监视器', brand:'SmallHD', model:'1303 HDR', cat:'monitor', code:'MON-002', st:'in', own:'自有', val:40000, day:500, dep:8000, tot:2, av:2, loc:'D-02', specs:['13" 1500nit','HDR 预览','多画面','导演村'], note:'' },
+    { id:22, name:'LVM-171S 监看监视器', brand:'TVLogic', model:'LVM-171S', cat:'monitor', code:'MON-003', st:'in', own:'自有', val:30000, day:400, dep:6000, tot:2, av:2, loc:'D-03', specs:['17" 广色域','调色级','SDI','机房监看'], note:'' },
+    { id:23, name:'Shogun 7 录机监视器', brand:'Atomos', model:'Shogun 7', cat:'monitor', code:'MON-004', st:'inspect', own:'自有', val:12000, day:220, dep:3000, tot:3, av:2, loc:'D-04', specs:['7" HDR','ProRes RAW','SDI / HDMI','录监一体'], note:'一台归库待检查。' },
+
+    { id:24, name:'Video 18 流体云台脚架', brand:'Sachtler', model:'Video 18', cat:'support', code:'SUP-001', st:'in', own:'自有', val:30000, day:280, dep:4000, tot:4, av:4, loc:'E-01', specs:['承重 2-22kg','碳纤脚管','流体阻尼','含云台'], note:'' },
+    { id:25, name:'Ronin 2 专业稳定器', brand:'DJI', model:'Ronin 2', cat:'support', code:'SUP-002', st:'in', own:'自有', val:40000, day:600, dep:10000, tot:2, av:2, loc:'E-02', specs:['承重 13.6kg','车载 / 飞行','含配件箱','专业级'], note:'' },
+    { id:26, name:'RS 4 Pro 手持稳定器', brand:'DJI', model:'RS 4 Pro', cat:'support', code:'SUP-003', st:'out', own:'自有', val:6000, day:200, dep:3000, tot:5, av:2, loc:'E-03', specs:['承重 4.5kg','碳纤臂','LiDAR 对焦','手持'], note:'三台外借中。' },
+    { id:27, name:'2575 D 专业云台', brand:"O'Connor", model:'2575 D', cat:'support', code:'SUP-004', st:'in', own:'合作商', val:90000, day:700, dep:12000, tot:1, av:1, loc:'E-04', specs:['顶级流体头','无级阻尼','重负载','合作商'], note:'合作商挂靠。' },
+    { id:28, name:'C-Stand 灯架套装(10 支)', brand:'Matthews', model:'C-Stand', cat:'support', code:'SUP-005', st:'in', own:'自有', val:12000, day:150, dep:1500, tot:1, av:1, loc:'E-05', specs:['10 支套装','含旗板臂','沙袋配套','灯位必备'], note:'按套出租。' },
+    { id:29, name:'Dana Dolly 轨道套装', brand:'Dana', model:'Dana Dolly', cat:'support', code:'SUP-006', st:'in', own:'自有', val:20000, day:350, dep:5000, tot:1, av:1, loc:'E-06', specs:['便携轨道','可调轮距','含轨道管','移动镜头'], note:'' },
+
+    { id:30, name:'888 多通道调音台', brand:'Sound Devices', model:'888', cat:'audio', code:'AUD-001', st:'in', own:'自有', val:60000, day:700, dep:10000, tot:1, av:1, loc:'F-01', specs:['8 路输入','32-bit 浮点','内置时码','现场混录'], note:'' },
+    { id:31, name:'MKH 416 指向性枪麦', brand:'Sennheiser', model:'MKH 416', cat:'audio', code:'AUD-002', st:'in', own:'自有', val:8000, day:150, dep:2000, tot:3, av:3, loc:'F-02', specs:['超心型','抗潮湿','行业标准','含防风'], note:'' },
+    { id:32, name:'MTP60 无线话筒套装', brand:'Wisycom', model:'MTP60', cat:'audio', code:'AUD-003', st:'in', own:'合作商', val:90000, day:600, dep:12000, tot:2, av:2, loc:'F-03', specs:['宽频无线','多通道','低延迟','合作商'], note:'合作商挂靠。' },
+    { id:33, name:'F8n Pro 现场录音机', brand:'Zoom', model:'F8n Pro', cat:'audio', code:'AUD-004', st:'in', own:'个人挂靠', val:8000, day:200, dep:2500, tot:2, av:2, loc:'F-04', specs:['8 输入','32-bit','双 SD','含时码'], note:'个人挂靠设备。' },
+
+    { id:34, name:'Avata 2 穿越机套装', brand:'DJI', model:'Avata 2', cat:'fpv', code:'FPV-001', st:'in', own:'自有', val:8000, day:350, dep:4000, tot:3, av:3, loc:'G-01', specs:['Cinewhoop','O4 高清图传','约 23min','含眼镜遥控'], note:'即开即飞，适合室内穿梭。' },
+    { id:35, name:'5 寸自组穿越机', brand:'Custom', model:'5" FPV', cat:'fpv', code:'FPV-002', st:'in', own:'个人挂靠', val:6000, day:300, dep:3000, tot:4, av:4, loc:'G-02', specs:['5 寸轴距','高清数字图传','极速机动','需专业飞手'], note:'个人挂靠，建议搭配飞手服务。' },
+    { id:36, name:'Cinewhoop 室内穿越机', brand:'Custom', model:'Cinewhoop', cat:'fpv', code:'FPV-003', st:'reserved', own:'自有', val:9000, day:380, dep:4000, tot:2, av:1, loc:'G-03', specs:['涵道保护','室内安全','稳定运镜','含护栏'], note:'一台已预留。' },
+    { id:37, name:'穿越机飞手套装', brand:'DJI', model:'Goggles 3', cat:'fpv', code:'FPV-004', st:'in', own:'自有', val:9000, day:250, dep:3000, tot:2, av:2, loc:'G-04', specs:['Goggles 3 眼镜','RC 遥控','高清回传','配套使用'], note:'眼镜 + 遥控套装。' },
+
+    { id:38, name:'Inspire 3 专业航拍无人机', brand:'DJI', model:'Inspire 3', cat:'drone', code:'DRN-001', st:'out', own:'自有', val:110000, day:2200, dep:30000, tot:2, av:1, loc:'H-01', specs:['全画幅 8K','DL 卡口','15km O3 Pro','双控'], note:'需持证飞手，一台外借。' },
+    { id:39, name:'Mavic 3 Cine 航拍无人机', brand:'DJI', model:'Mavic 3 Cine', cat:'drone', code:'DRN-002', st:'in', own:'自有', val:28000, day:800, dep:10000, tot:3, av:2, loc:'H-02', specs:['4/3 CMOS','Apple ProRes','5.1K 50fps','便携'], note:'' },
+    { id:40, name:'Air 3 航拍无人机', brand:'DJI', model:'Air 3', cat:'drone', code:'DRN-003', st:'in', own:'合作商', val:12000, day:500, dep:5000, tot:4, av:4, loc:'H-03', specs:['双摄','4K 100fps','46min 续航','轻巧'], note:'合作商挂靠。' },
+
+    { id:41, name:'V-Mount 电池套装', brand:'Core SWX', model:'V-Mount', cat:'accessory', code:'ACC-001', st:'in', own:'自有', val:30000, day:200, dep:3000, tot:10, av:8, loc:'I-01', specs:['多块装','D-tap 输出','含充电器','大容量'], note:'按套出租。' },
+    { id:42, name:'Nucleus-M 无线跟焦', brand:'Tilta', model:'Nucleus-M', cat:'accessory', code:'ACC-002', st:'in', own:'自有', val:12000, day:250, dep:4000, tot:3, av:3, loc:'I-02', specs:['三马达','无线手轮','低延迟','含支架'], note:'' },
+    { id:43, name:'Bolt 6 LT 无线图传', brand:'Teradek', model:'Bolt 6 LT', cat:'accessory', code:'ACC-003', st:'in', own:'自有', val:40000, day:450, dep:8000, tot:2, av:2, loc:'I-03', specs:['零延迟','750ft','多接收','5GHz'], note:'' },
+    { id:44, name:'CFexpress / SSD 存储套装', brand:'Angelbird', model:'Storage', cat:'accessory', code:'ACC-004', st:'in', own:'自有', val:30000, day:300, dep:5000, tot:6, av:5, loc:'I-04', specs:['多卡组合','高速读写','含读卡器','含硬盘箱'], note:'按套出租，归还需清空数据。' },
+    { id:45, name:'电影滤镜套装', brand:'NiSi', model:'Cine Filter', cat:'accessory', code:'ACC-005', st:'in', own:'合作商', val:20000, day:200, dep:3000, tot:3, av:3, loc:'I-05', specs:['ND / 黑柔','多尺寸','含滤镜包','合作商'], note:'合作商挂靠。' },
+    { id:46, name:'Delta Pro 移动电站', brand:'EcoFlow', model:'Delta Pro', cat:'accessory', code:'ACC-006', st:'in', own:'自有', val:25000, day:300, dep:4000, tot:4, av:3, loc:'I-06', specs:['3.6kWh','市电级输出','快充','外景供电'], note:'外景常备电源。' },
+  ];
+
+  RECORDS = [
+    { t:'今天 14:20', dev:'RED V-RAPTOR 8K VV', op:'出库', by:'张磊', proj:'某汽车品牌 TVC' },
+    { t:'今天 11:05', dev:'DJI Inspire 3', op:'出库', by:'李娜', proj:'城市形象宣传片' },
+    { t:'昨天 18:40', dev:'Aputure LS 600x Pro ×2', op:'入库', by:'王浩', proj:'直播多机位' },
+    { t:'昨天 16:12', dev:'Angénieux EZ 变焦', op:'报修', by:'设备组', proj:'例行检修' },
+    { t:'昨天 09:30', dev:'Sony VENICE 2', op:'预留', by:'陈曦', proj:'网剧 第二季' },
+    { t:'06-13 20:15', dev:'DJI RS 4 Pro ×3', op:'出库', by:'刘洋', proj:'美食短视频' },
+  ];
+
+  fmt(n) { return '¥' + Number(n).toLocaleString('en-US'); }
+
+  opColor(op) {
+    return ({ '出库':'oklch(0.62 0.08 255)', '入库':'oklch(0.64 0.11 152)', '报修':'oklch(0.62 0.16 32)', '预留':'oklch(0.74 0.12 78)' })[op] || '#9C9A93';
+  }
+  opTagStyle(op) {
+    const c = this.opColor(op);
+    return { fontSize:'11px', padding:'2px 9px', borderRadius:'6px', color:c, background:'color-mix(in oklch, '+c+' 14%, white)', fontWeight:500, flexShrink:0, whiteSpace:'nowrap' };
+  }
+
+  catLabel(id) { const c = this.CATS.find(c => c.id === id); return c ? c.label : id; }
+  catEn(id) { const c = this.CATS.find(c => c.id === id); return c ? c.en : ''; }
+
+  enrich(it) {
+    const s = this.STATUS[it.st];
+    const qty = this.state.cart[it.id] || 0;
+    return {
+      ...it,
+      en: this.catEn(it.cat),
+      catLabel: this.catLabel(it.cat),
+      statusLabel: s.label,
+      statusColor: s.color,
+      dotStyle: { width:'6px', height:'6px', borderRadius:'999px', background:s.color, flexShrink:0, display:'inline-block' },
+      availText: '可借 ' + it.av + '/' + it.tot,
+      totText: it.tot + ' / ' + it.av + ' 可借',
+      dailyText: this.fmt(it.day),
+      depositText: this.fmt(it.dep),
+      valueText: this.fmt(it.val),
+      ownerLabel: it.own,
+      ownerBadge: it.own === '自有' ? null : it.own,
+      inCart: qty > 0,
+      notInCart: qty === 0,
+      cartQty: qty,
+      hasNote: !!it.note,
+      open: () => this.openDetail(it.id),
+      add: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.addToCart(it.id, 1); },
+    };
+  }
+
+  filtered() {
+    const { cat, brand, status, owner, search, sort } = this.state;
+    let list = this.EQUIP.slice();
+    if (cat !== 'all') list = list.filter(i => i.cat === cat);
+    if (brand !== 'all') list = list.filter(i => i.brand === brand);
+    if (status !== 'all') list = list.filter(i => i.st === status);
+    if (owner !== 'all') list = list.filter(i => i.own === owner);
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter(i => (i.name + ' ' + i.brand + ' ' + i.model + ' ' + i.code).toLowerCase().includes(q));
+    }
+    if (sort === 'priceAsc') list.sort((a,b) => a.day - b.day);
+    else if (sort === 'priceDesc') list.sort((a,b) => b.day - a.day);
+    else if (sort === 'avail') list.sort((a,b) => b.av - a.av);
+    return list;
+  }
+
+  // navigation
+  goCatalog() { this.setState({ screen:'catalog' }); }
+  goCart() { this.setState({ screen:'cart' }); }
+  goDashboard() { this.setState({ screen:'dashboard' }); }
+  openDetail(id) { this.setState({ detailId:id, detailQty:1 }); }
+  closeDetail() { this.setState({ detailId:null }); }
+
+  // cart
+  addToCart(id, n) { this.setState(s => ({ cart: { ...s.cart, [id]: (s.cart[id]||0) + (n||1) } })); }
+  setQty(id, n) { this.setState(s => { const c = { ...s.cart }; if (n <= 0) delete c[id]; else c[id] = n; return { cart:c }; }); }
+  clearCart() { this.setState({ cart:{} }); }
+
+  navBtn(active) {
+    return { display:'flex', alignItems:'center', gap:'6px', height:'34px', padding:'0 13px', borderRadius:'9px', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:'13.5px', background: active ? '#1C1B19' : 'transparent', color: active ? '#fff' : '#44423D', fontWeight: active ? 500 : 400, transition:'background .12s' };
+  }
+
+  // ===== admin: mutation & nav =====
+  get logEntries() { if (!this._log) this._log = this.RECORDS.map((r, i) => ({ ...r, id: 'L' + i })); return this._log; }
+  nextId() { return Math.max(0, ...this.EQUIP.map(e => e.id)) + 1; }
+  pushLog(op, dev, by, proj) { this.logEntries.unshift({ id: 'L' + Date.now(), t: '刚刚', op, dev, by: by || '—', proj: proj || '—' }); }
+  goAdmin() { this.setState({ view: 'admin', adminScreen: 'home' }); }
+  goFront() { this.setState({ view: 'front', screen: 'catalog' }); }
+  setAdmin(s) { this.setState({ adminScreen: s, statusMenu: null }); }
+  toast(msg) { this.setState({ toast: msg }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: '' }), 2200); }
+  setStatus(id, k) { const it = this.EQUIP.find(e => e.id === id); if (it && it.st !== k) { it.st = k; this.pushLog('改状态', it.name, '设备组', this.STATUS[k].label); this.toast(it.name + ' → ' + this.STATUS[k].label); } this.setState({ statusMenu: null }); }
+  toggleStatusMenu(id) { this.setState(s => ({ statusMenu: s.statusMenu === id ? null : id })); }
+  toggleSelect(id) { this.setState(s => ({ selected: s.selected.includes(id) ? s.selected.filter(x => x !== id) : [...s.selected, id] })); }
+  selectAll(ids) { this.setState(s => ({ selected: s.selected.length === ids.length ? [] : ids.slice() })); }
+  batchStatus(k) { this.state.selected.forEach(id => { const it = this.EQUIP.find(e => e.id === id); if (it) it.st = k; }); this.toast('已批量更新 ' + this.state.selected.length + ' 项'); this.setState({ selected: [] }); }
+  _del(ids) { for (let i = this.EQUIP.length - 1; i >= 0; i--) if (ids.includes(this.EQUIP[i].id)) this.EQUIP.splice(i, 1); }
+  batchDelete() { const n = this.state.selected.length; this._del(this.state.selected); this.toast('已删除 ' + n + ' 项'); this.setState({ selected: [] }); }
+  deleteDevice(id) { this._del([id]); this.toast('已删除该设备'); this.setState({ statusMenu: null }); }
+  openEditor(id) { let d; if (id) { const it = this.EQUIP.find(e => e.id === id); d = { ...it, specsText: (it.specs || []).join('、') }; } else { d = { id: null, name: '', brand: '', model: '', cat: 'cinema', code: '', st: 'in', own: '自有', val: '', day: '', dep: '', tot: 1, av: 1, loc: '', note: '', specsText: '' }; } this.setState({ editorOpen: true, editorId: id || null, draft: d, view: 'admin' }); }
+  closeEditor() { this.setState({ editorOpen: false }); }
+  setDraft(k, v) { this.setState(s => ({ draft: { ...s.draft, [k]: v } })); }
+  saveDraft() { const d = this.state.draft; if (!d.name || !d.name.trim()) { this.toast('请填写设备名称'); return; } const specs = (d.specsText || '').split(/[、,，\n]/).map(x => x.trim()).filter(Boolean); const rec = { name: d.name.trim(), brand: d.brand || '—', model: d.model || '', cat: d.cat, code: d.code || ('NEW-' + this.nextId()), st: d.st, own: d.own, val: Number(d.val) || 0, day: Number(d.day) || 0, dep: Number(d.dep) || 0, tot: Number(d.tot) || 1, av: Number(d.av) || 0, loc: d.loc || '—', specs, note: d.note || '' }; if (this.state.editorId) { Object.assign(this.EQUIP.find(e => e.id === this.state.editorId), rec); this.toast('已保存修改'); } else { this.EQUIP.unshift({ id: this.nextId(), ...rec }); this.pushLog('入库', rec.name, '设备组', '新设备登记'); this.toast('已新增设备'); } this.setState({ editorOpen: false }); }
+  submitReg() { const s = this.state; if (!s.regDevice) { this.toast('请选择设备'); return; } const it = this.EQUIP.find(e => e.id === Number(s.regDevice)); const op = { out: '出库', in: '入库' }[s.regOp]; if (it) { if (s.regOp === 'out') { it.av = Math.max(0, it.av - 1); if (it.av === 0) it.st = 'out'; } else { it.av = Math.min(it.tot, it.av + 1); it.st = 'in'; } this.pushLog(op, it.name, s.regBy, s.regProj); } this.toast('已登记' + op); this.setState({ regDevice: '', regBy: '', regProj: '' }); }
+
+  renderVals() {
+    const st = this.state;
+    const list = this.filtered();
+    const cards = list.map(i => this.enrich(i));
+
+    // categories (rail + chips)
+    const counts = {};
+    this.EQUIP.forEach(i => { counts[i.cat] = (counts[i.cat]||0) + 1; });
+    const railBase = { display:'flex', alignItems:'center', justifyContent:'space-between', width:'100%', padding:'8px 11px', borderRadius:'8px', border:'none', fontSize:'13px', cursor:'pointer', fontFamily:'inherit', textAlign:'left', transition:'background .12s' };
+    const chipBase = { padding:'7px 14px', borderRadius:'999px', fontSize:'13px', cursor:'pointer', whiteSpace:'nowrap', fontFamily:'inherit', transition:'all .12s' };
+    const mkCat = (id, label, count) => {
+      const active = st.cat === id;
+      return {
+        id, label, count, en: id === 'all' ? 'ALL' : this.catEn(id),
+        active,
+        select: () => this.setState({ cat:id }),
+        railStyle: { ...railBase, background: active ? '#EEF2FD' : 'transparent', color: active ? '#2F5AC7' : '#44423D', fontWeight: active ? 600 : 400 },
+        chipStyle: { ...chipBase, background: active ? '#1C1B19' : '#fff', color: active ? '#fff' : '#44423D', border: active ? '1px solid #1C1B19' : '1px solid #E4E3DE' },
+      };
+    };
+    const cats = [ mkCat('all', '全部器材', this.EQUIP.length), ...this.CATS.map(c => mkCat(c.id, c.label, counts[c.id]||0)) ];
+
+    // aisles (group filtered by category)
+    const aisles = this.CATS.map(c => {
+      const items = list.filter(i => i.cat === c.id).map(i => this.enrich(i));
+      return { id:c.id, label:c.label, en:c.en, count:items.length, items, viewAll: () => this.setState({ cat:c.id, layout:'grid' }) };
+    }).filter(a => a.count > 0);
+
+    // filter option lists
+    const brandSet = Array.from(new Set(this.EQUIP.map(i => i.brand))).sort();
+    const brandOptions = [{ value:'all', label:'全部品牌' }, ...brandSet.map(b => ({ value:b, label:b }))];
+    const statusOptions = [{ value:'all', label:'全部状态' }, ...Object.keys(this.STATUS).map(k => ({ value:k, label:this.STATUS[k].label }))];
+    const ownerOptions = [{ value:'all', label:'全部所属方' }, { value:'自有', label:'公司自有' }, { value:'合作商', label:'合作商家' }, { value:'个人挂靠', label:'个人挂靠' }];
+
+    // layouts
+    const loBase = { padding:'7px 14px', borderRadius:'8px', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:'13px', transition:'all .12s' };
+    const layouts = [
+      { id:'grid', label:'货架网格' },
+      { id:'aisle', label:'分区货架' },
+      { id:'showcase', label:'大图筛选' },
+    ].map(l => {
+      const active = st.layout === l.id;
+      return { ...l, select: () => this.setState({ layout:l.id }), style: { ...loBase, background: active ? '#fff' : 'transparent', color: active ? '#1C1B19' : '#76746E', fontWeight: active ? 600 : 400, boxShadow: active ? '0 1px 3px rgba(20,20,18,.10)' : 'none' } };
+    });
+
+    // detail
+    const detRaw = st.detailId ? this.EQUIP.find(i => i.id === st.detailId) : null;
+    let detail = null;
+    if (detRaw) {
+      detail = this.enrich(detRaw);
+      detail.records = [
+        { t:'06-12', op:'入库', by:'设备组 · 清洁检测', tagStyle:this.opTagStyle('入库') },
+        { t:'06-08', op:'出库', by:'张磊 · 广告项目', tagStyle:this.opTagStyle('出库') },
+        { t:'05-30', op:'入库', by:'王浩 · 归还入库', tagStyle:this.opTagStyle('入库') },
+      ];
+    }
+
+    // cart
+    const cartIds = Object.keys(st.cart);
+    const cartItems = cartIds.map(id => {
+      const it = this.enrich(this.EQUIP.find(e => e.id === Number(id)));
+      const qty = st.cart[id];
+      return { ...it, qty, lineTotal: this.fmt(it.day * qty * st.days),
+        inc: () => this.addToCart(Number(id), 1),
+        dec: () => this.setQty(Number(id), qty - 1),
+        remove: () => this.setQty(Number(id), 0) };
+    });
+    const cartCount = cartIds.reduce((s,id) => s + st.cart[id], 0);
+    const sumDailyN = cartIds.reduce((s,id) => s + this.EQUIP.find(e => e.id === Number(id)).day * st.cart[id], 0);
+    const sumDepN = cartIds.reduce((s,id) => s + this.EQUIP.find(e => e.id === Number(id)).dep * st.cart[id], 0);
+
+    // dashboard stats
+    const totalUnits = this.EQUIP.reduce((s,i) => s + i.tot, 0);
+    const availUnits = this.EQUIP.reduce((s,i) => s + i.av, 0);
+    const outCount = this.EQUIP.filter(i => i.st === 'out').length;
+    const fixCount = this.EQUIP.filter(i => i.st === 'repair' || i.st === 'inspect').length;
+    const valTotal = this.EQUIP.reduce((s,i) => s + i.val * i.tot, 0);
+    const availRate = Math.round(availUnits / totalUnits * 100);
+    const stats = [
+      { label:'设备型号(SKU)', value:String(this.EQUIP.length), unit:'种', sub:'共 ' + totalUnits + ' 件实物' },
+      { label:'当前可借', value:String(availUnits), unit:'件', sub:'可借率 ' + availRate + '%' },
+      { label:'外借中', value:String(outCount), unit:'型号', sub:'正在项目使用' },
+      { label:'维修 / 待检', value:String(fixCount), unit:'型号', sub:'需关注处理' },
+      { label:'设备总估值', value:'¥' + (valTotal/10000).toFixed(0) + '万', unit:'', sub:'按实物数量计' },
+      { label:'分类数', value:String(this.CATS.length), unit:'类', sub:'覆盖全流程器材' },
+    ];
+
+    // status distribution (by SKU count)
+    const statusBars = Object.keys(this.STATUS).map(k => {
+      const count = this.EQUIP.filter(i => i.st === k).length;
+      const pct = count / this.EQUIP.length * 100;
+      const color = this.STATUS[k].color;
+      return { key:k, label:this.STATUS[k].label, count, pct, pctText: Math.round(pct) + '%',
+        barStyle: { width: pct + '%', background:color, height:'100%' },
+        dotStyle: { width:'9px', height:'9px', borderRadius:'3px', background:color, flexShrink:0, display:'inline-block' } };
+    }).filter(b => b.count > 0);
+
+    // owner distribution
+    const owners = ['自有','合作商','个人挂靠'];
+    const ownerLabels = { '自有':'公司自有', '合作商':'合作商家', '个人挂靠':'个人挂靠' };
+    const ownerColors = { '自有':'oklch(0.55 0.13 258)', '合作商':'oklch(0.64 0.11 152)', '个人挂靠':'oklch(0.74 0.10 78)' };
+    const ownerBars = owners.map(o => {
+      const count = this.EQUIP.filter(i => i.own === o).length;
+      const pct = count / this.EQUIP.length * 100;
+      return { label:ownerLabels[o], count, pctText: Math.round(pct) + '%',
+        barStyle: { width: pct + '%', height:'100%', background:ownerColors[o] } };
+    });
+
+    // category bars
+    const maxCat = Math.max(...this.CATS.map(c => this.EQUIP.filter(i => i.cat === c.id).reduce((s,i)=>s+i.tot,0)));
+    const catBars = this.CATS.map(c => {
+      const items = this.EQUIP.filter(i => i.cat === c.id);
+      const tot = items.reduce((s,i)=>s+i.tot,0);
+      const av = items.reduce((s,i)=>s+i.av,0);
+      return { label:c.label, availText: av + '/' + tot,
+        barStyle: { width: (tot/maxCat*100) + '%', height:'100%', background:'oklch(0.55 0.13 258)', borderRadius:'5px' } };
+    });
+
+    const records = this.logEntries.slice(0, 6).map(r => ({ ...r, tagStyle: this.opTagStyle(r.op) }));
+
+    // ===== ADMIN =====
+    const statusList = Object.keys(this.STATUS).map(k => ({ key: k, label: this.STATUS[k].label, color: this.STATUS[k].color }));
+    const adminNav = [ { id: 'home', label: '工作台' }, { id: 'devices', label: '设备管理' }, { id: 'records', label: '出入库记录' } ].map(n => { const active = st.adminScreen === n.id; return { ...n, active, select: () => this.setAdmin(n.id), navStyle: { display:'flex', alignItems:'center', gap:'9px', width:'100%', padding:'9px 11px', borderRadius:'8px', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:'13.5px', textAlign:'left', background: active ? 'rgba(255,255,255,.10)' : 'transparent', color: active ? '#fff' : '#A8A6A0', fontWeight: active ? 600 : 400 } }; });
+    let arows = this.EQUIP.slice();
+    if (st.aCat !== 'all') arows = arows.filter(i => i.cat === st.aCat);
+    if (st.aStatus !== 'all') arows = arows.filter(i => i.st === st.aStatus);
+    if (st.aOwner !== 'all') arows = arows.filter(i => i.own === st.aOwner);
+    if (st.aSearch.trim()) { const q = st.aSearch.trim().toLowerCase(); arows = arows.filter(i => (i.name + ' ' + i.brand + ' ' + i.model + ' ' + i.code).toLowerCase().includes(q)); }
+    const allIds = arows.map(i => i.id);
+    const ROWCOLS = '34px 92px 1.7fr 84px 116px 80px 60px 78px 86px 78px';
+    const stPill = (k) => { const c = this.STATUS[k].color; return { display:'inline-flex', alignItems:'center', gap:'5px', fontSize:'12px', padding:'3px 9px', borderRadius:'6px', color:c, background:'color-mix(in oklch, '+c+' 13%, white)', border:'1px solid color-mix(in oklch, '+c+' 26%, white)', cursor:'pointer', whiteSpace:'nowrap', fontFamily:'inherit' }; };
+    const adminRows = arows.map(i => ({ ...i, catLabel: this.catLabel(i.cat), statusLabel: this.STATUS[i.st].label, pillStyle: stPill(i.st), dotStyle: { width:'6px', height:'6px', borderRadius:'999px', background:this.STATUS[i.st].color, display:'inline-block' }, dailyText: this.fmt(i.day), qtyText: i.av + ' / ' + i.tot, selected: st.selected.includes(i.id), menuOpen: st.statusMenu === i.id, rowStyle: { display:'grid', gridTemplateColumns: ROWCOLS, alignItems:'center', gap:'10px', padding:'9px 16px', borderBottom:'1px solid #F2F1ED', background: st.selected.includes(i.id) ? '#F4F8FF' : '#fff' }, qtyStyle: { fontFamily:"'JetBrains Mono', monospace", fontSize:'12px', textAlign:'right', color: i.av === 0 ? 'oklch(0.55 0.18 25)' : '#44423D' }, toggleSel: () => this.toggleSelect(i.id), openMenu: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.toggleStatusMenu(i.id); }, edit: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.openEditor(i.id); }, del: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.deleteDevice(i.id); }, menuItems: statusList.map(s2 => ({ ...s2, dotStyle: { width:'7px', height:'7px', borderRadius:'999px', background:s2.color, display:'inline-block' }, pick: () => this.setStatus(i.id, s2.key) })) }));
+    const todayOut = this.logEntries.filter(r => /今天|刚刚/.test(r.t) && r.op === '出库').length;
+    const todayIn = this.logEntries.filter(r => /今天|刚刚/.test(r.t) && r.op === '入库').length;
+    const cnt = (k) => this.EQUIP.filter(i => i.st === k).length;
+    const mkStat = (label, value, unit, accent) => ({ label, value, unit, accent, dot: { width:'8px', height:'8px', borderRadius:'3px', background:accent, display:'inline-block' } });
+    const aStats = [ mkStat('今日出库', String(todayOut || 2), '次', '#2F5AC7'), mkStat('今日入库', String(todayIn || 1), '次', 'oklch(0.6 0.12 152)'), mkStat('待检设备', String(cnt('inspect')), '件', 'oklch(0.66 0.04 100)'), mkStat('维修中', String(cnt('repair')), '件', 'oklch(0.62 0.16 32)'), mkStat('外借中', String(cnt('out')), '型号', 'oklch(0.62 0.08 255)'), mkStat('待归还', String(cnt('out') + cnt('reserved')), '项', 'oklch(0.74 0.12 78)') ];
+    const todos = [ { op:'到期', text:'RED V-RAPTOR 8K VV 预计今日 18:00 归还', sub:'某汽车品牌 TVC · 张磊', tagStyle:this.opTagStyle('出库') }, { op:'待检', text:'Atomos Shogun 7 已归库，待验收入库', sub:'设备组检查后置为在库', tagStyle:this.opTagStyle('预留') }, { op:'维修', text:'Angénieux EZ 变焦 维修进行中', sub:'送检第 3 天 · 跟进维修商', tagStyle:this.opTagStyle('报修') }, { op:'预留', text:'Sony VENICE 2 已被网剧第二季预留', sub:'确认档期 06-20 起', tagStyle:this.opTagStyle('预留') }, { op:'库存', text:'DJI RS 4 Pro 可借 2/5，临近不足', sub:'建议协调归还或补充', tagStyle:this.opTagStyle('改状态') } ];
+    const quickActions = [ { label:'新增设备', desc:'录入一台新器材', go:() => this.openEditor(null) }, { label:'登记出库', desc:'设备出库登记', go:() => this.setState({ adminScreen:'records', regOp:'out' }) }, { label:'登记入库', desc:'归还入库登记', go:() => this.setState({ adminScreen:'records', regOp:'in' }) }, { label:'设备管理', desc:'查看全部台账', go:() => this.setAdmin('devices') } ];
+    let recRows = this.logEntries.slice();
+    if (st.recFilter !== 'all') recRows = recRows.filter(r => r.op === st.recFilter);
+    recRows = recRows.map(r => ({ ...r, tagStyle: this.opTagStyle(r.op) }));
+    const recFilters = [['all','全部'],['出库','出库'],['入库','入库'],['改状态','状态变更'],['预留','预留'],['报修','报修']].map(([k,l]) => { const active = st.recFilter === k; return { key:k, label:l, active, select: () => this.setState({ recFilter:k }), chipStyle: { padding:'5px 12px', borderRadius:'999px', border: active ? '1px solid #1C1B19' : '1px solid #E4E3DE', background: active ? '#1C1B19' : '#fff', color: active ? '#fff' : '#76746E', fontSize:'12.5px', cursor:'pointer', fontFamily:'inherit' } }; });
+    const regDeviceOptions = this.EQUIP.map(i => ({ value: String(i.id), label: i.code + ' · ' + i.name }));
+    const segStyle = (active) => ({ flex:1, padding:'8px', borderRadius:'7px', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:'13px', background: active ? '#fff' : 'transparent', color: active ? '#1C1B19' : '#76746E', fontWeight: active ? 600 : 400, boxShadow: active ? '0 1px 2px rgba(20,20,18,.08)' : 'none' });
+    const catOptions = this.CATS.map(c => ({ value:c.id, label:c.label }));
+    const ownerSel = [ { value:'自有', label:'公司自有' }, { value:'合作商', label:'合作商家' }, { value:'个人挂靠', label:'个人挂靠' } ];
+    const dd = st.draft || {};
+
+    return {
+      // shell
+      goCatalog: () => this.goCatalog(),
+      goCart: () => this.goCart(),
+      goDashboard: () => this.goDashboard(),
+      navCatStyle: this.navBtn(st.screen === 'catalog'),
+      navDashStyle: this.navBtn(st.screen === 'dashboard'),
+      navCartStyle: this.navBtn(st.screen === 'cart'),
+      searchVal: st.search,
+      onSearch: (e) => this.setState({ search: e.target.value }),
+      cartCount,
+      cartHasItems: cartCount > 0,
+      stop: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+
+      // screen flags
+      showCatalog: st.screen === 'catalog',
+      showCart: st.screen === 'cart',
+      showDashboard: st.screen === 'dashboard',
+
+      // catalog header
+      totalCount: this.EQUIP.length,
+      totalAvail: availUnits,
+      layouts,
+      layoutGrid: st.layout === 'grid',
+      layoutAisle: st.layout === 'aisle',
+      layoutShowcase: st.layout === 'showcase',
+      resultCount: list.length,
+      sortVal: st.sort,
+      onSort: (e) => this.setState({ sort: e.target.value }),
+
+      // filters
+      cats,
+      aisles,
+      brandOptions, statusOptions, ownerOptions,
+      brandVal: st.brand, statusVal: st.status, ownerVal: st.owner,
+      onBrand: (e) => this.setState({ brand: e.target.value }),
+      onStatus: (e) => this.setState({ status: e.target.value }),
+      onOwner: (e) => this.setState({ owner: e.target.value }),
+      resetFilters: () => this.setState({ cat:'all', brand:'all', status:'all', owner:'all', search:'' }),
+
+      // grid
+      cards,
+      hasResults: list.length > 0,
+      noResults: list.length === 0,
+
+      // detail
+      detailOpen: !!detail,
+      detail,
+      detailQty: st.detailQty,
+      incDetailQty: () => this.setState(s => ({ detailQty: s.detailQty + 1 })),
+      decDetailQty: () => this.setState(s => ({ detailQty: Math.max(1, s.detailQty - 1) })),
+      detailAdd: () => { this.addToCart(st.detailId, st.detailQty); this.setState({ detailId:null, screen:'cart' }); },
+      closeDetail: () => this.closeDetail(),
+
+      // cart
+      cartItems,
+      cartEmpty: cartCount === 0,
+      projectName: st.projectName,
+      onProjectName: (e) => this.setState({ projectName: e.target.value }),
+      daysVal: st.days,
+      incDays: () => this.setState(s => ({ days: Math.min(90, s.days + 1) })),
+      decDays: () => this.setState(s => ({ days: Math.max(1, s.days - 1) })),
+      sumDaily: this.fmt(sumDailyN),
+      sumRent: this.fmt(sumDailyN * st.days),
+      sumDeposit: this.fmt(sumDepN),
+      sumTotal: this.fmt(sumDailyN * st.days + sumDepN),
+      clearCart: () => this.clearCart(),
+
+      // dashboard
+      today: '2026-06-15',
+      stats, statusBars, ownerBars, catBars, records,
+
+      // ===== admin =====
+      frontView: st.view === 'front',
+      adminView: st.view === 'admin',
+      goAdmin: () => this.goAdmin(),
+      goFront: () => this.goFront(),
+      adminNav,
+      adminHome: st.adminScreen === 'home',
+      adminDevices: st.adminScreen === 'devices',
+      adminRecords: st.adminScreen === 'records',
+      aStats, todos, todoCount: todos.length, quickActions,
+      adminRows, adminEmpty: arows.length === 0, adminCount: arows.length, totalSkus: this.EQUIP.length,
+      aSearch: st.aSearch, onASearch: (e) => this.setState({ aSearch: e.target.value }),
+      aCat: st.aCat, onACat: (e) => this.setState({ aCat: e.target.value }),
+      aStatus: st.aStatus, onAStatus: (e) => this.setState({ aStatus: e.target.value }),
+      aOwner: st.aOwner, onAOwner: (e) => this.setState({ aOwner: e.target.value }),
+      catFilterOptions: [{ value:'all', label:'全部类别' }, ...this.CATS.map(c => ({ value:c.id, label:c.label }))],
+      statusFilterOptions: [{ value:'all', label:'全部状态' }, ...statusList.map(s2 => ({ value:s2.key, label:s2.label }))],
+      ownerFilterOptions: [{ value:'all', label:'全部所属方' }, { value:'自有', label:'公司自有' }, { value:'合作商', label:'合作商家' }, { value:'个人挂靠', label:'个人挂靠' }],
+      selCount: st.selected.length, hasSel: st.selected.length > 0,
+      allSelected: allIds.length > 0 && st.selected.length === allIds.length,
+      onSelectAll: () => this.selectAll(allIds), clearSel: () => this.setState({ selected: [] }),
+      batchInOptions: statusList.map(s2 => ({ ...s2, pick: () => this.batchStatus(s2.key) })),
+      batchDelete: () => this.batchDelete(), openNew: () => this.openEditor(null),
+      closeMenus: () => { if (this.state.statusMenu !== null) this.setState({ statusMenu: null }); },
+      recRows, recFilters, regDeviceOptions,
+      regDevice: st.regDevice, onRegDevice: (e) => this.setState({ regDevice: e.target.value }),
+      regOp: st.regOp, regOut: () => this.setState({ regOp: 'out' }), regIn: () => this.setState({ regOp: 'in' }),
+      regOutStyle: segStyle(st.regOp === 'out'), regInStyle: segStyle(st.regOp === 'in'),
+      regBy: st.regBy, onRegBy: (e) => this.setState({ regBy: e.target.value }),
+      regProj: st.regProj, onRegProj: (e) => this.setState({ regProj: e.target.value }),
+      submitReg: () => this.submitReg(),
+      editorOpen: st.editorOpen, editorTitle: st.editorId ? '编辑设备' : '新增设备',
+      catOptions, ownerSel, statusEditOptions: statusList,
+      dName: dd.name || '', dBrand: dd.brand || '', dModel: dd.model || '', dCat: dd.cat || 'cinema', dCode: dd.code || '', dSt: dd.st || 'in', dOwn: dd.own || '自有', dVal: dd.val ?? '', dDay: dd.day ?? '', dDep: dd.dep ?? '', dTot: dd.tot ?? 1, dAv: dd.av ?? 0, dLoc: dd.loc || '', dNote: dd.note || '', dSpecs: dd.specsText || '',
+      setName: (e) => this.setDraft('name', e.target.value), setBrand: (e) => this.setDraft('brand', e.target.value), setModel: (e) => this.setDraft('model', e.target.value), setCat: (e) => this.setDraft('cat', e.target.value), setCode: (e) => this.setDraft('code', e.target.value), setSt: (e) => this.setDraft('st', e.target.value), setOwn: (e) => this.setDraft('own', e.target.value), setVal: (e) => this.setDraft('val', e.target.value), setDay: (e) => this.setDraft('day', e.target.value), setDep: (e) => this.setDraft('dep', e.target.value), setTot: (e) => this.setDraft('tot', e.target.value), setAv: (e) => this.setDraft('av', e.target.value), setLoc: (e) => this.setDraft('loc', e.target.value), setNote: (e) => this.setDraft('note', e.target.value), setSpecs: (e) => this.setDraft('specsText', e.target.value),
+      saveDraft: () => this.saveDraft(), closeEditor: () => this.closeEditor(),
+      toastMsg: st.toast, toastShow: !!st.toast,
+    };
+  }
+}
+</script>
+</body>
+</html>
