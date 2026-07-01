@@ -1,25 +1,95 @@
-# CODING AGENTS: READ THIS FIRST
+# 景彩文化 · 器材超市
 
-This is a **handoff bundle** from Claude Design (claude.ai/design).
+影视器材租赁与服务平台 —— Next.js 14 (App Router) + TypeScript + Tailwind CSS + Zustand，可选接入 Supabase。
 
-A user mocked up designs in HTML/CSS/JS using an AI design tool, then exported this bundle so a coding agent can implement the designs for real.
+- **器材超市** `/catalog`：46 件器材，三种布局(货架网格 / 分区货架 / 大图筛选)、分类/品牌/状态筛选、排序、租用清单
+- **服务超市** `/services`：6 个服务包，按领域筛选
+- **人才库** `/talent`：9 位专业成员，按角色筛选
+- **库存总览** `/dashboard`：统计卡、状态分布、类别库存、出入库记录
+- **后台管理** `/admin`：工作台、设备管理(增删改 / 批量 / Excel 导入)、出入库记录(扫码登记)
 
-## What you should do — IMPORTANT
+---
 
-**Read the chat transcripts first.** There are 2 chat transcript(s) in `chats/`. The transcripts show the full back-and-forth between the user and the design assistant — they tell you **what the user actually wants** and **where they landed** after iterating. Don't skip them. The final HTML files are the output, but the chat is where the intent lives.
+## 一、本地开发环境准备
 
-**Read `project/Canvas.dc.html` in full.** The user had this file open when they triggered the handoff, so it's almost certainly the primary design they want built. Read it top to bottom — don't skim. Then **follow its imports**: open every file it pulls in (shared components, CSS, scripts) so you understand how the pieces fit together before you start implementing.
+安装三样:
 
-**If anything is ambiguous, ask the user to confirm before you start implementing.** It's much cheaper to clarify scope up front than to build the wrong thing.
+- [Node.js](https://nodejs.org) 18 或 20 LTS
+- [Git](https://git-scm.com)
+- [VS Code](https://code.visualstudio.com)
 
-## About the design files
+## 二、拉取项目
 
-The design medium is **HTML/CSS/JS** — these are prototypes, not production code. Your job is to **recreate them pixel-perfectly** in whatever technology makes sense for the target codebase (React, Vue, native, whatever fits). Match the visual output; don't copy the prototype's internal structure unless it happens to fit.
+在 VS Code 终端(`` Ctrl+` ``)执行:
 
-**Don't render these files in a browser or take screenshots unless the user asks you to.** Everything you need — dimensions, colors, layout rules — is spelled out in the source. Read the HTML and CSS directly; a screenshot won't tell you anything they don't.
+```bash
+git clone https://github.com/a17181710606-prog/-_-_0.01.git
+cd -_-_0.01
+code .
+```
 
-## Bundle contents
+## 三、本地跑起来
 
-- `README.md` — this file
-- `chats/` — conversation transcripts (read these!)
-- `project/` — the `公司主程序App` project files (HTML prototypes, assets, components)
+```bash
+npm install
+cp .env.local.example .env.local   # 先不填也能跑,用内置种子数据
+npm run dev                        # 打开 http://localhost:3000
+```
+
+> ⚠️ 不要在同一目录同时跑 `npm run dev` 和 `npm start`,会污染 `.next` 构建目录导致 500。
+> 要测生产版:先 `npm run build`,再 `npm start`。
+
+## 四、连接 GitHub 自动上传
+
+**先在 VS Code 登录 GitHub(一次即可):** 左下角头像图标 → *Sign in to GitHub* → 浏览器授权。
+
+**方式 A(推荐 · 半自动):**
+1. 左侧「源代码管理」面板 → 填提交信息 → 点 **✓ 提交**
+2. 点 **↻ Sync Changes** 推送到 GitHub
+3. 设置里勾上 `git.autofetch` 自动拉取远端更新
+
+**方式 B(全自动 · 保存即上传):** 安装扩展 **GitDoc** → 命令面板 `GitDoc: Enable` → 每次保存自动 commit + push。历史会较碎,适合个人快速迭代,可随时 `GitDoc: Disable`。
+
+## 五、自动部署(Vercel)
+
+在 [Vercel](https://vercel.com) 用 GitHub 登录并 Import 本仓库后,每次 push 会自动构建上线:
+
+```
+VS Code 提交 → 推送 GitHub → Vercel 自动部署 → 线上更新
+```
+
+---
+
+## 环境变量
+
+`.env.local`(不提交到 git):
+
+```
+NEXT_PUBLIC_SUPABASE_URL=https://你的项目.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=你的 anon key
+```
+
+不填则使用内存种子数据(`lib/data.ts`)。填写后数据库结构见 `supabase/migrations/001_schema.sql`,在 Supabase SQL Editor 执行即可建表。
+
+## 项目结构
+
+```
+app/            页面路由(catalog / services / talent / dashboard / admin)
+components/     组件(equipment / services / talent / dashboard / admin / layout / ui)
+lib/            types / constants / data(种子数据) / store(Zustand) / supabase / utils
+supabase/       数据库迁移 SQL
+public/assets/  Logo 等静态资源
+```
+
+## 常用命令
+
+```bash
+npm run dev     # 开发
+npm run build   # 生产构建
+npm start       # 运行生产构建
+npm run lint    # 代码检查
+```
+
+---
+
+> 原始设计稿(Claude Design 导出的 HTML 原型)保留在 `project/`,设计对话记录在 `chats/`,供比对参考。
