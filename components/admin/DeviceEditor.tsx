@@ -8,7 +8,7 @@ import type { CatKey, StatusKey, OwnerKey } from '@/lib/types'
 const BLANK = {
   name: '', brand: '', model: '', cat: 'cinema' as CatKey,
   code: '', st: 'in' as StatusKey, own: '自有' as OwnerKey,
-  val: 0, day: 0, dep: 0, tot: 0, av: 1, loc: '', specs: [] as string[], note: '',
+  val: 0, day: 0, dep: 0, tot: 1, av: 1, loc: '', specs: [] as string[], note: '',
 }
 
 export default function DeviceEditor() {
@@ -99,9 +99,12 @@ export default function DeviceEditor() {
             <Input type="number" value={String(form.dep)} onChange={v => set('dep', Number(v))} placeholder="0" />
           </Row>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <Row label="资产价值 (¥)">
             <Input type="number" value={String(form.val)} onChange={v => set('val', Number(v))} placeholder="0" />
+          </Row>
+          <Row label="总数量">
+            <Input type="number" value={String(form.tot)} onChange={v => set('tot', Number(v))} placeholder="1" />
           </Row>
           <Row label="可用数量">
             <Input type="number" value={String(form.av)} onChange={v => set('av', Number(v))} placeholder="1" />

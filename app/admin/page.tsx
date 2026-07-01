@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useStore } from '@/lib/store'
+import { useStore, todayStr } from '@/lib/store'
 import { OP_COLORS } from '@/lib/constants'
 
 export default function AdminHomePage() {
@@ -13,12 +13,14 @@ export default function AdminHomePage() {
 
   const today = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-')
   const cnt = (k: string) => equipment.filter(e => e.st === k).length
-  const todayOut = movements.filter(r => /今天|刚刚/.test(r.t) && r.op === '出库').length
-  const todayIn = movements.filter(r => /今天|刚刚/.test(r.t) && r.op === '入库').length
+  const td = todayStr()
+  const isToday = (t: string) => t.startsWith(td) || /今天|刚刚/.test(t)
+  const todayOut = movements.filter(r => isToday(r.t) && r.op === '出库').length
+  const todayIn = movements.filter(r => isToday(r.t) && r.op === '入库').length
 
   const aStats = [
-    { label: '今日出库', value: String(todayOut || 2), unit: '次', accent: '#2F5AC7' },
-    { label: '今日入库', value: String(todayIn || 1), unit: '次', accent: 'oklch(0.6 0.12 152)' },
+    { label: '今日出库', value: String(todayOut), unit: '次', accent: '#2F5AC7' },
+    { label: '今日入库', value: String(todayIn), unit: '次', accent: 'oklch(0.6 0.12 152)' },
     { label: '待检设备', value: String(cnt('inspect')), unit: '件', accent: 'oklch(0.66 0.04 100)' },
     { label: '维修中', value: String(cnt('repair')), unit: '件', accent: 'oklch(0.62 0.16 32)' },
     { label: '外借中', value: String(cnt('out')), unit: '型号', accent: 'oklch(0.62 0.08 255)' },

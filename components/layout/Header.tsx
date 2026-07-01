@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { useStore } from '@/lib/store'
+import { useAuth } from '@/lib/auth'
 
 const NAV = [
   { href: '/catalog',   label: '器材超市' },
@@ -20,8 +21,15 @@ export default function Header() {
     setSearchQ: s.setSearchQ,
   }))
 
+  const { user, hydrated } = useAuth()
+
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0)
   if (pathname.startsWith('/admin')) return null
+
+  // 已登录进后台，未登录先去登录页
+  const loggedIn = hydrated && !!user
+  const adminHref = loggedIn ? '/admin' : '/login?redirect=/admin'
+  const adminLabel = loggedIn ? '后台管理' : '登录'
 
   return (
     <header
@@ -104,18 +112,26 @@ export default function Header() {
 
       <div style={{ width: '1px', height: '22px', background: '#E4E3DE', margin: '0 2px' }} />
 
-      {/* admin */}
+      {/* admin / login */}
       <Link
-        href="/admin"
+        href={adminHref}
         className="flex items-center cursor-pointer transition-colors hover:!bg-[#1C1B19] hover:!text-white hover:!border-[#1C1B19]"
         style={{ height: '34px', padding: '0 13px', borderRadius: '9px', border: '1px solid #E4E3DE', background: '#fff', fontSize: '13px', color: '#44423D', gap: '6px' }}
       >
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.4}>
-          <rect x="2.5" y="3" width="11" height="8" rx="1.2" />
-          <line x1="6" y1="13.6" x2="10" y2="13.6" strokeLinecap="round" />
-          <line x1="8" y1="11" x2="8" y2="13.6" />
-        </svg>
-        后台管理
+        {loggedIn ? (
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.4}>
+            <rect x="2.5" y="3" width="11" height="8" rx="1.2" />
+            <line x1="6" y1="13.6" x2="10" y2="13.6" strokeLinecap="round" />
+            <line x1="8" y1="11" x2="8" y2="13.6" />
+          </svg>
+        ) : (
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.4}>
+            <path d="M7 2.5H12.5a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H7" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M4 5.5L1.5 8L4 10.5" strokeLinecap="round" strokeLinejoin="round" />
+            <line x1="9.5" y1="8" x2="2" y2="8" strokeLinecap="round" />
+          </svg>
+        )}
+        {adminLabel}
       </Link>
     </header>
   )

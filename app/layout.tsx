@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import AppBootstrap from '@/components/AppBootstrap'
 
 export const metadata: Metadata = {
   title: '景彩文化 | 器材超市',
@@ -9,7 +10,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN">
-      <body>{children}</body>
+      <body>
+        <AppBootstrap />
+        {children}
+      </body>
     </html>
   )
 }
