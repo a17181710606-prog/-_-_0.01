@@ -1,6 +1,5 @@
 'use client'
 import { create } from 'zustand'
-import { supabase } from './supabase'
 
 export interface AuthUser {
   id: string
@@ -11,58 +10,58 @@ export interface AuthUser {
 interface AuthState {
   user: AuthUser | null
   hydrated: boolean          // 是否已完成会话初始化（避免登录态未知时误跳转）
-  configured: boolean        // 是否已配置 Supabase
+  configured: boolean        // 是否已启用数据库后端
   init: () => void
   signIn: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>
   signOut: () => Promise<void>
 }
 
-function mapUser(u: { id: string; email?: string; user_metadata?: Record<string, unknown> } | null | undefined): AuthUser | null {
-  if (!u) return null
-  const meta = u.user_metadata ?? {}
-  const name = (meta.name as string) || (meta.full_name as string) || (u.email ? u.email.split('@')[0] : '成员')
-  return { id: u.id, email: u.email ?? '', name }
-}
-
-function mapError(msg: string): string {
-  if (/Invalid login credentials/i.test(msg)) return '邮箱或密码错误'
-  if (/Email not confirmed/i.test(msg)) return '该账号邮箱未确认，请在 Supabase 后台确认后再登录'
-  if (/rate limit/i.test(msg)) return '尝试过于频繁，请稍后再试'
-  return msg || '登录失败，请重试'
-}
+const configured = process.env.NEXT_PUBLIC_ENABLE_DB === '1'
 
 let initialized = false
 
 export const useAuth = create<AuthState>((set) => ({
   user: null,
   hydrated: false,
-  configured: supabase !== null,
+  configured,
 
   init: () => {
     if (initialized) return
     initialized = true
-    if (!supabase) { set({ hydrated: true }); return }
-    supabase.auth.getSession().then(({ data }) => {
-      set({ user: mapUser(data.session?.user), hydrated: true })
-    })
-    supabase.auth.onAuthStateChange((_event, session) => {
-      set({ user: mapUser(session?.user ?? null) })
-    })
+    if (!configured) { set({ hydrated: true }); return }
+    fetch('/api/auth/me', { credentials: 'same-origin', cache: 'no-store' })
+      .then(res => res.json())
+      .then((data: { user: AuthUser | null }) => set({ user: data.user, hydrated: true }))
+      .catch(() => set({ hydrated: true })) // 网络失败也要放行路由，按未登录处理
   },
 
   signIn: async (email, password) => {
-    if (!supabase) return { ok: false, error: '尚未配置 Supabase，无法登录（请检查 .env.local）' }
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    })
-    if (error) return { ok: false, error: mapError(error.message) }
-    set({ user: mapUser(data.user) })
-    return { ok: true }
+    if (!configured) return { ok: false, error: '尚未配置数据库，无法登录（请检查 .env.local）' }
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password }),
+      })
+      if (!res.ok) {
+        if (res.status === 401) return { ok: false, error: '邮箱或密码错误' }
+        if (res.status === 429) return { ok: false, error: '尝试过于频繁，请稍后再试' }
+        const body = await res.json().catch(() => null) as { error?: string } | null
+        return { ok: false, error: body?.error || '登录失败，请重试' }
+      }
+      const data = await res.json() as { user: AuthUser }
+      set({ user: data.user })
+      return { ok: true }
+    } catch {
+      return { ok: false, error: '网络异常，登录失败，请重试' }
+    }
   },
 
   signOut: async () => {
-    if (supabase) await supabase.auth.signOut()
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' })
+    } catch { /* 登出请求失败也照常清除本地状态 */ }
     set({ user: null })
   },
 }))

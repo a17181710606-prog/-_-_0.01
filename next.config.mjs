@@ -1,9 +1,4 @@
-
-
-const nextConfig = {
-  images: {
-    domains: ['your-project.supabase.co'],
-  },
-}
+/** @type {import('next').NextConfig} */
+const nextConfig = {}
 
 export default nextConfig

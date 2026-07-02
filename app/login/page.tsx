@@ -57,7 +57,7 @@ function LoginForm() {
 
         {!configured && (
           <div style={{ fontSize: '12.5px', color: 'oklch(0.52 0.09 60)', background: 'oklch(0.96 0.04 80)', padding: '10px 12px', borderRadius: '9px', marginBottom: '16px', lineHeight: 1.5 }}>
-            ⚠️ 尚未配置 Supabase 环境变量，暂时无法登录。请在 <span className="font-mono">.env.local</span> 中填入项目 URL 与 anon key。
+            ⚠️ 尚未启用数据库后端，暂时无法登录。请在 <span className="font-mono">.env.local</span> 中设置 <span className="font-mono">NEXT_PUBLIC_ENABLE_DB=1</span> 并配置 DATABASE_URL。
           </div>
         )}
 

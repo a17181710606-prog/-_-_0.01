@@ -1,85 +1,71 @@
-// 数据访问层 —— 封装对 Supabase 的读写。
-// 若未配置 Supabase（本地无 key），helper 会抛错，由 store 兜底回退到种子数据。
-import { supabase } from './supabase'
+// 数据访问层 —— 同源 fetch 调用本项目 /api 路由（后端为本机 PostgreSQL）。
+// 未启用数据库（NEXT_PUBLIC_ENABLE_DB != '1'）时，store 兜底回退到种子数据。
 import type { Equipment, Movement, RentalOrder, ServiceInquiry } from './types'
 
-export const dbEnabled = () => supabase !== null
+export const dbEnabled = () => process.env.NEXT_PUBLIC_ENABLE_DB === '1'
 
-function client() {
-  if (!supabase) throw new Error('Supabase 未配置')
-  return supabase
+async function api<T = unknown>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`/api${path}`, {
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
+    ...init,
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => null) as { error?: string } | null
+    throw new Error(body?.error || `请求失败 (${res.status})`)
+  }
+  return res.json() as Promise<T>
 }
-
-const EQ_COLS = 'id,name,brand,model,cat,code,st,own,val,day,dep,tot,av,loc,specs,note'
 
 // ── equipment ─────────────────────────────────────────────
 export async function fetchEquipment(): Promise<Equipment[]> {
-  const { data, error } = await client().from('equipment').select(EQ_COLS).order('id')
-  if (error) throw error
-  return (data ?? []) as Equipment[]
+  return (await api<{ rows: Equipment[] }>('/equipment')).rows
 }
 
 export async function insertEquipment(e: Omit<Equipment, 'id'>): Promise<Equipment> {
-  const { data, error } = await client().from('equipment').insert(e).select(EQ_COLS).single()
-  if (error) throw error
-  return data as Equipment
+  const { rows } = await api<{ rows: Equipment[] }>('/equipment', {
+    method: 'POST',
+    body: JSON.stringify({ rows: [e] }),
+  })
+  return rows[0]
 }
 
 export async function insertEquipmentMany(rows: Omit<Equipment, 'id'>[]): Promise<Equipment[]> {
-  const { data, error } = await client().from('equipment').insert(rows).select(EQ_COLS)
-  if (error) throw error
-  return (data ?? []) as Equipment[]
+  return (await api<{ rows: Equipment[] }>('/equipment', {
+    method: 'POST',
+    body: JSON.stringify({ rows }),
+  })).rows
 }
 
 export async function updateEquipment(id: number, patch: Partial<Equipment>): Promise<void> {
   const clean = { ...patch }; delete clean.id
-  const { error } = await client().from('equipment').update(clean).eq('id', id)
-  if (error) throw error
+  await api('/equipment', { method: 'PATCH', body: JSON.stringify({ ids: [id], patch: clean }) })
 }
 
 export async function updateEquipmentMany(ids: number[], patch: Partial<Equipment>): Promise<void> {
   const clean = { ...patch }; delete clean.id
-  const { error } = await client().from('equipment').update(clean).in('id', ids)
-  if (error) throw error
+  await api('/equipment', { method: 'PATCH', body: JSON.stringify({ ids, patch: clean }) })
 }
 
 export async function deleteEquipment(ids: number[]): Promise<void> {
-  const { error } = await client().from('equipment').delete().in('id', ids)
-  if (error) throw error
+  await api('/equipment', { method: 'DELETE', body: JSON.stringify({ ids }) })
 }
 
 // ── movements ─────────────────────────────────────────────
 export async function fetchMovements(): Promise<Movement[]> {
-  const { data, error } = await client()
-    .from('movements')
-    .select('id,t,dev,op,by,proj')
-    .order('created_at', { ascending: false })
-    .limit(500)
-  if (error) throw error
-  return (data ?? []) as Movement[]
+  return (await api<{ rows: Movement[] }>('/movements')).rows
 }
 
 export async function insertMovement(m: Movement): Promise<void> {
-  const { error } = await client().from('movements').insert(m)
-  if (error) throw error
+  await api('/movements', { method: 'POST', body: JSON.stringify(m) })
 }
 
 // ── rental orders / inquiries（前台公开表单，仅写入）─────────
 export async function insertOrder(o: RentalOrder): Promise<void> {
-  const { error } = await client().from('rental_orders').insert({
-    id: o.id,
-    project_name: o.projectName,
-    items: o.items,
-    days: o.days,
-  })
-  if (error) throw error
+  await api('/orders', { method: 'POST', body: JSON.stringify(o) })
 }
 
 export async function insertInquiry(i: ServiceInquiry): Promise<void> {
-  const { error } = await client().from('service_inquiries').insert({
-    id: i.id,
-    service_id: i.serviceId,
-    contact_name: i.contactName,
-  })
-  if (error) throw error
+  await api('/inquiries', { method: 'POST', body: JSON.stringify(i) })
 }
