@@ -64,6 +64,23 @@ node scripts/smoke-test.mjs http://<服务器IP>
 
 ## 后续待办
 
-- [ ] 绑定公司域名（DNS A 记录 → 服务器 IP，nginx server_name）
-- [ ] 上 HTTPS（certbot / Let's Encrypt），然后把 `lib/server/session.ts` 里 cookie 的 `secure` 改为 `true`
+- [x] 绑定公司域名（DNS A 记录 → 47.96.108.103，wonderfulfilm.com + www）
+- [x] cookie secure 改为 true（已在 lib/server/session.ts 更新）
+- [ ] 上 HTTPS（服务器执行 certbot 申请证书，见下方命令）
 - [ ] 数据库定期备份（`pg_dump equipment` + crontab）
+
+### HTTPS 申请命令（在服务器上执行）
+
+```bash
+# 1. 装 certbot
+apt-get install -y certbot python3-certbot-nginx
+
+# 2. 申请证书（certbot 会自动改 nginx 配置）
+certbot --nginx -d wonderfulfilm.com -d www.wonderfulfilm.com \
+  --non-interactive --agree-tos -m a17181710606@gmail.com
+
+# 3. 验证证书自动续期
+certbot renew --dry-run
+```
+
+申请成功后访问 https://wonderfulfilm.com 即可。

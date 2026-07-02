@@ -28,7 +28,7 @@ export async function createSession(userId: number): Promise<void> {
   cookies().set(COOKIE, raw, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: false, // 当前部署为 HTTP；上 HTTPS 后改为 true
+    secure: true,
     path: '/',
     expires,
   })
